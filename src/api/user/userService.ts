@@ -48,11 +48,6 @@ export class UserService {
 
   async createUser(data: string): Promise<ServiceResponse<User | null>> {
     try {
-      const existingUser = await this.userRepository.findByIdAsync(3);
-      if (existingUser) {
-        return ServiceResponse.failure("User already exists", null, StatusCodes.CONFLICT);
-      }
-
       const newUser: User = {
         id: Math.floor(Math.random() * 10000), 
         phoneNumber: data,
