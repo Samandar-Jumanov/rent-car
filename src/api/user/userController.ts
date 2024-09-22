@@ -2,7 +2,7 @@ import type { Request, RequestHandler, Response } from "express";
 
 import { userService } from "@/api/user/userService";
 import { handleServiceResponse } from "@/common/utils/httpHandlers";
-import { CreateUserRequest, VerifyUserSchemaRequest } from "./userModel";
+import { CreateUserRequest, UpdateUserRequest, VerifyUserSchemaRequest } from "./userModel";
 
 class UserController {
   public getUsers: RequestHandler = async (_req: Request, res: Response) => {
@@ -11,8 +11,8 @@ class UserController {
   };
 
   public getUser: RequestHandler = async (req: Request, res: Response) => {
-    const id = Number.parseInt(req.params.id as string, 10);
-    const serviceResponse = await userService.findById(id);
+    const id = req.params.id 
+    const serviceResponse = await userService.findUser(id);
     return handleServiceResponse(serviceResponse, res);
   };
 
@@ -26,6 +26,13 @@ class UserController {
   public verifyUser: RequestHandler = async (req: Request, res: Response) => {
     const body : VerifyUserSchemaRequest  =  req.body;
     const serviceResponse = await userService.verifyUser(body.code , body.phoneNumber);
+    return handleServiceResponse(serviceResponse, res);
+  };
+
+  public updateUser: RequestHandler = async (req: Request, res: Response) => {
+    const body : UpdateUserRequest  =  req.body;
+    const id = req.params.id  // assuming id is part of the url path
+    const serviceResponse = await userService.updateUser(body , id );
     return handleServiceResponse(serviceResponse, res);
   };
 

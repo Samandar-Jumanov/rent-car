@@ -3,16 +3,16 @@ import express, { type Router } from "express";
 import { z } from "zod";
 
 import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
-import { GetUserSchema, UserSchema, CreateUserSchema, VerifyUserSchema } from "@/api/user/userModel";
+import { GetUserSchema, UserSchema, CreateUserSchema, VerifyUserSchema, UpdateUserSchema } from "@/api/user/userModel";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { userController } from "./userController";
 
 export const userRegistry = new OpenAPIRegistry();
 export const userRouter: Router = express.Router();
 
-userRegistry.register("User", UserSchema);
+userRegistry.register("User", UserSchema); // register
 
-userRegistry.registerPath({
+userRegistry.registerPath({ // get all 
   method: "get",
   path: "/users",
   tags: ["User"],
@@ -21,7 +21,7 @@ userRegistry.registerPath({
 
 userRouter.get("/", userController.getUsers);
 
-userRegistry.registerPath({
+userRegistry.registerPath({ // get single 
   method: "get",
   path: "/users/{id}",
   tags: ["User"],
@@ -31,7 +31,7 @@ userRegistry.registerPath({
 
 userRouter.get("/:id", validateRequest(GetUserSchema), userController.getUser);
 
-userRegistry.registerPath({
+userRegistry.registerPath({  // create user 
   method: "post",
   path: "/users",
   tags: ["User"],
@@ -49,11 +49,9 @@ userRegistry.registerPath({
 
 userRouter.post("/", userController.createUser);
 
-
-
-userRegistry.registerPath({
-  method: "post",
-  path: "/users/verify",
+userRegistry.registerPath({ // verify user
+  method: "patch",
+  path: "/users",
   tags: ["User"],
   request: {
     body: {
@@ -64,7 +62,35 @@ userRegistry.registerPath({
       }
     }
   },
+
   responses: createApiResponse(UserSchema, "Success"),
 });
 
-userRouter.post("/", userController.createUser);
+
+userRegistry.registerPath({
+  method: "put",
+  path: "/users/{id}",
+  tags: ["User"],
+  parameters: [
+    {
+      name: "id",
+      in: "path",
+      required: true,
+      schema: {
+        type: "string"
+      }
+    }
+  ],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: UpdateUserSchema
+        }
+      }
+    }
+  },
+  responses: createApiResponse(UserSchema, "Success"),
+});
+
+userRouter.put("/:id", userController.updateUser);

@@ -1,47 +1,40 @@
-import { UserRepository } from "@/api/user/userRepository";
+import { StatusCodes } from "http-status-codes";
+import { ServiceResponse } from "@/common/models/serviceResponse";
+import { logger } from "@/server";
+import prisma from "@/common/db/prisma";
 import { smsService } from "../sms/smsService";
 
 export class UserVerificationService {
-  private userRepository: UserRepository;
-
-  constructor(repository: UserRepository = new UserRepository()) {
-    this.userRepository = repository;
-  }
-
   private generateVerificationCode(): string {
     return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
-  async initiateVerification(phoneNumber: string): Promise<string> {
-    const user = await this.userRepository.findByPhoneNumber(phoneNumber);
-    if (!user) {
-      throw new Error('User not found');
+  async initiateVerification(phoneNumber: string): Promise<ServiceResponse<string | null>> {
+    try {
+      const user = await prisma.user.findUnique({ where: { phoneNumber } });
+      if (!user) {
+        return ServiceResponse.failure("User not found", null, StatusCodes.NOT_FOUND);
+      }
+
+      const verificationCode = this.generateVerificationCode();
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { verificationCode },
+      });
+
+      await smsService.sendVerificationCode(phoneNumber, verificationCode);
+      return ServiceResponse.success("Verification code sent", "Verification code sent");
+
+
+    } catch (ex) {
+      const errorMessage = `Error initiating verification: ${(ex as Error).message}`;
+      logger.error(errorMessage);
+      return ServiceResponse.failure(
+        "An error occurred while initiating verification.",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
     }
-
-    const verificationCode = this.generateVerificationCode();
-    
-    // Store the verification code in the database
-    await this.userRepository.setVerificationCode(user.id, verificationCode);
-
-    // Send the verification code
-    await smsService.sendVerificationCode(phoneNumber, verificationCode);
-    console.log("code sent")
-
-    return 'Verification code sent';
-  }
-
-  async verifyUser(phoneNumber: string, code: string): Promise<boolean> {
-    const user = await this.userRepository.findByPhoneNumber(phoneNumber);
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    if (user.verificationCode === code) {
-      await this.userRepository.markAsVerified(user.id);
-      return true;
-    }
-
-    return false;
   }
 }
 

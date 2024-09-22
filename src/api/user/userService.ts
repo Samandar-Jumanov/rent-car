@@ -1,28 +1,19 @@
 import { StatusCodes } from "http-status-codes";
-
-import type { User } from "@/api/user/userModel";
-import { UserRepository } from "@/api/user/userRepository";
 import { ServiceResponse } from "@/common/models/serviceResponse";
 import { logger } from "@/server";
-import {userVerificationService} from "../user-verfication/userVerficationService"
-import { CreateUserRequest } from "@/api/user/userModel";
+import { userVerificationService } from "../user-verfication/userVerficationService";
+import prisma from "@/common/db/prisma";
+import { IUser, UpdateUserRequest } from "./userModel";
+
 export class UserService {
-  private userRepository: UserRepository;
-
-  constructor(repository: UserRepository = new UserRepository()) {
-    this.userRepository = repository;
-  }
-
-  // Retrieves all users from the database
-  async findAll(): Promise<ServiceResponse<User[] | null>> {
+  async findAll(): Promise<ServiceResponse<IUser[] | null>> {
     try {
-      const users = await this.userRepository.findAllAsync();
-      if (!users || users.length === 0) {
-        return ServiceResponse.failure("No Users found", null, StatusCodes.NOT_FOUND);
-      }
-      return ServiceResponse.success<User[]>("Users found", users);
+
+      const users = await prisma.user.findMany();
+
+      return ServiceResponse.success<IUser[]>("Users found", users as IUser[]);
     } catch (ex) {
-      const errorMessage = `Error finding all users: $${(ex as Error).message}`;
+      const errorMessage = `Error finding all users: ${(ex as Error).message}`;
       logger.error(errorMessage);
       return ServiceResponse.failure(
         "An error occurred while retrieving users.",
@@ -32,38 +23,42 @@ export class UserService {
     }
   }
 
-  async findById(id: number): Promise<ServiceResponse<User | null>> {
+  async findUser(id: string): Promise<ServiceResponse<IUser | null>> {
     try {
-      const user = await this.userRepository.findByIdAsync(id);
+      const user = await prisma.user.findUnique({ where: { id } });
       if (!user) {
         return ServiceResponse.failure("User not found", null, StatusCodes.NOT_FOUND);
       }
-      return ServiceResponse.success<User>("User found", user);
+      return ServiceResponse.success<IUser>("User found", user as IUser );
     } catch (ex) {
-      const errorMessage = `Error finding user with id ${id}:, ${(ex as Error).message}`;
+      const errorMessage = `Error finding user with id ${id}: ${(ex as Error).message}`;
       logger.error(errorMessage);
       return ServiceResponse.failure("An error occurred while finding user.", null, StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
 
-  async createUser(data: string): Promise<ServiceResponse<User | null>> {
+  async createUser(data: string ): Promise<ServiceResponse<IUser | null>> {
     try {
-      const newUser: User = {
-        id: Math.floor(Math.random() * 10000), 
-        phoneNumber: data,
+      // will create or find new user 
 
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isVerified: false,
-      };
+      let user
 
-      const savedUser = await this.userRepository.createAsync(newUser);
+      const existingUser = await prisma.user.findUnique({
+          where  : { phoneNumber : data}
+      });
 
-      // Initiate verification process
-      await userVerificationService.initiateVerification(savedUser.phoneNumber);
+      if(!existingUser){
+          user = await prisma.user.create({
+              data: { phoneNumber: data }
+          });
+      } else {
+             user = existingUser
+      }
+      await userVerificationService.initiateVerification(user.phoneNumber);
 
-      return ServiceResponse.success<User>("User created and verification initiated", savedUser);
+      return ServiceResponse.success<IUser>("User created and verification initiated", user as IUser);
     } catch (ex) {
+      console.log({ ex })
       const errorMessage = `Error creating user: ${(ex as Error).message}`;
       logger.error(errorMessage);
       return ServiceResponse.failure(
@@ -74,14 +69,26 @@ export class UserService {
     }
   }
 
-  async verifyUser(phoneNumber: string, code: string): Promise<ServiceResponse<boolean>> {
+  async verifyUser(code: string, phoneNumber: string): Promise<ServiceResponse<boolean>> {
     try {
-      const isVerified = await userVerificationService.verifyUser(phoneNumber, code);
-      if (isVerified) {
-        return ServiceResponse.success<boolean>("User verified successfully", true);
-      } else {
-        return ServiceResponse.failure("Invalid verification code", false, StatusCodes.BAD_REQUEST);
+      logger.info(`Verifying ${phoneNumber}`)
+      const user = await prisma.user.findUnique({ where: { phoneNumber } });
+
+      if (!user) {
+        return ServiceResponse.failure("User not found", false, StatusCodes.NOT_FOUND);
       }
+
+      if (user.verificationCode === code) {
+        // Mark the user as verified and clear the verification code
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { isVerified: true, verificationCode: null },
+        });
+
+        return ServiceResponse.success("User verified successfully", true);
+      }
+
+      return ServiceResponse.failure("Invalid verification code", false, StatusCodes.BAD_REQUEST);
     } catch (ex) {
       const errorMessage = `Error verifying user: ${(ex as Error).message}`;
       logger.error(errorMessage);
@@ -92,8 +99,38 @@ export class UserService {
       );
     }
   }
+
+  
+  async updateUser(data : UpdateUserRequest  , id : string) : Promise<ServiceResponse<IUser | null>> {
+    
+    try {
+
+      const user = await prisma.user.findUnique({
+         where   : {  id }
+      })
+
+      if (!user) {
+        return ServiceResponse.failure("User not found", null, StatusCodes.NOT_FOUND);
+      }
+
+     const updatedUser =   await prisma.user.update({
+          where : { id },
+          data : {
+              ...data
+          }
+      })
+
+      return ServiceResponse.success<IUser>("User updated sucessfully", updatedUser as IUser );
+    } catch (ex) {
+      const errorMessage = `Error verifying user: ${(ex as Error).message}`;
+      logger.error(errorMessage);
+      return ServiceResponse.failure(
+        "An error occurred while verifying user.",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
 
 export const userService = new UserService();
-
-

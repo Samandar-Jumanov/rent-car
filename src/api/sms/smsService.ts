@@ -14,8 +14,6 @@ export class SmsService {
           from: process.env.TWILIO_PHONE_NUMBER,
         });
 
-        console.log(`SMS sent successfully ${process.env.TWILIO_PHONE_NUMBER} to ${to}:`, message.sid);
-
         return message.sid;
       } catch (error) {
         console.error(`Error sending SMS (attempt ${retries + 1}):`, error);
