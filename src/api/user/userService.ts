@@ -4,6 +4,7 @@ import { logger } from "@/server";
 import { userVerificationService } from "../user-verfication/userVerficationService";
 import prisma from "@/common/db/prisma";
 import { IUser, UpdateUserRequest } from "./userModel";
+import { generateToken } from "@/common/utils/jwt";
 
 export class UserService {
   async findAll(): Promise<ServiceResponse<IUser[] | null>> {
@@ -54,8 +55,11 @@ export class UserService {
       } else {
              user = existingUser
       }
+
+
       await userVerificationService.initiateVerification(user.phoneNumber);
 
+    
       return ServiceResponse.success<IUser>("User created and verification initiated", user as IUser);
     } catch (ex) {
       console.log({ ex })
@@ -69,7 +73,7 @@ export class UserService {
     }
   }
 
-  async verifyUser(code: string, phoneNumber: string): Promise<ServiceResponse<boolean>> {
+  async verifyUser(code: string, phoneNumber: string): Promise<ServiceResponse<{ token : string} | boolean>> {
     try {
       logger.info(`Verifying ${phoneNumber}`)
       const user = await prisma.user.findUnique({ where: { phoneNumber } });
@@ -79,15 +83,14 @@ export class UserService {
       }
 
       if (user.verificationCode === code) {
-        // Mark the user as verified and clear the verification code
         await prisma.user.update({
           where: { id: user.id },
           data: { isVerified: true, verificationCode: null },
         });
 
-        return ServiceResponse.success("User verified successfully", true);
+        const token = generateToken({phoneNumber: user.phoneNumber ,userId : user.id})
+        return ServiceResponse.success("User verified successfully", { token});
       }
-
       return ServiceResponse.failure("Invalid verification code", false, StatusCodes.BAD_REQUEST);
     } catch (ex) {
       const errorMessage = `Error verifying user: ${(ex as Error).message}`;

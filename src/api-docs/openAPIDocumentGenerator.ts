@@ -5,7 +5,15 @@ import { userRegistry } from "@/api/user/userRouter";
 import { brendRegistry } from "@/api/brend/brendRouter";
 
 export function generateOpenAPIDocument() {
-  const registry = new OpenAPIRegistry([healthCheckRegistry, userRegistry , brendRegistry]);
+  const registry = new OpenAPIRegistry([healthCheckRegistry, userRegistry, brendRegistry]);
+
+  // Register the security scheme
+  registry.registerComponent('securitySchemes', 'BearerAuth', {
+    type: 'http',
+    scheme: 'bearer',
+    bearerFormat: 'JWT',
+  });
+
   const generator = new OpenApiGeneratorV3(registry.definitions);
 
   return generator.generateDocument({
@@ -14,6 +22,7 @@ export function generateOpenAPIDocument() {
       version: "1.0.0",
       title: "Swagger API",
     },
+    security: [{ BearerAuth: [] }],
     externalDocs: {
       description: "View the raw OpenAPI Specification in JSON format",
       url: "/swagger.json",

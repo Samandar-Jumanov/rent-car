@@ -9,6 +9,7 @@ import { userRouter } from "@/api/user/userRouter";
 import { brendRouter } from "./api/brend/brendRouter";
 import errorHandler from "@/common/middleware/errorHandler";
 import { env } from "@/common/utils/envConfig";
+import { authMiddleware } from "./common/middleware/auth";
 
 const logger = pino({ name: "server start" });
 const app: Express = express();
@@ -25,9 +26,9 @@ app.use(helmet());
 // app.use(requestLogger);
 
 // Routes
-app.use("/health-check", healthCheckRouter);
+app.use("/health-check", authMiddleware, healthCheckRouter);
 app.use("/users", userRouter);
-app.use("/brends", brendRouter);
+app.use("/brends",  authMiddleware,  brendRouter);
 
 
 // Swagger UI
