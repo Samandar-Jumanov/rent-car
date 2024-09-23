@@ -6,8 +6,8 @@ import { pino } from "pino";
 import { openAPIRouter } from "@/api-docs/openAPIRouter";
 import { healthCheckRouter } from "@/api/healthCheck/healthCheckRouter";
 import { userRouter } from "@/api/user/userRouter";
+import { brendRouter } from "./api/brend/brendRouter";
 import errorHandler from "@/common/middleware/errorHandler";
-import requestLogger from "@/common/middleware/requestLogger";
 import { env } from "@/common/utils/envConfig";
 
 const logger = pino({ name: "server start" });
@@ -27,6 +27,8 @@ app.use(helmet());
 // Routes
 app.use("/health-check", healthCheckRouter);
 app.use("/users", userRouter);
+app.use("/brends", brendRouter);
+
 
 // Swagger UI
 app.use(openAPIRouter);

@@ -1,4 +1,4 @@
-import twilioClient from '../twilio/twilioService';
+import twilioClient from '../brend/twilio/twilioService';
 
 export class SmsService {
   private maxRetries = 3;

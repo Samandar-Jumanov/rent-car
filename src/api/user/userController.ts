@@ -31,12 +31,10 @@ class UserController {
 
   public updateUser: RequestHandler = async (req: Request, res: Response) => {
     const body : UpdateUserRequest  =  req.body;
-    const id = req.params.id  // assuming id is part of the url path
+    const id = req.params.id  
     const serviceResponse = await userService.updateUser(body , id );
     return handleServiceResponse(serviceResponse, res);
   };
-
-
 }
 
 export const userController = new UserController();
