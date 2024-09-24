@@ -50,7 +50,11 @@ export const UpdateUserSchema = z.object({
   });
 
 
-  
+export  const RefreshtokenSchema = z.object({
+       refreshToken : z.string()
+})
+
 export type UpdateUserRequest = z.infer<typeof UpdateUserSchema>;
 export type CreateUserRequest = z.infer<typeof CreateUserSchema>
 export type VerifyUserSchemaRequest = z.infer<typeof VerifyUserSchema>
+export type Refreshtoken = z.infer<typeof RefreshtokenSchema >

@@ -114,4 +114,7 @@ enum Role {
 }
 
 
-// when a rental created a new client should be created 
+// car should have a average rating 
+// Cars should have a search query
+
+

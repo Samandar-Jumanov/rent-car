@@ -4,7 +4,7 @@ import express, { type Router } from "express";
 import { z } from "zod";
 
 import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
-import { GetUserSchema, UserSchema, CreateUserSchema, VerifyUserSchema, UpdateUserSchema } from "@/api/user/userModel";
+import { GetUserSchema, UserSchema, CreateUserSchema, VerifyUserSchema, UpdateUserSchema  , RefreshtokenSchema} from "@/api/user/userModel";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { userController } from "./userController";
 
@@ -97,3 +97,22 @@ userRegistry.registerPath({
 });
 
 userRouter.put("/:id", userController.updateUser);
+
+
+userRegistry.registerPath({
+  method: "post",
+  path: "/users/refresh-token",
+  tags: ["User"],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: RefreshtokenSchema
+        }
+      }
+    }
+  },
+  responses: createApiResponse(RefreshtokenSchema, "Success"),
+});
+
+userRouter.post("/refresh-token" , userController.refreshToken);

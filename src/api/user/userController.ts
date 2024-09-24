@@ -35,6 +35,18 @@ class UserController {
     const serviceResponse = await userService.updateUser(body , id );
     return handleServiceResponse(serviceResponse, res);
   };
+
+ public refreshToken : RequestHandler  = async (req: Request, res: Response) => {
+    const { refreshToken } = req.body;
+    if (!refreshToken) {
+      return res.status(400).json({ message: 'Refresh token is required' });
+    }
+    
+    const serviceResponse = await userService.refreshToken(refreshToken);
+    return handleServiceResponse(serviceResponse, res);
+
+  };
+  
 }
 
 export const userController = new UserController();

@@ -4,7 +4,7 @@ import { logger } from "@/server";
 import { userVerificationService } from "../user-verfication/userVerficationService";
 import prisma from "@/common/db/prisma";
 import { IUser, UpdateUserRequest } from "./userModel";
-import { generateToken } from "@/common/utils/jwt";
+import { generateToken , verifyToken } from "@/common/utils/jwt";
 
 export class UserService {
   async findAll(): Promise<ServiceResponse<IUser[] | null>> {
@@ -133,7 +133,38 @@ export class UserService {
         StatusCodes.INTERNAL_SERVER_ERROR,
       );
     }
+
+    
+  }
+
+  async refreshToken(refreshToken: string): Promise<ServiceResponse<{ token: string } | null>> {
+    try {
+      const decoded = verifyToken(refreshToken);
+      
+      if (!decoded || typeof decoded === 'string') {
+        return ServiceResponse.failure("Invalid refresh token", null, StatusCodes.UNAUTHORIZED);
+      }
+
+      const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+
+      if (!user) {
+        return ServiceResponse.failure("User not found", null, StatusCodes.NOT_FOUND);
+      }
+
+      const newToken = generateToken({ phoneNumber: user.phoneNumber, userId: user.id });
+
+      return ServiceResponse.success("Token refreshed successfully", { token: newToken });
+    } catch (ex) {
+      const errorMessage = `Error refreshing token: ${(ex as Error).message}`;
+      logger.error(errorMessage);
+      return ServiceResponse.failure(
+        "An error occurred while refreshing token.",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
+
 
 export const userService = new UserService();
