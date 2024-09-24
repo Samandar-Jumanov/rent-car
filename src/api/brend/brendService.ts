@@ -13,7 +13,6 @@ export class BrendService {
           include : {
              cars : {
                   include : {
-                         images :true, 
                          rentals :true
                   }
              }
@@ -58,7 +57,6 @@ export class BrendService {
         include : {
              cars : {
                   include : {
-                         images :true, 
                          rentals :true
                   }
              }

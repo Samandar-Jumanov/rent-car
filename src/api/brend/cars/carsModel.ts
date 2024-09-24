@@ -6,22 +6,16 @@ extendZodWithOpenApi(z);
 export interface ICar {
   id: string;
   brendId: string;
-  model: string;
-  year: number;
-  mileage: number;
-  price: number;
+  title: string;
+  price: string;
   color: string;
   fuelType: string;
-  description: string;
   carType: string;
-  gearType: string;
-  numberOfDoors: number;
   numberOfSeats: number;
-  transmissionType: string;
-  engineCapacity: string;
-  enginePower: number;
+  features: string[];
+  requirements: string[];
   isAvailable: boolean;
-  isTopRent: boolean;
+  images: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,22 +23,16 @@ export interface ICar {
 export const CarSchema = z.object({
   id: z.string(),
   brendId: z.string(),
-  model: z.string(),
-  year: z.number().int(),
-  mileage: z.number().int(),
-  price: z.number(),
+  title: z.string(),
+  price: z.string(),
   color: z.string(),
   fuelType: z.string(),
-  description: z.string(),
   carType: z.string(),
-  gearType: z.string(),
-  numberOfDoors: z.number().int(),
   numberOfSeats: z.number().int(),
-  transmissionType: z.string(),
-  engineCapacity: z.string(),
-  enginePower: z.number().int(),
+  features: z.array(z.string()),
+  requirements: z.array(z.string()),
   isAvailable: z.boolean(),
-  isTopRent: z.boolean(),
+  images: z.array(z.string()),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -53,32 +41,55 @@ export const GetCarSchema = z.object({
   params: z.object({ id: z.string() }),
 });
 
+// Rental Schema and Interface
+export interface IRental {
+  id: string;
+  userId: string;
+  carId: string;
+  rentalStart: Date;
+  rentalEnd: Date;
+  pickupTime: string;
+  returnTime: string;
+  requiresDriver: boolean;
+  requiresDelivery: boolean;
+  travelRegion: string;
+  estimatedDistance: string;
+  username: string;
+  surname: string;
+  usersFatherName: string;
+  driverLicence: string;
+  passport: string;
+  address: string;
+  passportImages: string[];
+  driverLicenceImages: string[];
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export const RentalSchema = z.object({
   id: z.string(),
   userId: z.string(),
   carId: z.string(),
-
-  username: z.string(),
-  usersFatherName: z.string(),
-  driverLicence: z.string(),
-  address: z.string(),
-  passport : z.string(),
-
   rentalStart: z.date(),
   rentalEnd: z.date(),
   pickupTime: z.string(),
   returnTime: z.string(),
-
   requiresDriver: z.boolean(),
   requiresDelivery: z.boolean(),
-
   travelRegion: z.string(),
   estimatedDistance: z.string(),
-  
+  username: z.string(),
+  surname: z.string(),
+  usersFatherName: z.string(),
+  driverLicence: z.string(),
+  passport: z.string(),
+  address: z.string(),
+  passportImages: z.array(z.string()),
+  driverLicenceImages: z.array(z.string()),
   isActive: z.boolean(),
   createdAt: z.date(),
   updatedAt: z.date(),
-
 });
 
 export const GetRentalSchema = z.object({
@@ -86,21 +97,22 @@ export const GetRentalSchema = z.object({
 });
 
 export const CreateRentalSchema = z.object({
-  username: z.string(),
-  usersFatherName: z.string(),
-  driverLicence: z.string(),
-  address: z.string(),
-  passport : z.string(),
-
   rentalStart: z.date(),
   rentalEnd: z.date(),
   pickupTime: z.string(),
   returnTime: z.string(),
-
   requiresDriver: z.boolean().default(false),
   requiresDelivery: z.boolean().default(false),
   travelRegion: z.string(),
   estimatedDistance: z.string(),
+  username: z.string(),
+  surname: z.string(),
+  usersFatherName: z.string(),
+  driverLicence: z.string(),
+  passport: z.string(),
+  address: z.string(),
+  passportImages: z.array(z.string()),
+  driverLicenceImages: z.array(z.string()),
 });
 
 export const DeleteRentalSchema = z.object({
@@ -109,4 +121,3 @@ export const DeleteRentalSchema = z.object({
 
 export type CreateRentalRequest = z.infer<typeof CreateRentalSchema>;
 export type DeleteRentalRequest = z.infer<typeof DeleteRentalSchema>;
-export type IRental = z.infer<typeof CreateRentalSchema>

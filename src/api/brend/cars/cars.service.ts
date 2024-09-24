@@ -23,7 +23,6 @@ export class CarService {
           where : { id : carId},
           include : {
              brend : true,
-             images : true
           }
       });
 

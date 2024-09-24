@@ -84,6 +84,7 @@ brendRegistry.registerPath({
   },
   responses: createApiResponse(z.any(), "Success"),
 });
+
 brendRouter.delete("/order/:id", (req, res, next) => {
   const paramsSchema = z.object({
     id: z.string(),
