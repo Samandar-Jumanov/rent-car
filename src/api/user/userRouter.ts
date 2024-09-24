@@ -64,7 +64,7 @@ userRegistry.registerPath({ // verify user
     }
   },
 
-  responses: createApiResponse(UserSchema, "Success"),
+  responses: createApiResponse(VerifyUserSchema, "Success"),
 });
 
 userRouter.patch("/", userController.verifyUser);

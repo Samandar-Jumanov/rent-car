@@ -2,8 +2,15 @@ import { StatusCodes } from "http-status-codes";
 import { ServiceResponse } from "@/common/models/serviceResponse";
 import { logger } from "@/server";
 import prisma from "@/common/db/prisma";
-import { IBrend } from "./brendModel";
+import { IBrend , QueryBrend  } from "./brendModel";
 import { ITopBrend } from "./topBrend/topBrendModel";
+
+
+type QueryBrendResult = {
+  data: Omit<IBrend, 'password'>[];
+  count: number;
+};
+
 
 export class BrendService {
   async getBrends(): Promise<ServiceResponse<IBrend[] | null>> {
@@ -74,7 +81,40 @@ export class BrendService {
       return ServiceResponse.failure("An error occurred while finding brend.", null, StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
-};
+  async  queryBrends(query: QueryBrend): Promise<ServiceResponse<QueryBrendResult | null >> {
+    try {
+      const brends = await prisma.brend.findMany({
+        where: {
+          address: query.address ? { contains: query.address, mode: 'insensitive' } : undefined,
+          payment: query.payment,
+          carDelivery: query.carDelivery,
+          cars: {
+            some: {
+              carBrend: query.carBrend ? { contains: query.carBrend, mode: 'insensitive' } : undefined,
+              mirrorType: query.mirrorType,
+              fuelType: query.fuelType,
+              color: query.color ? { contains: query.color, mode: 'insensitive' } : undefined,
+            },
+          },
+        },
+        include: {
+          cars: true
+        },
+      });
+      const brendsWithoutPassword = brends.map(({ password, ...rest }) => rest);
+      const count = brends.length;
+      return ServiceResponse.success(
+        count > 0 ? "Brends queried successfully" : "No brends found that match the given criteria", 
+        { data: brendsWithoutPassword, count }
+      );
+      
+    } catch (error) {
+      const errorMessage = `Error querying brends`;
+      logger.error(errorMessage, error);
+      return ServiceResponse.failure("An error occurred while querying brends.", null, StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+}
 
 
 export const brendService = new BrendService();

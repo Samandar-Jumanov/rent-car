@@ -3,19 +3,27 @@ import { z } from "zod";
 
 extendZodWithOpenApi(z);
 
+const FuelTypeEnum = z.enum(['PETROL', 'DIESEL', 'ELECTRIC', 'HYBRID']);
+const CarTypeEnum = z.enum(['MANUAL', 'AUTOMATIC', 'ELECTRIC', 'HYBRID']);
+const MirorTypeEnum = z.enum(['STANDARD', 'TINTED', 'ANTI_GLARE', 'HEATED', 'AUTO_DIMMING']);
+
 export interface ICar {
   id: string;
   brendId: string;
   title: string;
-  price: string;
+  carBrend: string;
+  price: number;
   color: string;
-  fuelType: string;
-  carType: string;
+  fuelType: z.infer<typeof FuelTypeEnum>;
+  carType: z.infer<typeof CarTypeEnum>;
   numberOfSeats: number;
+  airConditioner: boolean;
+  fuelEconomy: number;
   features: string[];
   requirements: string[];
   isAvailable: boolean;
   images: string[];
+  mirrorType: z.infer<typeof MirorTypeEnum>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,15 +32,19 @@ export const CarSchema = z.object({
   id: z.string(),
   brendId: z.string(),
   title: z.string(),
-  price: z.string(),
+  carBrend: z.string(),
+  price: z.number(),
   color: z.string(),
-  fuelType: z.string(),
-  carType: z.string(),
+  fuelType: FuelTypeEnum,
+  carType: CarTypeEnum,
   numberOfSeats: z.number().int(),
+  airConditioner: z.boolean(),
+  fuelEconomy: z.number(),
   features: z.array(z.string()),
   requirements: z.array(z.string()),
   isAvailable: z.boolean(),
   images: z.array(z.string()),
+  mirrorType: MirorTypeEnum,
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -41,13 +53,12 @@ export const GetCarSchema = z.object({
   params: z.object({ id: z.string() }),
 });
 
-// Rental Schema and Interface
 export interface IRental {
   id: string;
   userId: string;
   carId: string;
-  rentalStart: Date;
-  rentalEnd: Date;
+  rentalStart: string;
+  rentalEnd: string;
   pickupTime: string;
   returnTime: string;
   requiresDriver: boolean;
@@ -71,8 +82,8 @@ export const RentalSchema = z.object({
   id: z.string(),
   userId: z.string(),
   carId: z.string(),
-  rentalStart: z.date(),
-  rentalEnd: z.date(),
+  rentalStart: z.string(),
+  rentalEnd: z.string(),
   pickupTime: z.string(),
   returnTime: z.string(),
   requiresDriver: z.boolean(),
@@ -97,8 +108,8 @@ export const GetRentalSchema = z.object({
 });
 
 export const CreateRentalSchema = z.object({
-  rentalStart: z.date(),
-  rentalEnd: z.date(),
+  rentalStart: z.string(),
+  rentalEnd: z.string(),
   pickupTime: z.string(),
   returnTime: z.string(),
   requiresDriver: z.boolean().default(false),
@@ -118,6 +129,12 @@ export const CreateRentalSchema = z.object({
 export const DeleteRentalSchema = z.object({
   params: z.object({ id: z.string() }),
 });
+
+
+export  const CreateRentalQuerySchema = z.object({
+    brendId : z.string(),
+    carId : z.string()
+})
 
 export type CreateRentalRequest = z.infer<typeof CreateRentalSchema>;
 export type DeleteRentalRequest = z.infer<typeof DeleteRentalSchema>;

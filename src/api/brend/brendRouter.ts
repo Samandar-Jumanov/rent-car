@@ -3,10 +3,11 @@ import express, { type Router } from "express";
 import { z } from "zod";
 
 import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
-import { GetBrendSchema, BrendSchema, CreateBrendSchema } from "./brendModel";
+import { GetBrendSchema, BrendSchema, CreateBrendSchema, QueryBrendSchema } from "./brendModel";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { brendController } from "./brendController";
-import { CreateRentalSchema , CreateRentalRequest } from "./cars/carsModel";
+import { CreateRentalSchema  , DeleteRentalSchema , CreateRentalQuerySchema } from "./cars/carsModel";
+
 export const brendRegistry = new OpenAPIRegistry();
 export const brendRouter: Router = express.Router();
 
@@ -31,6 +32,17 @@ brendRegistry.registerPath({
 });
 brendRouter.get("/top", brendController.getTopBrends);
 
+// Query brends 
+brendRegistry.registerPath({
+  method: "get",
+  path: "/brends/query",
+  tags: ["Brend"],
+  request: { query: QueryBrendSchema },
+  responses: createApiResponse(z.array(BrendSchema), "Success"),
+});
+
+brendRouter.get("/query", validateRequest(QueryBrendSchema), brendController.queryBrend);
+
 // GET /brends/:id
 brendRegistry.registerPath({
   method: "get",
@@ -39,17 +51,16 @@ brendRegistry.registerPath({
   request: { params: GetBrendSchema.shape.params },
   responses: createApiResponse(BrendSchema, "Success"),
 });
+
 brendRouter.get("/:id", validateRequest(GetBrendSchema), brendController.getBrend);
 
+// Create order 
 brendRegistry.registerPath({
   method: "post",
   path: "/brends/order",
   tags: ["Brend"],
   request: {
-    query: z.object({
-      brendId: z.string(),
-      carId: z.string(),
-    }),
+    query:CreateRentalQuerySchema,
     body: {
         content: {
           'application/json': {
@@ -58,40 +69,20 @@ brendRegistry.registerPath({
         }
       }
   },
-  responses: createApiResponse(z.any(), "Success"),
+  responses: createApiResponse(CreateRentalSchema, "Success"),
 });
+brendRouter.post("/order" , validateRequest(CreateRentalSchema),brendController.createOrder);
 
-brendRouter.post("/order", (req, res, next) => {
-  const querySchema = z.object({
-    brendId: z.string(),
-    carId: z.string(),
-  });
-  const { success } = querySchema.safeParse(req.query);
-  if (!success) {
-    return res.status(400).json({ error: 'Invalid query parameters' });
-  }
-  next();
-}, brendController.createOrder);
 
+// Delete order
 brendRegistry.registerPath({
   method: "delete",
   path: "/brends/order/{id}",
   tags: ["Brend"],
   request: {
-    params: z.object({
-      id: z.string(),
-    }),
+      params : DeleteRentalSchema.shape.params
   },
+
   responses: createApiResponse(z.any(), "Success"),
 });
-
-brendRouter.delete("/order/:id", (req, res, next) => {
-  const paramsSchema = z.object({
-    id: z.string(),
-  });
-  const { success } = paramsSchema.safeParse(req.params);
-  if (!success) {
-    return res.status(400).json({ error: 'Invalid path parameter' });
-  }
-  next();
-}, brendController.cancelOrder);
+brendRouter.delete("/order/:id",  validateRequest(DeleteRentalSchema) , brendController.cancelOrder);

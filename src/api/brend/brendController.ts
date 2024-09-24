@@ -4,6 +4,8 @@ import { handleServiceResponse } from "@/common/utils/httpHandlers";
 import { brendService } from "./brendService";
 import { CreateRentalRequest } from "./cars/carsModel";
 import { carService } from "./cars/cars.service";
+import { QueryBrend } from "./brendModel";
+import { logger } from "@/server";
 
 class BrendController {
   public getBrends: RequestHandler = async (_req: Request, res: Response) => {
@@ -40,6 +42,12 @@ class BrendController {
     const id = req.params.id;
     const serviceResponse = await carService.cancelOrder(id)
     return handleServiceResponse(serviceResponse, res);
+  }
+
+  public queryBrend  : RequestHandler = async (req: Request, res: Response) => {
+       const query  =  req.query as QueryBrend
+       const serviceResponse = await brendService.queryBrends(query)
+     return handleServiceResponse(serviceResponse, res);
   }
 
 }
