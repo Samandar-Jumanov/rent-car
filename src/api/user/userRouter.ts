@@ -7,6 +7,7 @@ import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
 import { GetUserSchema, UserSchema, CreateUserSchema, VerifyUserSchema, UpdateUserSchema  , RefreshtokenSchema} from "@/api/user/userModel";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { userController } from "./userController";
+import { authMiddleware } from "@/common/middleware/auth";
 
 export const userRegistry = new OpenAPIRegistry();
 export const userRouter: Router = express.Router();
@@ -30,7 +31,7 @@ userRegistry.registerPath({ // get single
   responses: createApiResponse(UserSchema, "Success"),
 });
 
-userRouter.get("/:id", validateRequest(GetUserSchema), userController.getUser);
+userRouter.get("/:id", authMiddleware ,  validateRequest(GetUserSchema), userController.getUser);
 
 userRegistry.registerPath({  // create user 
   method: "post",
@@ -50,7 +51,7 @@ userRegistry.registerPath({  // create user
 
 userRouter.post("/", userController.createUser);
 
-userRegistry.registerPath({ // verify user
+userRegistry.registerPath({ 
   method: "patch",
   path: "/users",
   tags: ["User"],
@@ -72,18 +73,8 @@ userRouter.patch("/", userController.verifyUser);
 
 userRegistry.registerPath({
   method: "put",
-  path: "/users/{id}",
+  path: "/users",
   tags: ["User"],
-  parameters: [
-    {
-      name: "id",
-      in: "path",
-      required: true,
-      schema: {
-        type: "string"
-      }
-    }
-  ],
   request: {
     body: {
       content: {
@@ -96,7 +87,7 @@ userRegistry.registerPath({
   responses: createApiResponse(UserSchema, "Success"),
 });
 
-userRouter.put("/:id", userController.updateUser);
+userRouter.put("/", authMiddleware, userController.updateUser);
 
 
 userRegistry.registerPath({
@@ -115,4 +106,4 @@ userRegistry.registerPath({
   responses: createApiResponse(RefreshtokenSchema, "Success"),
 });
 
-userRouter.post("/refresh-token" , userController.refreshToken);
+userRouter.post("/refresh-token" , authMiddleware ,  userController.refreshToken);

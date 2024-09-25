@@ -31,8 +31,8 @@ class UserController {
 
   public updateUser: RequestHandler = async (req: Request, res: Response) => {
     const body : UpdateUserRequest  =  req.body;
-    const id = req.params.id  
-    const serviceResponse = await userService.updateUser(body , id );
+    const user = req.user
+    const serviceResponse = await userService.updateUser(body , String( user?.userId) ); // should be updated lately 
     return handleServiceResponse(serviceResponse, res);
   };
 
@@ -41,10 +41,8 @@ class UserController {
     if (!refreshToken) {
       return res.status(400).json({ message: 'Refresh token is required' });
     }
-    
     const serviceResponse = await userService.refreshToken(refreshToken);
     return handleServiceResponse(serviceResponse, res);
-
   };
   
 }

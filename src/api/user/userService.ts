@@ -40,7 +40,6 @@ export class UserService {
 
   async createUser(data: string ): Promise<ServiceResponse<IUser | null>> {
     try {
-      // will create or find new user 
 
       let user
 
@@ -60,7 +59,7 @@ export class UserService {
       await userVerificationService.initiateVerification(user.phoneNumber);
 
     
-      return ServiceResponse.success<IUser>("User created and verification initiated", user as IUser);
+      return ServiceResponse.success<IUser>("User verification initiated", user as IUser);
     } catch (ex) {
       console.log({ ex })
       const errorMessage = `Error creating user: ${(ex as Error).message}`;
@@ -128,13 +127,11 @@ export class UserService {
       const errorMessage = `Error verifying user: ${(ex as Error).message}`;
       logger.error(errorMessage);
       return ServiceResponse.failure(
-        "An error occurred while verifying user.",
+        "An error occurred while updating user.",
         null,
         StatusCodes.INTERNAL_SERVER_ERROR,
       );
     }
-
-    
   }
 
   async refreshToken(refreshToken: string): Promise<ServiceResponse<{ token: string } | null>> {
