@@ -18,7 +18,6 @@ export interface IBrend {
   ownerNumber: string;
   address: string;
   password: string;
-  isTopBrend: boolean;
   carDelivery : z.infer<typeof CarDelivery>
   topBrendId: string | null;
   payment: z.infer<typeof PaymentType>;

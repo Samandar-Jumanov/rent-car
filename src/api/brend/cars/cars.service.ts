@@ -9,7 +9,7 @@ export class CarService {
   async orderBrendCar( brendId : string  , carId : string , body : CreateRentalRequest  , user : JwtPayload ): Promise<ServiceResponse<IRental | null>> {
     try {
 
-      const brend = await prisma.brend.findUnique({
+      const brend = await prisma.brand.findUnique({
           where : {
               id : brendId
           }
@@ -60,7 +60,6 @@ export class CarService {
         StatusCodes.INTERNAL_SERVER_ERROR,
       );
     }
-
   }
 
   async cancelOrder( rentalId : string ): Promise<ServiceResponse<IRental | null>> {

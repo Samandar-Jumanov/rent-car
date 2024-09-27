@@ -1,35 +1,51 @@
-import twilioClient from '../brend/twilio/twilioService';
+// File: smsService.ts
+import axios from 'axios';
+import { logger } from '@/server';
 
-export class SmsService {
-  private maxRetries = 3;
-  private retryDelay = 1000;
 
-  async sendSms(to: string, body: string): Promise<string> {
-    let retries = 0;
-    while (retries < this.maxRetries) {
-      try {
-        const message = await twilioClient.messages.create({
-          body,
-          to,
-          from: process.env.TWILIO_PHONE_NUMBER,
+const ESKIZ_PASSWORD = process.env.ESKIZ_PASSWORD;
+const ESKIZ_EMAIL = process.env.ESKIZ_EMAIL;
+
+
+async function getAuthToken(): Promise<string> {
+    const AUTHORIZATION_URL = 'http://notify.eskiz.uz/api/auth/login';
+    try {
+        const response = await axios.post(AUTHORIZATION_URL, {
+            email: ESKIZ_EMAIL,
+            password: ESKIZ_PASSWORD,
         });
-
-        return message.sid;
-      } catch (error) {
-        console.error(`Error sending SMS (attempt ${retries + 1}):`, error);
-        retries++;
-        if (retries >= this.maxRetries) {
-          throw new Error('Max retries reached. SMS could not be sent.');
+        if (response.data.data.token) {
+            return response.data.data.token;
+        } else {
+            throw new Error('Failed to obtain authorization token');
         }
-        await new Promise(resolve => setTimeout(resolve, this.retryDelay));
-      }
+    } catch (error) {
+        logger.error('Authorization error:', error);
+        throw new Error('Authorization failed');
     }
-    throw new Error('Unexpected error in sendSms');
-  }
-
-  async sendVerificationCode(to: string, code: string): Promise<string> {
-    return this.sendSms(to, `Your verification code is: ${code}`);
-  }
 }
 
-export const smsService = new SmsService();
+export default async function sendMessage(message: string, phone: string): Promise<number> {
+    try {
+        const token = await getAuthToken();
+        const SEND_SMS_URL = "http://notify.eskiz.uz/api/message/sms/send";
+        const response = await axios.post(SEND_SMS_URL, 
+            {
+                mobile_phone: phone,
+                message: message,
+                from: '4546'
+            },
+            {
+                headers: { Authorization: `Bearer ${token}` }
+            }
+        );
+
+        // issue is being occured / 400 bad request 
+        logger.info(`SMS sent. Response: ${JSON.stringify(response.data)}`);
+        return response.status;
+    } catch (error) {
+        logger.error('Send message error:', error);
+        throw error;
+    }
+}
+

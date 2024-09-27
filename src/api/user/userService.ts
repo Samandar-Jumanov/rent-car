@@ -38,7 +38,7 @@ export class UserService {
     }
   }
 
-  async createUser(data: string ): Promise<ServiceResponse<IUser | null>> {
+  async createUser(data: string ): Promise<ServiceResponse<{ token : string } | null >> {
     try {
 
       let user
@@ -56,16 +56,21 @@ export class UserService {
       }
 
 
-      await userVerificationService.initiateVerification(user.phoneNumber);
+    //  const isSent = await userVerificationService.initiateVerification(user.phoneNumber);
 
-    
-      return ServiceResponse.success<IUser>("User verification initiated", user as IUser);
+    //  if(!isSent) {
+    //         throw new Error("Could not sent sms ")
+    //  }
+
+     const token = generateToken({phoneNumber: user.phoneNumber ,userId : user.id})
+
+      return ServiceResponse.success("User verification initiated", { token });
     } catch (ex) {
       console.log({ ex })
-      const errorMessage = `Error creating user: ${(ex as Error).message}`;
+      const errorMessage = `Error in createUser  user: ${(ex as Error).message}`;
       logger.error(errorMessage);
       return ServiceResponse.failure(
-        "An error occurred while creating user.",
+        `${(ex as Error).message}`,
         null,
         StatusCodes.INTERNAL_SERVER_ERROR,
       );

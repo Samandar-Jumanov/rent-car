@@ -16,7 +16,7 @@ export class BrendService {
   async getBrends(): Promise<ServiceResponse<IBrend[] | null>> {
     try {
 
-      const brends = await prisma.brend.findMany( {
+      const brends = await prisma.brand.findMany( {
           include : {
              cars : {
                   include : {
@@ -59,7 +59,7 @@ export class BrendService {
 
   async getBrendById(brendId: string): Promise<ServiceResponse<IBrend | null>> {
     try {
-      const brend = await prisma.brend.findUnique({
+      const brend = await prisma.brand.findUnique({
         where: { id: brendId },
         include : {
              cars : {
@@ -83,7 +83,7 @@ export class BrendService {
   }
   async  queryBrends(query: QueryBrend): Promise<ServiceResponse<QueryBrendResult | null >> {
     try {
-      const brends = await prisma.brend.findMany({
+      const brends = await prisma.brand.findMany({
         where: {
           address: query.address ? { contains: query.address, mode: 'insensitive' } : undefined,
           payment: query.payment,
@@ -91,8 +91,6 @@ export class BrendService {
           cars: {
             some: {
               carBrend: query.carBrend ? { contains: query.carBrend, mode: 'insensitive' } : undefined,
-              mirrorType: query.mirrorType,
-              fuelType: query.fuelType,
               color: query.color ? { contains: query.color, mode: 'insensitive' } : undefined,
             },
           },
