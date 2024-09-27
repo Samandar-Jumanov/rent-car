@@ -3,6 +3,12 @@ import { z } from "zod";
 
 extendZodWithOpenApi(z);
 
+export enum Role {
+      ADMIN="ADMIN",
+      USER="USER",
+      SUPER_ADMIN="SUPER_ADMIN"
+}
+
 export interface IUser {
   id: string;
   phoneNumber: string;
@@ -33,6 +39,7 @@ export const GetUserSchema = z.object({
 
 export const CreateUserSchema = z.object({
   phoneNumber: z.string(),
+  password : z.string().optional(),
 });
 
 

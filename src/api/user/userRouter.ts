@@ -49,7 +49,7 @@ userRegistry.registerPath({  // create user
   responses: createApiResponse(UserSchema, "Success"),
 });
 
-userRouter.post("/", userController.createUser);
+userRouter.post("/",  validateRequest(z.object({ body : CreateUserSchema })),userController.createUser);
 
 userRegistry.registerPath({ 
   method: "patch",

@@ -76,6 +76,10 @@ export class DiscountService {
           startDate: { lte: now },
           endDate: { gte: now },
         },
+        include : {
+           car : true ,
+           brend : true
+        }
       });
 
       return ServiceResponse.success<IDiscount[]>(

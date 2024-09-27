@@ -3,8 +3,10 @@ import { ServiceResponse } from "@/common/models/serviceResponse";
 import { logger } from "@/server";
 import { userVerificationService } from "../user-verfication/userVerficationService";
 import prisma from "@/common/db/prisma";
-import { IUser, UpdateUserRequest } from "./userModel";
+import { CreateUserRequest, IUser, UpdateUserRequest } from "./userModel";
 import { generateToken , verifyToken } from "@/common/utils/jwt";
+import { IRental } from "../brend/cars/carsModel";
+import { Role } from "@prisma/client";
 
 export class UserService {
   async findAll(): Promise<ServiceResponse<IUser[] | null>> {
@@ -38,19 +40,25 @@ export class UserService {
     }
   }
 
-  async createUser(data: string ): Promise<ServiceResponse<{ token : string } | null >> {
+  async createUser(data: CreateUserRequest ): Promise<ServiceResponse<{ token : string } | null >> {
     try {
 
       let user
+      let role
+
+      if(data.password) {
+           role = Role.AGENT
+      }
 
       const existingUser = await prisma.user.findUnique({
-          where  : { phoneNumber : data}
+          where  : { phoneNumber : data.phoneNumber}
       });
 
       if(!existingUser){
           user = await prisma.user.create({
-              data: { phoneNumber: data }
+              data: { phoneNumber: data.phoneNumber  , role }
           });
+
       } else {
              user = existingUser
       }
@@ -61,6 +69,7 @@ export class UserService {
     //  if(!isSent) {
     //         throw new Error("Could not sent sms ")
     //  }
+
 
      const token = generateToken({phoneNumber: user.phoneNumber ,userId : user.id})
 
@@ -166,6 +175,33 @@ export class UserService {
       );
     }
   }
+
+
+  async getRentals( userId : string  , role : string ) : Promise<ServiceResponse<IRental[] | null>> {
+    try {
+        const user = await prisma.user.findUnique({ where :  {id : userId} , include : { rentals : {
+            include : {
+                  user : role === "ADMIN",
+                  car : true,
+            }
+        } }});
+        
+        if (!user) {
+          return ServiceResponse.failure("User not found", null, StatusCodes.NOT_FOUND);
+        };
+
+        return ServiceResponse.success<IRental[]>("Rentals found", user.rentals as IRental[] );
+    } catch (ex) {
+      const errorMessage = `Error refreshing token: ${(ex as Error).message}`;
+      logger.error(errorMessage);
+      return ServiceResponse.failure(
+        "An error occurred while refreshing token.",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
 }
 
 

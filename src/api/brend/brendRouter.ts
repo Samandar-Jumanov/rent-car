@@ -60,7 +60,7 @@ brendRegistry.registerPath({
   path: "/brends/order",
   tags: ["Brend"],
   request: {
-    query:CreateRentalQuerySchema,
+    query: CreateRentalQuerySchema,
     body: {
         content: {
           'application/json': {
@@ -86,3 +86,50 @@ brendRegistry.registerPath({
   responses: createApiResponse(z.any(), "Success"),
 });
 brendRouter.delete("/order/:id",  validateRequest(DeleteRentalSchema) , brendController.cancelOrder);
+
+
+// Delete order
+brendRegistry.registerPath({
+  method: "post",
+  path: "/brends/order/{id}",
+  tags: ["Brend"],
+  request: {
+      params : DeleteRentalSchema.shape.params
+  },
+
+  responses: createApiResponse(z.any(), "Success"),
+});
+brendRouter.delete("/order/:id",  validateRequest(DeleteRentalSchema) , brendController.cancelOrder);
+
+
+
+const CreateReviewRequestSchema = z.object({
+  query: z.object({
+    carId: z.string().optional(),
+    brandId: z.string().optional(),
+  }).refine(data => data.carId || data.brandId, {
+    message: "Either carId or brandId must be provided",
+  }),
+  body: z.object({
+    rating: z.number().int().min(1).max(5),
+    review: z.string().optional(),
+  }),
+});
+
+brendRegistry.registerPath({
+  method: "post",
+  path: "/brends/reviews",
+  tags: ["Brend"],
+  request: {
+    query: CreateReviewRequestSchema.shape.query,
+    body:{
+         content  : {  
+            'application/json': {
+              schema:CreateReviewRequestSchema.shape.body
+            }
+         }
+    }
+  },
+
+  responses: createApiResponse(z.any(), "Success"),
+});

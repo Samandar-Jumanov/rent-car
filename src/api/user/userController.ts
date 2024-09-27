@@ -19,7 +19,7 @@ class UserController {
 
   public createUser: RequestHandler = async (req: Request, res: Response) => {
     const body : CreateUserRequest  =  req.body;
-    const serviceResponse = await userService.createUser(body.phoneNumber);
+    const serviceResponse = await userService.createUser(body);
     return handleServiceResponse(serviceResponse, res);
   };
 

@@ -21,6 +21,8 @@ export interface IBrend {
   carDelivery : z.infer<typeof CarDelivery>
   topBrendId: string | null;
   payment: z.infer<typeof PaymentType>;
+  ratings : number[];
+  averageRating: number
   createdAt: Date;
   updatedAt: Date;
 }
@@ -81,6 +83,43 @@ export const QueryBrendSchema = z.object({
 })
 
 
+export interface IReviewSchema {
+  id: string;
+  carId: string | null;
+  brandId : string | null;
+  review: string;
+  rating: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export const ReviewSchema = z.object({
+  id: z.string(),
+  carId: z.string(),
+  review: z.string(),
+  brandId  : z.string(),
+  rating: z.number().int().min(1).max(5),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export const CreateReviewSchema = z.object({
+  carId: z.string(),
+  brandId  : z.string(),
+  rating: z.number().int().min(1).max(5),
+  review: z.string(),
+});
+
+export const GetReviewSchema = z.object({
+  params: z.object({ id: z.string() }),
+});
+
+export const DeleteReviewSchema = z.object({
+  params: z.object({ id: z.string() }),
+});
+
+
+export type CreateReviewRequest = z.infer<typeof CreateReviewSchema>;
 export type UpdateBrendRequest = z.infer<typeof UpdateBrendSchema>;
 export type CreateBrendRequest = z.infer<typeof CreateBrendSchema>;
 export type QueryBrend = z.infer<typeof QueryBrendSchema>;

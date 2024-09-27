@@ -50,6 +50,22 @@ class BrendController {
      return handleServiceResponse(serviceResponse, res);
   }
 
+  public addReview  : RequestHandler = async (req: Request, res: Response) => {
+      const cardId = req.query.cardId
+      const brandId  = req.query.brandId
+      const body = req.body
+
+      const data = {
+           cardId ,
+           brandId,
+           ...body
+      }
+
+    const userId = req.user?.userId
+    
+    const serviceResponse = await brendService.addReview(data , String(userId))
+    return handleServiceResponse(serviceResponse, res);
+ }
 }
 
 export const brendController = new BrendController();

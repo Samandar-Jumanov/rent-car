@@ -26,6 +26,7 @@ model User {
   rentals          Rental[]
   favourites       Favorite[]
   reviews          UserReviews[]
+  givenReviews     Reviews[]
 
 }
 
@@ -63,9 +64,13 @@ model Brand {
   topBrendId   String ?
   payment      PaymentType  @default(CARD)
   topBrend     TopBrend ?
+  ratings          Int[]     @default([0])
+  averageRating    Int @default(0)
+  // ISSUE : ALSO CARS AVERAGE RATING SHOULD BE CALCULATED 
 
   cars         Car[]
   discounts    Discount ?
+  reviews      Reviews[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -84,13 +89,15 @@ model Car {
   isAvailable      Boolean  @default(true)
   images           String[]
   status           CarStatus   @default(FREE)
+  ratings          Int[]     @default([0])
+  averageRating    Int @default(0)
  
-  brend             Brand    @relation(fields: [brendId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  brand             Brand    @relation(fields: [brendId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   favourites        Favorite[]
   requirements      Requirements[]
   features          Feature[]
   rentals           Rental[]
-  reviews           CarRewiew[]
+  reviews           Reviews[]
   discounts         Discount ?
 
   @@index([brendId])
@@ -98,14 +105,16 @@ model Car {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
-
-
-model  CarRewiew {
-     id   String  @id @default(cuid())
-     carId   String
+model  Reviews {
+     id         String  @id @default(cuid())
+     carId      String ?
+     brandId    String ?
+     userId     String
      review     String
      rating     Int
-     car      Car @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+     car        Car ? @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+     brand      Brand ? @relation(fields: [brandId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+     user       User  @relation(fields: [userId] , references: [id] , onDelete:  Cascade , onUpdate:  Cascade)
 
     createdAt  DateTime @default(now())
     updatedAt  DateTime @updatedAt
