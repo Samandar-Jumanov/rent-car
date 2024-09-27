@@ -88,28 +88,29 @@ export class FeatureService {
     }
   }
 
-  async applyFeature(data: ApplyFeature): Promise<ServiceResponse<IFeature[] | null>> {
+  async  applyFeature(data: ApplyFeature): Promise<ServiceResponse<IFeature[] | null>> {
     try {
-        const updatedFeatures = await prisma.$transaction(
-            data.featuresId.map(fId =>
-              prisma.requirements.update({
-                where: { id: fId },
-                data: { carId: data.carId }
-              })
-            )
-          );
-
+      const updatedFeatures = await prisma.$transaction(
+        data.featuresId.map(featureId =>
+          prisma.feature.update({
+            where: { id: featureId },
+            data: { carId: data.carId }
+          })
+        )
+      );
+  
       return ServiceResponse.success("Features applied successfully", updatedFeatures);
     } catch (ex) {
-      const errorMessage = `Error deleting feature: ${(ex as Error).message}`;
+      const errorMessage = `Error applying features: ${(ex as Error).message}`;
       logger.error(errorMessage);
       return ServiceResponse.failure(
-        "An error occurred while deleting the feature.",
+        "An error occurred while applying the features.",
         null,
         StatusCodes.INTERNAL_SERVER_ERROR,
       );
     }
-  }
 }
+}
+
 
 export const featureService = new FeatureService();

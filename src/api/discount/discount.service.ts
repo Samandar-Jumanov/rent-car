@@ -71,33 +71,47 @@ export class DiscountService {
   async findActiveDiscounts(): Promise<ServiceResponse<IDiscount[] | null>> {
     try {
       const now = new Date();
-      const activeDiscounts = await prisma.discount.findMany({
-        where: {
-          startDate: { lte: now },
-          endDate: { gte: now },
-        },
-        include : {
-           car : true ,
-           brend : true
+      
+      const discounts = await prisma.discount.findMany({
+        include: {
+          car: true,
+          brend: true
         }
       });
 
+      const calculatedDiscounts: IDiscount[] = discounts.map(discount => {
+        const startDate = new Date(discount.startDate);
+        const endDate = new Date(discount.endDate);
+        let daysRemaining: number | undefined;
+
+        if (now < startDate) {
+          daysRemaining = Math.ceil((startDate.getTime() - now.getTime()) / (1000 * 3600 * 24));
+        } else if (now > endDate) {
+        } else {
+          daysRemaining = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 3600 * 24));
+        }
+
+        return {
+          ...discount,
+          daysRemaining
+        };
+      });
+
       return ServiceResponse.success<IDiscount[]>(
-        "Active discounts found",
-        activeDiscounts as IDiscount[],
+        "Discounts retrieved successfully",
+        calculatedDiscounts
       );
 
     } catch (ex) {
-      const errorMessage = `Error finding active discounts: ${(ex as Error).message}`;
+      const errorMessage = `Error finding discounts: ${(ex as Error).message}`;
       logger.error(errorMessage);
       return ServiceResponse.failure(
-        "An error occurred while finding active discounts.",
+        "An error occurred while finding discounts.",
         null,
-        StatusCodes.INTERNAL_SERVER_ERROR,
+        StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
   }
-
   
 
 }

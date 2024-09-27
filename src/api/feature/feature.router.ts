@@ -49,6 +49,26 @@ featureRegistry.registerPath({
 
 featureRouter.post("/",  validateRequest(z.object({ body : CreateFeatureSchema})), featureController.createFeature);
 
+
+featureRegistry.registerPath({
+  method: "patch",
+  path: "/features/apply",
+  tags: ["Feature"],
+  request: {
+      body: {
+        content: {
+          'application/json': {
+            schema: ApplyFeatureSchema
+          }
+        }
+      }
+    },
+    
+  responses: createApiResponse(z.array(FeatureSchema), "Success"),
+});
+
+featureRouter.patch("/apply", validateRequest(z.object({ body : ApplyFeatureSchema })), featureController.applyFeature); 
+
 featureRegistry.registerPath({
   method: "put",
   path: "/features/{id}",
@@ -78,21 +98,3 @@ featureRegistry.registerPath({
 
 featureRouter.delete("/:id",  validateRequest(GetFeatureSchema), featureController.deleteFeature);
 
-
-featureRegistry.registerPath({
-    method: "put",
-    path: "/features/apply",
-    tags: ["Feature"],
-    request: {
-        body: {
-          content: {
-            'application/json': {
-              schema: ApplyFeatureSchema
-            }
-          }
-        }
-      },
-    responses: createApiResponse(FeatureSchema, "Success"),
-  });
-  
-  featureRouter.put("/apply",  validateRequest(z.object({ body : ApplyFeatureSchema})), featureController.applyFeature); // TEST

@@ -1,6 +1,7 @@
 import { Request, RequestHandler, Response } from "express";
 import { favoriteService } from "./favorite.service";
 import { handleServiceResponse } from "@/common/utils/httpHandlers";
+import { logger } from "@/server";
 
 class FavoriteController {
   public getFavorites: RequestHandler = async (_req: Request, res: Response) => {
@@ -17,7 +18,7 @@ class FavoriteController {
   public createFavorite: RequestHandler = async (req: Request, res: Response) => {
     const  carId  = req.params.carId
     const userId = req.user?.userId;
-    const serviceResponse = await favoriteService.createFavorite(carId , String(userId));
+    const serviceResponse = await favoriteService.createFavorite(String(userId) ,carId);
     return handleServiceResponse(serviceResponse, res);
   };
 

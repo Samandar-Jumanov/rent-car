@@ -7,12 +7,15 @@ import { IFavorite } from "./favorite.model";
 export class FavoriteService {
   async createFavorite(userId : string , carId : string ): Promise<ServiceResponse<IFavorite | null>> {
     try {
+      
+
       const favorite = await prisma.favorite.create({
         data: {
              carId ,
              userId
         },
       });
+
 
       return ServiceResponse.success<IFavorite>("Favorite created successfully", favorite);
     } catch (ex) {
@@ -43,7 +46,10 @@ export class FavoriteService {
 
   async findFavorite(id: string): Promise<ServiceResponse<IFavorite | null>> {
     try {
-      const favorite = await prisma.favorite.findUnique({ where: { id } });
+      const favorite = await prisma.favorite.findUnique({ where: { id },  include : {
+        user  : true ,
+        car : true 
+     }});
       
       if (!favorite) {
         return ServiceResponse.failure("Favorite not found", null, StatusCodes.NOT_FOUND);
@@ -63,7 +69,12 @@ export class FavoriteService {
 
   async findAllFavorites(): Promise<ServiceResponse<IFavorite[] | null>> {
     try {
-      const favorites = await prisma.favorite.findMany();
+      const favorites = await prisma.favorite.findMany({
+        include : {
+           user  : true ,
+           car : true 
+        }
+      });
       return ServiceResponse.success<IFavorite[]>(
         "Favorites found",
         favorites as IFavorite[],

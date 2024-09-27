@@ -73,14 +73,18 @@ export const UpdateBrendSchema = z.object({
 });
 
 export const QueryBrendSchema = z.object({
-        address :  z.string().optional(),
-        carBrend : z.string().optional(),
-        mirrorType  : MirrorType.optional(),
-        fuelType : FuelType.optional(),
-        color : z.string().optional(),
-        payment : PaymentType.optional(),
-        carDelivery : CarDelivery.optional()
-})
+  address: z.string().optional(),
+  carBrend: z.string().optional(),
+  mirrorType: MirrorType.optional(),
+  fuelType: FuelType.optional(),
+  color: z.string().optional(),
+  payment: PaymentType.optional(),
+  carDelivery: CarDelivery.optional(),
+  minPrice: z.string().optional(),
+  maxPrice: z.string().optional(),
+  requirements: z.array(z.string()).optional(),
+  features: z.array(z.string()).optional()
+});
 
 
 export interface IReviewSchema {

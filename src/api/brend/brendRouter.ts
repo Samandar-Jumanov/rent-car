@@ -19,6 +19,11 @@ brendRegistry.registerPath({
   method: "get",
   path: "/brends",
   tags: ["Brend"],
+  request : {
+       query : z.object({
+            location  : z.string()
+       })
+  },
   responses: createApiResponse(z.array(BrendSchema), "Success"),
 });
 brendRouter.get("/", brendController.getBrends);
@@ -28,6 +33,11 @@ brendRegistry.registerPath({
   method: "get",
   path: "/brends/top",
   tags: ["Brend"],
+  request : {
+    query : z.object({
+         location  : z.string()
+    })
+},
   responses: createApiResponse(z.array(BrendSchema), "Success"),
 });
 brendRouter.get("/top", brendController.getTopBrends);

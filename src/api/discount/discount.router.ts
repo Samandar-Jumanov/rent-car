@@ -48,7 +48,9 @@ discountRegistry.registerPath({
   responses: createApiResponse(DiscountSchema, "Success"),
 });
 
-discountRouter.post("/", authMiddleware, validateRequest(CreateDiscountSchema), discountController.createDiscount);
+discountRouter.post("/",  validateRequest(z.object({
+    body : CreateDiscountSchema
+})), discountController.createDiscount);
 
 discountRegistry.registerPath({
   method: "delete",
@@ -58,4 +60,4 @@ discountRegistry.registerPath({
   responses: createApiResponse(z.boolean(), "Success"),
 });
 
-discountRouter.delete("/:id", authMiddleware, validateRequest(DeleteDiscountSchema), discountController.deleteDiscount);
+discountRouter.delete("/:id",  validateRequest(DeleteDiscountSchema), discountController.deleteDiscount);

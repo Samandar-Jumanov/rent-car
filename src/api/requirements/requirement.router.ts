@@ -50,6 +50,24 @@ requirementsRegistry.registerPath({
 requirementsRouter.post("/",  validateRequest(z.object({ body : CreateRequirementsSchema})), requirementsController.createRequirements);
 
 requirementsRegistry.registerPath({
+  method: "patch",
+  path: "/requirements/apply",
+  tags: ["Requirements"],
+  request : {
+        body : {
+          content: {
+              'application/json': {
+                schema: ApplyRequirementsSchema
+              }
+            }
+        }
+  },
+  responses: createApiResponse(z.array(RequirementsSchema), "Success"),
+});
+
+requirementsRouter.patch("/apply",   requirementsController.applyRequirements); // not working
+
+requirementsRegistry.registerPath({
   method: "put",
   path: "/requirements/{id}",
   tags: ["Requirements"],
@@ -66,7 +84,7 @@ requirementsRegistry.registerPath({
   responses: createApiResponse(RequirementsSchema, "Success"),
 });
 
-requirementsRouter.put("/:id",  validateRequest(z.object({ body : UpdateRequirementsSchema})), requirementsController.updateRequirements);
+requirementsRouter.put("/:id",   requirementsController.updateRequirements);
 
 requirementsRegistry.registerPath({
   method: "delete",
@@ -79,20 +97,3 @@ requirementsRegistry.registerPath({
 requirementsRouter.delete("/:id",  validateRequest(GetRequirementsSchema), requirementsController.deleteRequirements);
 
 
-requirementsRegistry.registerPath({
-    method: "put",
-    path: "/requirements/apply",
-    tags: ["Requirements"],
-    request : {
-          body : {
-            content: {
-                'application/json': {
-                  schema: ApplyRequirementsSchema
-                }
-              }
-          }
-    },
-    responses: createApiResponse(z.array(RequirementsSchema), "Success"),
-  });
-  
-  requirementsRouter.delete("/apply",  validateRequest(ApplyRequirementsSchema), requirementsController.applyRequirements);

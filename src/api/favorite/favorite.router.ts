@@ -12,14 +12,30 @@ export const favoriteRouter: Router = express.Router();
 
 favoriteRegistry.register("Favorite", FavoriteSchema);
 
+
+favoriteRegistry.registerPath({
+  method: "post",
+  path: "/favorites/{carId}",
+  tags: ["Favorite"],
+  request: {
+    params:z.object({ carId: z.string()}),
+    body: { content: { 'application/json': { schema: CreateFavoriteSchema } } }
+  },
+  responses: createApiResponse(FavoriteSchema, "Success"),
+});
+
+favoriteRouter.post("/:carId", favoriteController.createFavorite);
+
+
 favoriteRegistry.registerPath({
   method: "get",
-  path: "/favorites",
+  path: "/favorites/user",
   tags: ["Favorite"],
   responses: createApiResponse(z.array(FavoriteSchema), "Success"),
 });
 
-favoriteRouter.get("/", favoriteController.getFavorites);
+favoriteRouter.get("/user", favoriteController.getUserFavorites);
+
 
 favoriteRegistry.registerPath({
   method: "get",
@@ -31,15 +47,6 @@ favoriteRegistry.registerPath({
 
 favoriteRouter.get("/:id", validateRequest(GetFavoriteSchema), favoriteController.getFavorite);
 
-favoriteRegistry.registerPath({
-  method: "post",
-  path: "/favorites/:carId",
-  tags: ["Favorite"],
-  request: { params: CreateFavoriteSchema.shape.params },
-  responses: createApiResponse(CreateFavoriteSchema, "Success"),
-});
-
-favoriteRouter.post("/:carId", validateRequest(z.object({ body : CreateFavoriteSchema})), favoriteController.createFavorite);  // TODO test
 
 favoriteRegistry.registerPath({
   method: "delete",
@@ -51,11 +58,3 @@ favoriteRegistry.registerPath({
 
 favoriteRouter.delete("/:id", validateRequest(DeleteFavoriteSchema), favoriteController.deleteFavorite);
 
-favoriteRegistry.registerPath({
-  method: "get",
-  path: "/favorites/user",
-  tags: ["Favorite"],
-  responses: createApiResponse(z.array(FavoriteSchema), "Success"),
-});
-
-favoriteRouter.get("/user", favoriteController.getUserFavorites);

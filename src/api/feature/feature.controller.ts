@@ -2,6 +2,7 @@ import type { Request, RequestHandler, Response } from "express";
 import { featureService } from "./feature.service";
 import { handleServiceResponse } from "@/common/utils/httpHandlers";
 import { CreateFeatureRequest, UpdateFeatureRequest } from "./feature.model";
+import { logger } from "@/server";
 
 class FeatureController {
   public getFeatures: RequestHandler = async (_req: Request, res: Response) => {

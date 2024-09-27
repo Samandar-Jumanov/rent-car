@@ -58,7 +58,7 @@ model Brand {
   logo         String
   brendName    String
   ownerNumber  String    @unique
-  address      String
+  address      String //  may be updated later 
   password     String 
   carDelivery  CarDelivery  @default(TAKE_AWAY)
   topBrendId   String ?
@@ -73,7 +73,6 @@ model Brand {
   reviews      Reviews[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
-
 }
 
 
@@ -84,7 +83,7 @@ model Car {
   carBrend         String   @default("MERCADES")
   price            Decimal  @default(180.00)
   isDiscounted     Boolean  @default(true)
-  discountedPrice  String ? 
+  discountedPrice  Int ? 
   color            String
   isAvailable      Boolean  @default(true)
   images           String[]
@@ -105,6 +104,7 @@ model Car {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
+
 model  Reviews {
      id         String  @id @default(cuid())
      carId      String ?
@@ -131,12 +131,12 @@ model Feature {
 
 model Requirements {
       id  String   @id @default(cuid())
-      title  String
+      title  String  
+      value    String
       icon  String
-      upFrontMoney  String
 
-      carId   String ?
-      car     Car   ?  @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+       carId  String ?
+       car    Car   ?  @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
      createdAt DateTime @default(now())
      updatedAt DateTime @updatedAt
@@ -157,6 +157,7 @@ model Rental {
   requiresDelivery Boolean @default(false)
   travelRegion    String
   estimatedDistance String
+  userImage       String  @default("image")
   
 
   //user info
@@ -179,13 +180,16 @@ model Rental {
   updatedAt       DateTime @updatedAt
 }
 
+
 model Favorite {
-    id   String @id  @default(cuid())
-    carId  String
-    userId String
-    car     Car    @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate : Cascade)
-    user  User @relation(fields: [id], references: [id] ,onDelete: Cascade, onUpdate : Cascade)
-  }
+  id     String @id @default(cuid())
+  user   User   @relation(fields: [userId], references: [id] , onDelete: Cascade , onUpdate:  Cascade)
+  userId String
+  car    Car    @relation(fields: [carId], references: [id] , onDelete: Cascade , onUpdate:  Cascade )
+  carId  String
+
+  @@unique([userId, carId])
+}
 
 
 model Discount {

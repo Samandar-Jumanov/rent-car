@@ -8,7 +8,7 @@ export interface IRequirements {
   carId?: string | null;
   title: string;
   icon: string;
-  upFrontMoney: string;
+  value : string 
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,7 +26,8 @@ export const RequirementsSchema = z.object({
 export const CreateRequirementsSchema = z.object({
   title: z.string(),
   icon: z.string(),
-  upFrontMoney: z.string(),
+  value: z.string(),
+  
 });
 
 export const GetRequirementsSchema = z.object({
@@ -36,7 +37,7 @@ export const GetRequirementsSchema = z.object({
 export const UpdateRequirementsSchema = z.object({
   title: z.string().optional(),
   icon: z.string().optional(),
-  upFrontMoney: z.string().optional(),
+  value: z.string().optional(),
 }).refine(data => Object.values(data).some(value => value !== undefined), {
   message: "At least one field must be provided for update"
 });
