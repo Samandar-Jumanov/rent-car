@@ -52,7 +52,6 @@ export const CarSchema = z.object({
 export const GetCarSchema = z.object({
   params: z.object({ id: z.string() }),
 });
-
 export interface IRental {
   id: string;
   userId: string;
@@ -61,10 +60,9 @@ export interface IRental {
   rentalEnd: string;
   pickupTime: string;
   returnTime: string;
-  requiresDriver: boolean;
-  requiresDelivery: boolean;
   travelRegion: string;
   estimatedDistance: string;
+  userImage: string;
   username: string;
   surname: string;
   usersFatherName: string;
@@ -73,6 +71,8 @@ export interface IRental {
   address: string;
   passportImages: string[];
   driverLicenceImages: string[];
+  requirements: { id: string }[];
+  status: 'NEW' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED'; // Assuming these are the possible RentalType values
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -86,10 +86,9 @@ export const RentalSchema = z.object({
   rentalEnd: z.string(),
   pickupTime: z.string(),
   returnTime: z.string(),
-  requiresDriver: z.boolean(),
-  requiresDelivery: z.boolean(),
   travelRegion: z.string(),
   estimatedDistance: z.string(),
+  userImage: z.string(),
   username: z.string(),
   surname: z.string(),
   usersFatherName: z.string(),
@@ -98,6 +97,8 @@ export const RentalSchema = z.object({
   address: z.string(),
   passportImages: z.array(z.string()),
   driverLicenceImages: z.array(z.string()),
+  requirements: z.array(z.object({ id: z.string() })),
+  status: z.enum(['NEW', 'PENDING', 'APPROVED', 'REJECTED', 'COMPLETED']),
   isActive: z.boolean(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -112,10 +113,9 @@ export const CreateRentalSchema = z.object({
   rentalEnd: z.string(),
   pickupTime: z.string(),
   returnTime: z.string(),
-  requiresDriver: z.boolean().default(false),
-  requiresDelivery: z.boolean().default(false),
   travelRegion: z.string(),
   estimatedDistance: z.string(),
+  userImage: z.string().optional(),
   username: z.string(),
   surname: z.string(),
   usersFatherName: z.string(),
@@ -124,17 +124,17 @@ export const CreateRentalSchema = z.object({
   address: z.string(),
   passportImages: z.array(z.string()),
   driverLicenceImages: z.array(z.string()),
+  requirements: z.array(z.object({ id: z.string() })),
 });
 
 export const DeleteRentalSchema = z.object({
   params: z.object({ id: z.string() }),
 });
 
-
-export  const CreateRentalQuerySchema = z.object({
-    brendId : z.string(),
-    carId : z.string()
-})
+export const CreateRentalQuerySchema = z.object({
+  brendId: z.string(),
+  carId: z.string()
+});
 
 export type CreateRentalRequest = z.infer<typeof CreateRentalSchema>;
 export type DeleteRentalRequest = z.infer<typeof DeleteRentalSchema>;

@@ -9,12 +9,12 @@ import { logger } from "@/server";
 
 class BrendController {
   public getBrends: RequestHandler = async (_req: Request, res: Response) => {
-    const serviceResponse = await brendService.getBrends();
+    const serviceResponse = await brendService.getBrends(""); // location needed 
     return handleServiceResponse(serviceResponse, res);
   };
 
   public getTopBrends: RequestHandler = async (req: Request, res: Response) => {
-    const serviceResponse = await brendService.getTopBrends()
+    const serviceResponse = await brendService.getTopBrends("") // location needed 
     return handleServiceResponse(serviceResponse, res);
   };
 
@@ -25,18 +25,41 @@ class BrendController {
   };
 
 
-  public createOrder : RequestHandler = async (req: Request, res: Response) => {
+  public createOrder: RequestHandler = async (req: Request, res: Response) => {
     const user = req.user;
     const brendId = req.query.brendId as string;
     const carId = req.query.carId as string;
-
-    if (!brendId || !carId ||  !user) {
+  
+    if (!brendId || !carId || !user) {
       return res.status(400).json({ error: 'brendId and carId are required query parameters' });
     }
-    const body = req.body as CreateRentalRequest;
-    const serviceResponse = await carService.orderBrendCar(brendId, carId, body, user);
+  
+    const body = req.body ;
+   
+
+    // Handle file uploads
+    const passportImages = (req.files as { [fieldname: string]: Express.Multer.File[] })['passportImages'] || [];
+    const driverLicenceImages = (req.files as { [fieldname: string]: Express.Multer.File[] })['driverLicenceImages'] || [];
+  
+    // Convert file information to a format that can be stored (e.g., file paths or URLs)
+    const passportImagePaths = passportImages.map(file => file.path);
+    const driverLicenceImagePaths = driverLicenceImages.map(file => file.path);
+  
+    const serviceResponse = await carService.orderBrendCar(
+      brendId, 
+      carId, 
+      { 
+        ...body,
+        passportImages: passportImagePaths, 
+        driverLicenceImages: driverLicenceImagePaths 
+      },
+
+      user
+    );
+  
     return handleServiceResponse(serviceResponse, res);
   }
+
 
   public cancelOrder : RequestHandler = async (req: Request, res: Response) => {
     const id = req.params.id;

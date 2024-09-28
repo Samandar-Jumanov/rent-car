@@ -41,21 +41,33 @@ export class CarService {
         return ServiceResponse.failure("User  not found", null, StatusCodes.NOT_FOUND);
       }
 
+      const { requirements  , ...rest } = body
+      const reqArray = Array.isArray(requirements) ? requirements : (requirements as any ).split(",")
+     
+
+
       const newRental = await prisma.rental.create({
              data : {
-                     ...body, 
-                     userId : existingUser.id ,
-                     carId
+              ...rest,
+              requirements: {
+                connect: reqArray.map(( reqId : string ) => ({ id: reqId }))
+              },
+              user: { connect: { id: existingUser.id } },
+              car: { connect: { id: carId } },
              }
       });
 
 
-      return ServiceResponse.success<IRental | null >("Order created succesfully", newRental , StatusCodes.CREATED );
+      
+    
+
+
+      return ServiceResponse.success<IRental | null >("Order created succesfully", newRental  as IRental, StatusCodes.CREATED );
       
     } catch (ex) {
         logger.error(`Error creating order: ${(ex as Error).message}`);
       return ServiceResponse.failure(
-        "An error occurred while retrieving users.",
+        "An error occurred while creating an order",
         null,
         StatusCodes.INTERNAL_SERVER_ERROR,
       );
@@ -69,9 +81,9 @@ export class CarService {
          where : { id : rentalId}
       })
 
-     return ServiceResponse.success<IRental | null >("Order cancelled", cancelled  , StatusCodes.OK);
+     return ServiceResponse.success<IRental | null >("Order cancelled", cancelled  as IRental , StatusCodes.OK);
     } catch (ex) {
-      return ServiceResponse.failure("An error occurred while finding user.", null, StatusCodes.INTERNAL_SERVER_ERROR);
+      return ServiceResponse.failure("An error occurred while cancelling order.", null, StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
 };

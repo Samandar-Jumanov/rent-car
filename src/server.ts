@@ -37,7 +37,6 @@ app.use("/discounts",  authMiddleware,  discountRouter);
 app.use("/features" , authMiddleware , featureRouter)
 app.use("/requirements" , authMiddleware , requirementsRouter)
 app.use("/favorites" , authMiddleware , favoriteRouter)
-app.use('/uploads', express.static('uploads'));
 
 
 

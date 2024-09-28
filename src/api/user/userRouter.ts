@@ -9,7 +9,6 @@ import { validateRequest } from "@/common/utils/httpHandlers";
 import { userController } from "./userController";
 import { authMiddleware } from "@/common/middleware/auth";
 import { upload } from "../aws/multer.service";
-
 export const userRegistry = new OpenAPIRegistry();
 export const userRouter: Router = express.Router();
 
@@ -118,7 +117,7 @@ userRegistry.registerPath({
   responses: createApiResponse(UserSchema, "Success"),
 });
 
-userRouter.put("/profile-picture", authMiddleware, upload.single("image"), userController.uploadImage);
+userRouter.put("/profile-picture", authMiddleware, upload.single("image") ,userController.uploadImage);
 
 
 userRegistry.registerPath({

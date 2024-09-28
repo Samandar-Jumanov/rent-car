@@ -116,24 +116,6 @@ export class BrendService {
   }
   async  queryBrends(query: QueryBrend): Promise<ServiceResponse<QueryBrendResult | null >> {
     try {
-
-      /**
-       * Age 
-       * mirrors
-       * engineType  
-       * NEED TO GET THESE FROM FEATURES  INSIDE OF A CAR 
-       * 
-       */
-
-
-      // Filter steps 
-      /**
-       *  find brand
-       * find cars 
-       * find features that cars may have from features
-       * 
-       */
-
       const brends = await prisma.brand.findMany({
         where: {
           address: query.address ? { contains: query.address, mode: 'insensitive' } : undefined,
