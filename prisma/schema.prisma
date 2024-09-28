@@ -16,6 +16,8 @@ model User {
   verificationCode String?
   password         String ?
   location          String   @default("Tashkent")
+  image            String?
+
 
   isVerified       Boolean  @default(false)
   role             Role     @default(USER)

@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { ServiceResponse } from "@/common/models/serviceResponse";
 import { logger } from "@/server";
-import { userVerificationService } from "../user-verfication/userVerficationService";
+// import { userVerificationService } from "../user-verfication/userVerficationService";
 import prisma from "@/common/db/prisma";
 import { CreateUserRequest, IUser, UpdateUserRequest } from "./userModel";
 import { generateToken , verifyToken } from "@/common/utils/jwt";
@@ -201,6 +201,35 @@ export class UserService {
       );
     }
   }
+
+  async uploadImage( image : string , userId : string  ) : Promise<ServiceResponse<IUser | null>> {
+    try {
+       const user = await prisma.user.findUnique({ where : { id : userId}})
+        
+        if (!user) {
+          return ServiceResponse.failure("User not found", null, StatusCodes.NOT_FOUND);
+        };
+
+
+        const updatedUser = await prisma.user.update({
+              where : { id : userId },
+              data : {
+                  image : image
+              }
+        })
+        
+        return ServiceResponse.success("Uploaded succefully", updatedUser  as IUser );
+    } catch (ex) {
+      const errorMessage = `Something went wrong ${(ex as Error).message}`;
+      logger.error(errorMessage);
+      return ServiceResponse.failure(
+        "An error occurred while refreshing token.",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
 
 }
 

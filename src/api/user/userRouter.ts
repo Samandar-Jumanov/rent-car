@@ -8,6 +8,7 @@ import { GetUserSchema, UserSchema, CreateUserSchema, VerifyUserSchema, UpdateUs
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { userController } from "./userController";
 import { authMiddleware } from "@/common/middleware/auth";
+import { upload } from "../aws/multer.service";
 
 export const userRegistry = new OpenAPIRegistry();
 export const userRouter: Router = express.Router();
@@ -88,6 +89,36 @@ userRegistry.registerPath({
 });
 
 userRouter.put("/", authMiddleware, userController.updateUser);
+
+
+
+userRegistry.registerPath({
+  method: "put",
+  path: "/users/profile-picture",
+  tags: ["User"],
+  summary: "Upload user profile picture",
+  description: "Upload a new profile picture for the current user",
+  request: {
+    body: {
+      content: {
+        'multipart/form-data': {
+          schema: {
+            type: "object",
+            properties: {
+              image: {
+                type: "string",
+                format: "binary"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  responses: createApiResponse(UserSchema, "Success"),
+});
+
+userRouter.put("/profile-picture", authMiddleware, upload.single("image"), userController.uploadImage);
 
 
 userRegistry.registerPath({

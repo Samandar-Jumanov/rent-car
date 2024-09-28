@@ -25,6 +25,7 @@ class FavoriteController {
   public deleteFavorite: RequestHandler = async (req: Request, res: Response) => {
     const id = req.params.id;
     const serviceResponse = await favoriteService.deleteFavorite(id);
+    
     return handleServiceResponse(serviceResponse, res);
   };
 
