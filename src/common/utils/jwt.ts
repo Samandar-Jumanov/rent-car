@@ -5,6 +5,7 @@ const SECRET_KEY: string = process.env.JWT_SECRET_KEY!
 interface JWTPayload {
   userId: string;
   phoneNumber : string;
+  role : string 
 }
 
 const generateToken = (payload: JWTPayload, expiresIn: string = '1h'): string => {

@@ -29,6 +29,27 @@ model User {
   favourites       Favorite[]
   reviews          UserReviews[]
   givenReviews     Reviews[]
+  
+  // Users blocked by this admin
+  blockedUsers     BlockedUsers[] @relation("AdminWhoBlocked")
+  // This user when blocked by an admin
+  blockedByAdmin   BlockedUsers[] @relation("UserBlockedByAdmin")
+  
+  // Users blocked by this agent
+  agentBlocks      AgentBlock[]   @relation("AgentWhoBlocked")
+  // This user when blocked by an agent
+  blockedByAgent   AgentBlock[]   @relation("UserBlockedByAgent")
+
+  //Agent history 
+  history      History[]
+
+  // Sessions 
+  sessions      Sessions[]
+
+  // colloborated rent cars 
+  colloboratedCars CollaboratedCars[]
+
+
 
 }
 
@@ -70,6 +91,10 @@ model Brand {
   averageRating    Int @default(0)
   // ISSUE : ALSO CARS AVERAGE RATING SHOULD BE CALCULATED 
 
+  // colloborated rent cars 
+  colloboratedCars CollaboratedCars[]
+  
+
   cars         Car[]
   discounts    Discount ?
   reviews      Reviews[]
@@ -108,18 +133,18 @@ model Car {
 }
 
 model  Reviews {
-     id         String  @id @default(cuid())
-     carId      String ?
-     brandId    String ?
-     userId     String
-     review     String
-     rating     Int
-     car        Car ? @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-     brand      Brand ? @relation(fields: [brandId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-     user       User  @relation(fields: [userId] , references: [id] , onDelete:  Cascade , onUpdate:  Cascade)
+  id         String  @id @default(cuid())
+  carId      String ?
+  brandId    String ?
+  userId     String
+  review     String
+  rating     Int
+  car        Car ? @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  brand      Brand ? @relation(fields: [brandId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user       User  @relation(fields: [userId] , references: [id] , onDelete:  Cascade , onUpdate:  Cascade)
 
-    createdAt  DateTime @default(now())
-    updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Feature {
@@ -132,18 +157,18 @@ model Feature {
 }
 
 model Requirements {
-      id  String   @id @default(cuid())
-      title  String  
-      value    String
-      icon  String
+  id  String   @id @default(cuid())
+  title  String  
+  value    String
+  icon  String
 
-       carId  String ?
-       car    Car   ?  @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-       rentalId   String ?
-       rental    Rental ?  @relation(fields: [rentalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  carId  String ?
+  car    Car   ?  @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  rentalId   String ?
+  rental    Rental ?  @relation(fields: [rentalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-       createdAt DateTime @default(now())
-       updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Rental {
@@ -213,6 +238,79 @@ model Discount {
   updatedAt DateTime @updatedAt
 }
 
+
+model BlockedUsers {
+  id            String  @id @default(cuid())
+  adminId       String
+  blockedUserId String
+
+  admin       User   @relation("AdminWhoBlocked", fields: [adminId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  blockedUser User   @relation("UserBlockedByAdmin", fields: [blockedUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AgentBlock {
+  id        String   @id @default(cuid())
+  agentId   String
+  userId    String
+
+  agent     User   @relation("AgentWhoBlocked", fields: [agentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user      User   @relation("UserBlockedByAgent", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+}
+
+// What happans to blocked users and admin blocked users 
+
+
+model History {
+   id     String @id @default(cuid())
+   agentId  String
+   agent   User  @relation(fields: [agentId ] , references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+}
+
+// How does history work , for agents 
+// for now just write each action ( logged in , created a car , ....)
+
+
+model Sessions {
+     id  String  @id @default(cuid())
+     agentId     String
+     location     String
+     isOwner    Boolean
+     user       User    @relation(fields: [agentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+     
+     // Who is the one that manages session 
+     // for now just write isOwner 
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+
+model CollaboratedCars {
+  id     String @id @default(cuid())
+  agentId  String
+  brandId String
+
+  user    User   @relation(fields: [agentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  brand    Brand   @relation(fields: [brandId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+
+// How does colloborated rent cars   work  
 
 enum Role {
   USER

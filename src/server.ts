@@ -9,12 +9,14 @@ import { userRouter } from "@/api/user/userRouter";
 import { brendRouter } from "./api/brend/brendRouter";
 import errorHandler from "@/common/middleware/errorHandler";
 import { env } from "@/common/utils/envConfig";
-import { authMiddleware } from "./common/middleware/auth";
+import { authMiddleware  , checkRole} from "./common/middleware/auth";
 import requestLogger from "./common/middleware/requestLogger";
 import { discountRouter } from "./api/discount/discount.router";
 import { featureRouter } from "./api/feature/feature.router";
 import { requirementsRouter } from "./api/requirements/requirement.router";
 import { favoriteRouter } from "./api/favorite/favorite.router";
+import { colloborateRouter } from "./api/colloborate/colloborate.router";
+
 const logger = pino({ name: "server start" });
 const app: Express = express();
 
@@ -37,6 +39,7 @@ app.use("/discounts",  authMiddleware,  discountRouter);
 app.use("/features" , authMiddleware , featureRouter)
 app.use("/requirements" , authMiddleware , requirementsRouter)
 app.use("/favorites" , authMiddleware , favoriteRouter)
+app.use("/colloborate" ,colloborateRouter)
 
 
 

@@ -42,7 +42,9 @@ export class DiscountService {
 
   async findDiscount(id: string): Promise<ServiceResponse<IDiscount | null>> {
     try {
-      const discount = await prisma.discount.findUnique({ where: { id } });
+      const discount = await prisma.discount.findUnique({ where: { id }  , include : {
+           car : true 
+      }});
       
       if (!discount) {
         return ServiceResponse.failure("Discount not found", null, StatusCodes.NOT_FOUND);
@@ -90,7 +92,6 @@ export class DiscountService {
         } else {
           daysRemaining = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 3600 * 24));
         }
-
         return {
           ...discount,
           daysRemaining

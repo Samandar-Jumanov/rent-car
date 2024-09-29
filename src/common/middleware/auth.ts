@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
 import { verifyToken } from '../utils/jwt';
+
 interface UserPayload {
   userId: string;
-  phoneNumber : string 
+  phoneNumber: string;
+  role: string;
 }
 
 declare global {
@@ -14,7 +15,6 @@ declare global {
   }
 }
 
-const JWT_SECRET = process.env.JWT_SECRET!
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
@@ -36,13 +36,25 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
   }
 
   const decodedToken = verifyToken(token);
-  
-  if(!decodedToken){
-       return res.status(403).json({ message: 'Invalid token' });
+    
+  if (!decodedToken) {
+    return res.status(403).json({ message: 'Invalid token' });
   }
- 
+    
   req.user = decodedToken as UserPayload;
-    return next();
-
+  return next();
 };
 
+export const checkRole = (allowedRoles: string[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ message: 'Access denied. Insufficient permissions.' });
+    }
+
+    next();
+  };
+};

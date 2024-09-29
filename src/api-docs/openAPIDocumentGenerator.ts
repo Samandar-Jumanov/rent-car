@@ -7,9 +7,10 @@ import { discountRegistry } from "@/api/discount/discount.router";
 import { featureRegistry } from "@/api/feature/feature.router";
 import { requirementsRegistry } from "@/api/requirements/requirement.router";
 import { favoriteRegistry } from "@/api/favorite/favorite.router";
+import { collaboratedCarsRegistry } from "@/api/colloborate/colloborate.router";
 
 export function generateOpenAPIDocument() {
-  const registry = new OpenAPIRegistry([healthCheckRegistry, userRegistry, brendRegistry , discountRegistry , featureRegistry , requirementsRegistry , favoriteRegistry]);
+  const registry = new OpenAPIRegistry([healthCheckRegistry, userRegistry, brendRegistry , discountRegistry , featureRegistry , requirementsRegistry , favoriteRegistry , collaboratedCarsRegistry]);
 
   // Register the security scheme
   registry.registerComponent('securitySchemes', 'BearerAuth', {
