@@ -20,7 +20,13 @@ class UserController {
 
   public createUser: RequestHandler = async (req: Request, res: Response) => {
     const body : CreateUserRequest  =  req.body;
-    const serviceResponse = await userService.createUser(body);
+    const query = req.query
+
+    const queryData = {
+           location : String(query.location),
+           role :   String(query.role)
+    }
+    const serviceResponse = await userService.createUser(body , queryData);
     return handleServiceResponse(serviceResponse, res);
   };
 
@@ -88,6 +94,13 @@ class UserController {
 
     return handleServiceResponse(serviceResponse, res);
   };
+
+  public getBlockedUsers : RequestHandler  = async (req: Request, res: Response) => {
+    const serviceResponse = await blockService.getBlockedUsers( );
+    return handleServiceResponse(serviceResponse, res);
+  };
+  
+
   
 
   // agent 
@@ -113,6 +126,21 @@ class UserController {
     const serviceResponse = await blockService.cancelBlockUser( blockedUserId);
     return handleServiceResponse(serviceResponse, res);
   };
+
+  
+  public getAgentBlocked : RequestHandler  = async (req: Request, res: Response) => {
+    const agentId = req.user?.userId
+    const serviceResponse = await blockService.getAgentBlocks(String(agentId));
+    return handleServiceResponse(serviceResponse, res);
+  };
+
+  // session remove 
+
+  public  deleteSession : RequestHandler = async (req: Request, res: Response) => {
+    const sessionId : string = req.params.sessionId
+    const serviceResponse = await userService.removeSession(sessionId);
+    return handleServiceResponse(serviceResponse, res);
+  }
 
   
 }

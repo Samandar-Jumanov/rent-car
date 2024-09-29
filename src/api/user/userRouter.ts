@@ -9,7 +9,8 @@ import { validateRequest } from "@/common/utils/httpHandlers";
 import { userController } from "./userController";
 import { authMiddleware, checkRole } from "@/common/middleware/auth";
 import { upload } from "../aws/multer.service";
-import { CreateBlockedUsersSchema, GetBlockedUsersSchema , CreateAgentBlockSchema  } from "./block/block.model";
+import { CreateBlockedUsersSchema, GetBlockedUsersSchema , CreateAgentBlockSchema, AdminBlockUser, AgentBlockSchema  } from "./block/block.model";
+import { SessionsSchema } from "./sessions/sessions.model";
 export const userRegistry = new OpenAPIRegistry();
 export const userRouter: Router = express.Router();
 
@@ -39,6 +40,10 @@ userRegistry.registerPath({  // create user
   path: "/users",
   tags: ["User"],
   request: {
+    query : z.object({
+      location : z.string(),
+      role : z.string(),
+    }),
     body: {
       content: {
         'application/json': {
@@ -145,6 +150,16 @@ userRouter.post("/refresh-token" , authMiddleware ,  userController.refreshToken
 // Agent
 
 userRegistry.registerPath({
+  method: "get",
+  path: "/users/admin/block",
+  tags: ["User"],
+  responses: createApiResponse(AdminBlockUser, "Success"), // should be changed later 
+});
+
+userRouter.get("/admin/block" , authMiddleware ,  checkRole(["ADMIN"]) ,  userController.getBlockedUsers);
+
+
+userRegistry.registerPath({
   method: "post",
   path: "/users/admin/block",
   tags: ["User"],
@@ -184,6 +199,17 @@ userRouter.delete("/admin/block" , authMiddleware ,  checkRole(["ADMIN"]) ,  use
 
 
 // Agent 
+
+
+userRegistry.registerPath({
+  method: "get",
+  path: "/users/agent/block",
+  tags: ["User"],
+  responses: createApiResponse(AgentBlockSchema, "Success"),
+});
+
+userRouter.get("/agent/block" , authMiddleware ,  checkRole(["ADMIN"]) ,  userController.getAgentBlocked);
+
 userRegistry.registerPath({
   method: "post",
   path: "/users/agent/block",
@@ -220,5 +246,22 @@ userRegistry.registerPath({
 
 userRouter.delete("/agent/block" , authMiddleware ,  checkRole(["ADMIN"]) ,  userController.blockUser);
 
+
+
+// Session 
+
+userRegistry.registerPath({
+  method: "delete",
+  path: "/users/session",
+  tags: ["User"],
+  request: {
+       params : z.object({
+            sessionId : z.string()
+       })
+  },
+  responses: createApiResponse(SessionsSchema, "Success"),
+});
+
+userRouter.delete("/session" , authMiddleware ,  checkRole(["ADMIN"]) ,  userController.deleteSession);
 
 

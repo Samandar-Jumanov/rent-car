@@ -15,7 +15,6 @@ model User {
   birthday         String?
   verificationCode String?
   password         String ?
-  location          String   @default("Tashkent")
   image            String?
 
 
@@ -48,9 +47,6 @@ model User {
 
   // colloborated rent cars 
   colloboratedCars CollaboratedCars[]
-
-
-
 }
 
 model  UserReviews {

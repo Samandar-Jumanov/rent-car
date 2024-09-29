@@ -7,6 +7,7 @@ import { CreateUserRequest, IUser, UpdateUserRequest } from "./userModel";
 import { generateToken , verifyToken } from "@/common/utils/jwt";
 import { IRental } from "../brend/cars/carsModel";
 import { Role } from "@prisma/client";
+import { ISessions } from "./sessions/sessions.model";
 
 export class UserService {
   async findAll(): Promise<ServiceResponse<IUser[] | null>> {
@@ -40,27 +41,41 @@ export class UserService {
     }
   }
 
-  async createUser(data: CreateUserRequest ): Promise<ServiceResponse<{ token : string } | null >> {
+  async createUser(data: CreateUserRequest , queryData : { location : string , role : any  }  ): Promise<ServiceResponse<{ token : string } | null >> {
     try {
-
       let user
-      let role
-
-      if(data.password) {
-           role = Role.AGENT
-      }
 
       const existingUser = await prisma.user.findUnique({
           where  : { phoneNumber : data.phoneNumber}
       });
 
+
       if(!existingUser){
           user = await prisma.user.create({
-              data: { phoneNumber: data.phoneNumber  , role }
+              data: { phoneNumber: data.phoneNumber  , role : queryData.role }
           });
+
+       if(queryData.role === "ADMIN") {
+            await prisma.sessions.create({
+                  data : {
+                      agentId : user.id,
+                      location :queryData.location , 
+                      isOwner : true 
+                  }
+              })
+       }
 
       } else {
              user = existingUser
+             if(queryData.role === "ADMIN") {
+              await prisma.sessions.create({
+                    data : {
+                        agentId : user.id,
+                        location :queryData.location , 
+                        isOwner : false 
+                    }
+                })
+         }
       }
 
 
@@ -229,6 +244,39 @@ export class UserService {
         StatusCodes.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  async removeSession (  sessionsId: string)  : Promise<ServiceResponse<ISessions | null>> {
+    try {
+     const session = await prisma.sessions.findUnique({
+        where : { id : sessionsId},
+        include : {
+           user : true 
+        }
+     })
+
+     if (!session) {
+      return ServiceResponse.failure("Session not found", null, StatusCodes.NOT_FOUND);
+     };
+
+     if(session?.isOwner) {
+       return ServiceResponse.failure("You cannot main account session", null, StatusCodes.NOT_FOUND);
+     }
+     await prisma.sessions.delete({
+        where : { id : sessionsId}
+     })
+
+     return ServiceResponse.success("Session deleted succesfully", session , StatusCodes.OK );
+
+  } catch (ex) {
+    const errorMessage = `Error refreshing token: ${(ex as Error).message}`;
+    logger.error(errorMessage);
+    return ServiceResponse.failure(
+      "An error occurred while deleting  sessiobn.",
+      null,
+      StatusCodes.INTERNAL_SERVER_ERROR,
+    );
+  }
   }
 }
 
