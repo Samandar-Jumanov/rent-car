@@ -3,7 +3,7 @@ import type { Request, RequestHandler, Response } from "express";
 import { userService } from "@/api/user/userService";
 import { handleServiceResponse } from "@/common/utils/httpHandlers";
 import { CreateUserRequest, UpdateUserRequest, VerifyUserSchemaRequest } from "./userModel";
-import { logger } from "@/server";
+import { blockService } from "./block/block.service";
 
 class UserController {
   public getUsers: RequestHandler = async (_req: Request, res: Response) => {
@@ -60,6 +60,60 @@ class UserController {
     const serviceResponse = await userService.refreshToken(refreshToken);
     return handleServiceResponse(serviceResponse, res);
   };
+  
+
+  // block actions 
+  // Admin 
+
+  public blockAgentUser : RequestHandler  = async (req: Request, res: Response) => {
+
+    const blockUserId  = req.params.id 
+    const adminid = req.user?.userId
+
+    if(!blockUserId) {
+         return  res.status(404).json({ message : "Block user id is required" });
+    }
+
+    const serviceResponse = await blockService.blockUser(String(adminid) , blockUserId);
+
+    return handleServiceResponse(serviceResponse, res);
+  };
+
+  public cancelAgentUserBlock : RequestHandler  = async (req: Request, res: Response) => {
+    const blockUserId  = req.params.id 
+    if(!blockUserId) {
+         return  res.status(404).json({ message : "Block user id is required" });
+    }
+    const serviceResponse = await blockService.cancelBlock( blockUserId);
+
+    return handleServiceResponse(serviceResponse, res);
+  };
+  
+
+  // agent 
+
+
+  public blockUser : RequestHandler  = async (req: Request, res: Response) => {
+    const blockUserId  = req.params.userId 
+    const agentId = req.user?.userId
+    if(!blockUserId) {
+         return  res.status(404).json({ message : "Block user id is required" });
+    }
+
+    const serviceResponse = await blockService.blockUserByAgent(String(agentId), blockUserId);
+    return handleServiceResponse(serviceResponse, res);
+  };
+
+
+  public cancelBlockUser : RequestHandler  = async (req: Request, res: Response) => {
+    const blockedUserId  = req.params.userId 
+    if(!blockedUserId) {
+         return  res.status(404).json({ message : "Block user id is required" });
+    }
+    const serviceResponse = await blockService.cancelBlockUser( blockedUserId);
+    return handleServiceResponse(serviceResponse, res);
+  };
+
   
 }
 

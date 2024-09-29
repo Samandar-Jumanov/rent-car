@@ -7,8 +7,9 @@ import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
 import { GetUserSchema, UserSchema, CreateUserSchema, VerifyUserSchema, UpdateUserSchema  , RefreshtokenSchema} from "@/api/user/userModel";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { userController } from "./userController";
-import { authMiddleware } from "@/common/middleware/auth";
+import { authMiddleware, checkRole } from "@/common/middleware/auth";
 import { upload } from "../aws/multer.service";
+import { CreateBlockedUsersSchema, GetBlockedUsersSchema , CreateAgentBlockSchema  } from "./block/block.model";
 export const userRegistry = new OpenAPIRegistry();
 export const userRouter: Router = express.Router();
 
@@ -137,3 +138,87 @@ userRegistry.registerPath({
 });
 
 userRouter.post("/refresh-token" , authMiddleware ,  userController.refreshToken);
+
+
+// Block
+
+// Agent
+
+userRegistry.registerPath({
+  method: "post",
+  path: "/users/admin/block",
+  tags: ["User"],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: CreateBlockedUsersSchema
+        }
+      }
+    }
+  },
+  responses: createApiResponse(UserSchema, "Success"),
+});
+
+userRouter.post("/admin/block" , authMiddleware ,  checkRole(["ADMIN"]) ,  userController.blockUser);
+
+
+userRegistry.registerPath({
+  method: "delete",
+  path: "/users/admin/block",
+  tags: ["User"],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: GetBlockedUsersSchema
+        }
+      }
+    }
+  },
+  responses: createApiResponse(UserSchema, "Success"),
+});
+
+userRouter.delete("/admin/block" , authMiddleware ,  checkRole(["ADMIN"]) ,  userController.cancelAgentUserBlock);
+
+
+
+// Agent 
+userRegistry.registerPath({
+  method: "post",
+  path: "/users/agent/block",
+  tags: ["User"],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: CreateAgentBlockSchema
+        }
+      }
+    }
+  },
+  responses: createApiResponse(UserSchema, "Success"),
+});
+
+userRouter.post("/agent/block" , authMiddleware ,  checkRole(["ADMIN"]) ,  userController.blockUser);
+
+userRegistry.registerPath({
+  method: "delete",
+  path: "/users/agent/block",
+  tags: ["User"],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: CreateAgentBlockSchema
+        }
+      }
+    }
+  },
+  responses: createApiResponse(UserSchema, "Success"),
+});
+
+userRouter.delete("/agent/block" , authMiddleware ,  checkRole(["ADMIN"]) ,  userController.blockUser);
+
+
+

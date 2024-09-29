@@ -39,7 +39,7 @@ app.use("/discounts",  authMiddleware,  discountRouter);
 app.use("/features" , authMiddleware , featureRouter)
 app.use("/requirements" , authMiddleware , requirementsRouter)
 app.use("/favorites" , authMiddleware , favoriteRouter)
-app.use("/colloborate" ,colloborateRouter)
+app.use("/colloborate" , authMiddleware , checkRole(["ADMIN"]) ,colloborateRouter)
 
 
 

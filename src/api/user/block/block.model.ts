@@ -8,7 +8,6 @@ export interface IBlockedUsers {
   id: string;
   adminId: string;
   blockedUserId: string;
-  blockedByAdmin: boolean;
 }
 
 export const AdminBlockUser = z.object({
@@ -18,7 +17,7 @@ export const AdminBlockUser = z.object({
 });
 
 export const CreateBlockedUsersSchema = z.object({
-  blockedUserId: z.string(),
+  id: z.string(),
 });
 
 export const GetBlockedUsersSchema = z.object({

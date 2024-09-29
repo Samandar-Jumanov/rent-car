@@ -71,7 +71,7 @@ export class UserService {
     //  }
 
 
-     const token = generateToken({phoneNumber: user.phoneNumber ,userId : user.id})
+     const token = generateToken({phoneNumber: user.phoneNumber ,userId : user.id , role : user.role})
 
       return ServiceResponse.success("User verification initiated", { token });
     } catch (ex) {
@@ -101,7 +101,7 @@ export class UserService {
           data: { isVerified: true, verificationCode: null },
         });
 
-        const token = generateToken({phoneNumber: user.phoneNumber ,userId : user.id})
+        const token = generateToken({phoneNumber: user.phoneNumber ,userId : user.id , role : user.role})
         return ServiceResponse.success("User verified successfully", { token});
       }
       return ServiceResponse.failure("Invalid verification code", false, StatusCodes.BAD_REQUEST);
@@ -162,7 +162,7 @@ export class UserService {
         return ServiceResponse.failure("User not found", null, StatusCodes.NOT_FOUND);
       }
 
-      const newToken = generateToken({ phoneNumber: user.phoneNumber, userId: user.id });
+      const newToken = generateToken({ phoneNumber: user.phoneNumber, userId: user.id , role : user.role });
 
       return ServiceResponse.success("Token refreshed successfully", { token: newToken });
     } catch (ex) {
@@ -183,6 +183,7 @@ export class UserService {
             include : {
                   user : role === "ADMIN",
                   car : true,
+                  requirements  : true 
             }
         } }});
         
@@ -229,8 +230,6 @@ export class UserService {
       );
     }
   }
-
-
 }
 
 
