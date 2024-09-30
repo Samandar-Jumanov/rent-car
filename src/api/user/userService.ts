@@ -290,9 +290,12 @@ export class UserService {
 
   async adminLogin ( data : { phoneNumber: string , password : string}) {
     try {
-      const user = await prisma.user.findUnique({ where : { phoneNumber : data.phoneNumber}});
+
+     const phoneNumber = data.phoneNumber.startsWith('+') ? data.phoneNumber : `+${data.phoneNumber}`;
+     const user = await prisma.user.findUnique({ where: { phoneNumber } });
       
-      if (!user || user.role !== "SUPER_ADMIN") {
+      if (!user) {
+        logger.warn("User not foudn")
         return ServiceResponse.failure("User not found", null, StatusCodes.NOT_FOUND);
       }
       

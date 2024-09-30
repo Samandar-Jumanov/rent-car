@@ -5,7 +5,7 @@ import bcrypt from "bcrypt"
 async function createSuperAdmin ( ) {
    await prisma.user.create({
        data : {
-             phoneNumber : "+998 95 001 82 22",
+             phoneNumber : "+998950018222",
              role : "SUPER_ADMIN",
              password : await bcrypt.hash("adminPass123" , 12 )
 
