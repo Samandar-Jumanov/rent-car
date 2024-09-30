@@ -6,8 +6,8 @@ import prisma from "@/common/db/prisma";
 import { CreateUserRequest, IUser, UpdateUserRequest } from "./userModel";
 import { generateToken , verifyToken } from "@/common/utils/jwt";
 import { IRental } from "../brend/cars/carsModel";
-import { Role } from "@prisma/client";
 import { ISessions } from "./sessions/sessions.model";
+import bcrypt from "bcrypt"
 
 export class UserService {
   async findAll(): Promise<ServiceResponse<IUser[] | null>> {
@@ -41,62 +41,71 @@ export class UserService {
     }
   }
 
-  async createUser(data: CreateUserRequest , queryData : { location : string , role : any  }  ): Promise<ServiceResponse<{ token : string } | null >> {
+  async  createUser(
+    data: CreateUserRequest,
+    queryData: { location: string; role: any }
+  ): Promise<ServiceResponse<{ token: string } | null>> {
     try {
-      let user
-
       const existingUser = await prisma.user.findUnique({
-          where  : { phoneNumber : data.phoneNumber}
+        where: { phoneNumber: data.phoneNumber },
       });
-
-
-      if(!existingUser){
-          user = await prisma.user.create({
-              data: { phoneNumber: data.phoneNumber  , role : queryData.role }
-          });
-
-       if(queryData.role === "ADMIN") {
-            await prisma.sessions.create({
-                  data : {
-                      agentId : user.id,
-                      location :queryData.location , 
-                      isOwner : true 
-                  }
-              })
-       }
-
-      } else {
-             user = existingUser
-             if(queryData.role === "ADMIN") {
-              await prisma.sessions.create({
-                    data : {
-                        agentId : user.id,
-                        location :queryData.location , 
-                        isOwner : false 
-                    }
-                })
-         }
+  
+      if (existingUser && data.password) { // compare password for agent 
+        const isValid = await bcrypt.compare(String(data.password), String(existingUser.password));
+        if (!isValid) {
+          return ServiceResponse.failure("Invalid password", null, StatusCodes.UNAUTHORIZED);
+        }
       }
-
-
-    //  const isSent = await userVerificationService.initiateVerification(user.phoneNumber);
-
-    //  if(!isSent) {
-    //         throw new Error("Could not sent sms ")
-    //  }
-
-
-     const token = generateToken({phoneNumber: user.phoneNumber ,userId : user.id , role : user.role})
-
-      return ServiceResponse.success("User verification initiated", { token });
+  
+      let user;
+  
+      if (!existingUser) {
+        user = await prisma.user.create({
+          data: { phoneNumber: data.phoneNumber, role: queryData.role  , password : data.password},
+        });  // if not user create for agent and user 
+  
+        if (queryData.role === "ADMIN") {
+          await prisma.sessions.create({
+            data: {
+              agentId: user.id,
+              location: queryData.location,
+              isOwner: true,
+            },
+          });// create first session 
+        }
+      } else {
+        user = existingUser;
+        if (queryData.role === "ADMIN") {
+          await prisma.sessions.create({
+            data: {
+              agentId: user.id,
+              location: queryData.location,
+              isOwner: false,
+            },
+          });
+        }  // if user exists just create a session  
+      }
+  
+      // Uncomment the following lines if you want to initiate user verification
+      // const isSent = await userVerificationService.initiateVerification(user.phoneNumber);
+      // if (!isSent) {
+      //   throw new Error("Could not send SMS");
+      // }
+  
+      const token = generateToken({
+        phoneNumber: user.phoneNumber,
+        userId: user.id,
+        role: user.role,
+      });
+    // generate token
+      return ServiceResponse.success("User created successfully", { token });
     } catch (ex) {
-      console.log({ ex })
-      const errorMessage = `Error in createUser  user: ${(ex as Error).message}`;
+      const errorMessage = `Error in createUser: ${(ex as Error).message}`;
       logger.error(errorMessage);
       return ServiceResponse.failure(
-        `${(ex as Error).message}`,
+        errorMessage,
         null,
-        StatusCodes.INTERNAL_SERVER_ERROR,
+        StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
   }
@@ -278,6 +287,31 @@ export class UserService {
     );
   }
   }
+
+  async adminLogin ( data : { phoneNumber: string , password : string}) {
+    try {
+      const user = await prisma.user.findUnique({ where : { phoneNumber : data.phoneNumber}});
+      
+      if (!user ||!user.isVerified || user.role !== "SUPER_ADMIN") {
+        return ServiceResponse.failure("Invalid credentials", null, StatusCodes.UNAUTHORIZED);
+      }
+      
+      const isPasswordValid = await bcrypt.compare(data.password, String(user.password))
+      
+      if (!isPasswordValid) {
+        return ServiceResponse.failure("Invalid credentials", null, StatusCodes.UNAUTHORIZED);
+      }
+      const token = generateToken({ phoneNumber: user.phoneNumber, userId: user.id , role : user.role });
+      return ServiceResponse.success("Logged in successfully", { token });
+    } catch (ex) {
+      const errorMessage = `Error logging in: ${(ex as Error).message}`;
+      logger.error(errorMessage);
+      return ServiceResponse.failure(
+        "An error occurred while logging in.",
+        null,
+      )
+   }
+}
 }
 
 

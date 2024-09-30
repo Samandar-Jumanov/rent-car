@@ -2,7 +2,7 @@ import type { Request, RequestHandler, Response } from "express";
 
 import { userService } from "@/api/user/userService";
 import { handleServiceResponse } from "@/common/utils/httpHandlers";
-import { CreateUserRequest, UpdateUserRequest, VerifyUserSchemaRequest } from "./userModel";
+import { CreateUserRequest, UpdateUserRequest, VerifyUserSchemaRequest , AdminLoginRequest} from "./userModel";
 import { blockService } from "./block/block.service";
 
 class UserController {
@@ -140,6 +140,14 @@ class UserController {
     const sessionId : string = req.params.sessionId
     const serviceResponse = await userService.removeSession(sessionId);
     return handleServiceResponse(serviceResponse, res);
+  }
+  // admin login 
+
+  public adminLogin : RequestHandler = async (req: Request, res: Response) => {
+    const body : AdminLoginRequest  =  req.body;
+    const serviceResponse = await userService.adminLogin(body);
+    return handleServiceResponse(serviceResponse, res);
+    
   }
 
   

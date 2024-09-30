@@ -62,8 +62,12 @@ export  const RefreshtokenSchema = z.object({
 })
 
 
-
+export const AdminLoginSchema = z.object({
+    phoneNumber : z.string(),
+    password : z.string()
+})
 export type UpdateUserRequest = z.infer<typeof UpdateUserSchema>;
 export type CreateUserRequest = z.infer<typeof CreateUserSchema>
 export type VerifyUserSchemaRequest = z.infer<typeof VerifyUserSchema>
 export type Refreshtoken = z.infer<typeof RefreshtokenSchema >
+export type AdminLoginRequest = z.infer<typeof AdminLoginSchema >

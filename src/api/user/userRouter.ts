@@ -4,7 +4,7 @@ import express, { type Router } from "express";
 import { z } from "zod";
 
 import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
-import { GetUserSchema, UserSchema, CreateUserSchema, VerifyUserSchema, UpdateUserSchema  , RefreshtokenSchema} from "@/api/user/userModel";
+import { GetUserSchema, UserSchema, CreateUserSchema, VerifyUserSchema, UpdateUserSchema  , RefreshtokenSchema, AdminLoginSchema} from "@/api/user/userModel";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { userController } from "./userController";
 import { authMiddleware, checkRole } from "@/common/middleware/auth";
@@ -147,7 +147,28 @@ userRouter.post("/refresh-token" , authMiddleware ,  userController.refreshToken
 
 // Block
 
-// Agent
+// Admin
+// admin login 
+
+
+userRegistry.registerPath({
+  method: "post",
+  path: "/users/admin/login",
+  tags: ["User"],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: AdminLoginSchema
+        }
+      }
+    }
+  },
+  responses: createApiResponse(SessionsSchema, "Success"),
+});
+
+
+userRouter.delete("/session" , validateRequest(z.object({  body : AdminLoginSchema})),  userController.adminLogin);
 
 userRegistry.registerPath({
   method: "get",
@@ -263,5 +284,7 @@ userRegistry.registerPath({
 });
 
 userRouter.delete("/session" , authMiddleware ,  checkRole(["ADMIN"]) ,  userController.deleteSession);
+
+
 
 
