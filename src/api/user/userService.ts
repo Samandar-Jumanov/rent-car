@@ -291,6 +291,10 @@ export class UserService {
   async adminLogin ( data : { phoneNumber: string , password : string}) {
     try {
 
+      console.log({ 
+         data
+      })
+
      const phoneNumber = data.phoneNumber.startsWith('+') ? data.phoneNumber : `+${data.phoneNumber}`;
      const user = await prisma.user.findUnique({ where: { phoneNumber } });
       
@@ -303,7 +307,7 @@ export class UserService {
 
      logger.warn(`Password validation result: ${isPasswordValid ? 'Valid' : 'Invalid'}`);
 
-    if (!isPasswordValid) {
+    if (isPasswordValid) {
       return ServiceResponse.failure("Invalid credentials", null, StatusCodes.BAD_REQUEST);
     };
 
