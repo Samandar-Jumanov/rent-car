@@ -293,13 +293,13 @@ export class UserService {
       const user = await prisma.user.findUnique({ where : { phoneNumber : data.phoneNumber}});
       
       if (!user || user.role !== "SUPER_ADMIN") {
-        return ServiceResponse.failure("Invalid credentials", null, StatusCodes.UNAUTHORIZED);
+        return ServiceResponse.failure("User not found", null, StatusCodes.NOT_FOUND);
       }
       
       const isPasswordValid = await bcrypt.compare(data.password, String(user.password))
       
       if (!isPasswordValid) {
-        return ServiceResponse.failure("Invalid credentials", null, StatusCodes.UNAUTHORIZED);
+        return ServiceResponse.failure("Invalid credentials", null, StatusCodes.BAD_REQUEST);
       };
 
       const token = generateToken({ phoneNumber: user.phoneNumber, userId: user.id , role : user.role });
