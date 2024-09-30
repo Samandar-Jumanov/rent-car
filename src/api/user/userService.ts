@@ -292,7 +292,7 @@ export class UserService {
     try {
       const user = await prisma.user.findUnique({ where : { phoneNumber : data.phoneNumber}});
       
-      if (!user ||!user.isVerified || user.role !== "SUPER_ADMIN") {
+      if (!user || user.role !== "SUPER_ADMIN") {
         return ServiceResponse.failure("Invalid credentials", null, StatusCodes.UNAUTHORIZED);
       }
       
@@ -300,7 +300,8 @@ export class UserService {
       
       if (!isPasswordValid) {
         return ServiceResponse.failure("Invalid credentials", null, StatusCodes.UNAUTHORIZED);
-      }
+      };
+
       const token = generateToken({ phoneNumber: user.phoneNumber, userId: user.id , role : user.role });
       return ServiceResponse.success("Logged in successfully", { token });
     } catch (ex) {
@@ -310,7 +311,7 @@ export class UserService {
         "An error occurred while logging in.",
         null,
       )
-   }
+   }  
 }
 }
 

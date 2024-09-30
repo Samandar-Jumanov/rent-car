@@ -4,6 +4,7 @@ import { userService } from "@/api/user/userService";
 import { handleServiceResponse } from "@/common/utils/httpHandlers";
 import { CreateUserRequest, UpdateUserRequest, VerifyUserSchemaRequest , AdminLoginRequest} from "./userModel";
 import { blockService } from "./block/block.service";
+import { logger } from "@/server";
 
 class UserController {
   public getUsers: RequestHandler = async (_req: Request, res: Response) => {
@@ -147,10 +148,7 @@ class UserController {
     const body : AdminLoginRequest  =  req.body;
     const serviceResponse = await userService.adminLogin(body);
     return handleServiceResponse(serviceResponse, res);
-    
   }
-
-  
 }
 
 export const userController = new UserController();

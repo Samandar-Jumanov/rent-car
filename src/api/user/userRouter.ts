@@ -164,11 +164,11 @@ userRegistry.registerPath({
       }
     }
   },
-  responses: createApiResponse(SessionsSchema, "Success"),
+  responses: createApiResponse(UserSchema, "Success"),
 });
 
+userRouter.post("/admin/login" , validateRequest(z.object({  body : AdminLoginSchema})),  userController.adminLogin);
 
-userRouter.delete("/session" , validateRequest(z.object({  body : AdminLoginSchema})),  userController.adminLogin);
 
 userRegistry.registerPath({
   method: "get",
