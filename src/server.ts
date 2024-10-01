@@ -16,6 +16,7 @@ import { featureRouter } from "./api/feature/feature.router";
 import { requirementsRouter } from "./api/requirements/requirement.router";
 import { favoriteRouter } from "./api/favorite/favorite.router";
 import { colloborateRouter } from "./api/colloborate/colloborate.router";
+import { bannersRouter } from "./api/banners/banners.router";
 
 const logger = pino({ name: "server start" });
 const app: Express = express();
@@ -39,9 +40,8 @@ app.use("/discounts",  authMiddleware,  discountRouter);
 app.use("/features" , authMiddleware , featureRouter)
 app.use("/requirements" , authMiddleware , requirementsRouter)
 app.use("/favorites" , authMiddleware , favoriteRouter)
-app.use("/colloborate" , authMiddleware , checkRole(["ADMIN"]) ,colloborateRouter)
-
-
+app.use("/colloborate" , authMiddleware , checkRole(["SUPER_ADMIN"]) ,colloborateRouter)
+app.use("/banners" , bannersRouter)
 
 // Swagger UI
 app.use(openAPIRouter);

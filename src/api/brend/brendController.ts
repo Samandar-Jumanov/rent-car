@@ -2,10 +2,8 @@ import type { Request, RequestHandler, Response } from "express";
 
 import { handleServiceResponse } from "@/common/utils/httpHandlers";
 import { brendService } from "./brendService";
-import { CreateRentalRequest } from "./cars/carsModel";
 import { carService } from "./cars/cars.service";
 import { QueryBrend } from "./brendModel";
-import { logger } from "@/server";
 
 class BrendController {
   public getBrends: RequestHandler = async (_req: Request, res: Response) => {
@@ -89,6 +87,30 @@ class BrendController {
     const serviceResponse = await brendService.addReview(data , String(userId))
     return handleServiceResponse(serviceResponse, res);
  }
+
+ public addCar  : RequestHandler = async (req: Request, res: Response) => {
+  const cardId = req.query.cardId
+  const brandId  = req.query.brandId
+  const body = req.body
+
+  const data = {
+       cardId ,
+       brandId,
+       ...body
+  }
+
+const userId = req.user?.userId
+
+const serviceResponse = await brendService.addReview(data , String(userId))
+return handleServiceResponse(serviceResponse, res);
+}
+
+
+public getCar  : RequestHandler = async (req: Request, res: Response) => {
+  const carId = req.params.carId
+  const serviceResponse = await carService.getOneCar(carId)
+  return handleServiceResponse(serviceResponse, res);
+}
 }
 
 export const brendController = new BrendController();

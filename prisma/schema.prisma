@@ -103,30 +103,78 @@ model Car {
   id               String   @id @default(cuid())
   brendId          String
   title            String   @default("title")
-  carBrend         String   @default("MERCADES")
   price            Decimal  @default(180.00)
   isDiscounted     Boolean  @default(true)
-  discountedPrice  Int ? 
-  color            String
-  isAvailable      Boolean  @default(true)
+  discountedPrice  Int?
   images           String[]
-  status           CarStatus   @default(FREE)
+  status           CarStatus @default(FREE)
   ratings          Int[]     @default([0])
-  averageRating    Int @default(0)
- 
-  brand             Brand    @relation(fields: [brendId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  favourites        Favorite[]
-  requirements      Requirements[]
-  features          Feature[]
-  rentals           Rental[]
-  reviews           Reviews[]
-  discounts         Discount ?
+  averageRating    Int       @default(0)
+
+  brand            Brand     @relation(fields: [brendId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  model            Model?
+  carColor         CarColor?
+  carBrend         CarBrend?
+
+  favourites       Favorite[]
+  requirements     Requirements[]
+  features         Feature[]
+  rentals          Rental[]
+  reviews          Reviews[]
+  banners          Banners[]
+  discounts        Discount?
 
   @@index([brendId])
-
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
+
+model Banners {
+  id           String   @id @default(cuid())
+  title        String
+  carId        String   @unique
+  car          Car      @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  choosenImage String
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Model {
+    id  String  @id @default(cuid())
+    carId      String ?  @unique
+    
+    modelName    String
+    car          Car   ?   @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+}
+
+
+model CarBrend {
+    id         String   @id @default(cuid())
+    carId      String ?  @unique 
+    carBrend    String
+    car          Car   ?    @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+}
+
+
+
+
+
+model CarColor {
+    id  String  @id @default(cuid())
+    carId      String ?   @unique 
+    color     String
+    car          Car   ?   @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+}
+
 
 model  Reviews {
   id         String  @id @default(cuid())

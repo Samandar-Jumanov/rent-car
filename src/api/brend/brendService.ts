@@ -99,7 +99,9 @@ export class BrendService {
                   include : {
                          rentals :true
                   }
-             }
+             },
+             reviews : true ,
+             colloboratedCars : true 
         }
       });
       
@@ -114,7 +116,7 @@ export class BrendService {
       return ServiceResponse.failure("An error occurred while finding brend.", null, StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
-  async  queryBrends(query: QueryBrend): Promise<ServiceResponse<QueryBrendResult | null >> {
+  async queryBrends(query: QueryBrend): Promise<ServiceResponse<QueryBrendResult | null>> {
     try {
       const brends = await prisma.brand.findMany({
         where: {
@@ -123,8 +125,12 @@ export class BrendService {
           carDelivery: query.carDelivery,
           cars: {
             some: {
-              carBrend: query.carBrend ? { contains: query.carBrend, mode: 'insensitive' } : undefined,
-              color: query.color ? { contains: query.color, mode: 'insensitive' } : undefined,
+              carBrend: query.carBrend ? {
+                carBrend: { contains: query.carBrend, mode: 'insensitive' }
+              } : undefined,
+              carColor: query.color ? {
+                color: { contains: query.color, mode: 'insensitive' }
+              } : undefined,
               status: "FREE",
               isAvailable: true,
               price: {
@@ -146,10 +152,17 @@ export class BrendService {
         },
         include: {
           cars: {
+            where: {
+              status: "FREE",
+              isAvailable: true,
+            },
             include: {
               requirements: true,
               features: true,
               discounts: true,
+              carBrend: true,
+              carColor: true,
+              model: true
             }
           }
         },
@@ -158,14 +171,14 @@ export class BrendService {
       const brendsWithoutPassword = brends.map(({ password, ...rest }) => rest);
       const count = brends.length;
       return ServiceResponse.success(
-        count > 0 ? "Brends queried successfully" : "No brends found that match the given criteria", 
+        count > 0 ? "Brands queried successfully" : "No brands found that match the given criteria", 
         { data: brendsWithoutPassword, count }
       );
       
     } catch (error) {
-      const errorMessage = `Error querying brends`;
+      const errorMessage = `Error querying brands`;
       logger.error(errorMessage, error);
-      return ServiceResponse.failure("An error occurred while querying brends.", null, StatusCodes.INTERNAL_SERVER_ERROR);
+      return ServiceResponse.failure("An error occurred while querying brands.", null, StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -225,7 +238,6 @@ export class BrendService {
       });
 
       }
-
       
       const review = await prisma.reviews.create({
             data : {
@@ -234,17 +246,16 @@ export class BrendService {
             }
       })
 
-      return ServiceResponse.success("An error occurred while querying brends.", review, StatusCodes.CREATED);
+      return ServiceResponse.success("Review created.", review, StatusCodes.CREATED);
     } catch (error) {
-      const errorMessage = `Error querying brends`;
+      const errorMessage = `Error creating review`;
       logger.error(errorMessage, error);
-      return ServiceResponse.failure("An error occurred while querying brends.", null, StatusCodes.INTERNAL_SERVER_ERROR);
+      return ServiceResponse.failure("An error occurred while creating review.", null, StatusCodes.INTERNAL_SERVER_ERROR);
     }
     
   }
-
-  
 }
+
 
 
 export const brendService = new BrendService();

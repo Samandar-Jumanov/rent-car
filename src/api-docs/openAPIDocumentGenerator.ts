@@ -1,5 +1,6 @@
 import { OpenAPIRegistry, OpenApiGeneratorV3 } from "@asteasolutions/zod-to-openapi";
 
+// Import registry modules
 import { healthCheckRegistry } from "@/api/healthCheck/healthCheckRouter";
 import { userRegistry } from "@/api/user/userRouter";
 import { brendRegistry } from "@/api/brend/brendRouter";
@@ -8,9 +9,21 @@ import { featureRegistry } from "@/api/feature/feature.router";
 import { requirementsRegistry } from "@/api/requirements/requirement.router";
 import { favoriteRegistry } from "@/api/favorite/favorite.router";
 import { collaboratedCarsRegistry } from "@/api/colloborate/colloborate.router";
+import { bannersRegistry } from "@/api/banners/banners.router";
 
 export function generateOpenAPIDocument() {
-  const registry = new OpenAPIRegistry([healthCheckRegistry, userRegistry, brendRegistry , discountRegistry , featureRegistry , requirementsRegistry , favoriteRegistry , collaboratedCarsRegistry]);
+  // Combine all registries
+  const registry = new OpenAPIRegistry([
+    healthCheckRegistry,
+    userRegistry,
+    brendRegistry,
+    discountRegistry,
+    featureRegistry,
+    requirementsRegistry,
+    favoriteRegistry,
+    collaboratedCarsRegistry,
+    bannersRegistry
+  ]);
 
   // Register the security scheme
   registry.registerComponent('securitySchemes', 'BearerAuth', {
@@ -19,8 +32,10 @@ export function generateOpenAPIDocument() {
     bearerFormat: 'JWT',
   });
 
+  // Create OpenAPI generator
   const generator = new OpenApiGeneratorV3(registry.definitions);
 
+  // Generate and return the OpenAPI document
   return generator.generateDocument({
     openapi: "3.0.0",
     info: {

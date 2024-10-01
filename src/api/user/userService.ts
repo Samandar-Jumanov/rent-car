@@ -307,7 +307,7 @@ export class UserService {
 
      logger.warn(`Password validation result: ${isPasswordValid ? 'Valid' : 'Invalid'}`);
 
-    if (isPasswordValid) {
+    if (!isPasswordValid) {
       return ServiceResponse.failure("Invalid credentials", null, StatusCodes.BAD_REQUEST);
     };
 

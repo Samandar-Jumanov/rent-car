@@ -6,8 +6,9 @@ import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
 import { GetBrendSchema, BrendSchema, CreateBrendSchema, QueryBrendSchema } from "./brendModel";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { brendController } from "./brendController";
-import { CreateRentalSchema  , DeleteRentalSchema  } from "./cars/carsModel";
+import { CreateCarSchema, CreateRentalSchema  , DeleteRentalSchema , GetCarSchema  } from "./cars/carsModel";
 import { upload   } from "../aws/multer.service";
+import { authMiddleware, checkRole } from "@/common/middleware/auth";
 
 export const brendRegistry = new OpenAPIRegistry();
 export const brendRouter: Router = express.Router();
@@ -157,9 +158,8 @@ brendRegistry.registerPath({
 
   responses: createApiResponse(z.any(), "Success"),
 });
+
 brendRouter.delete("/order/:id",  validateRequest(DeleteRentalSchema) , brendController.cancelOrder);
-
-
 
 const CreateReviewRequestSchema = z.object({
   query: z.object({
@@ -183,7 +183,7 @@ brendRegistry.registerPath({
     body:{
          content  : {  
             'application/json': {
-              schema:CreateReviewRequestSchema.shape.body
+              schema: CreateReviewRequestSchema
             }
          }
     }
@@ -191,3 +191,52 @@ brendRegistry.registerPath({
 
   responses: createApiResponse(z.any(), "Success"),
 });
+
+brendRouter.post("/reviews",  validateRequest(CreateReviewRequestSchema) , brendController.addReview);
+
+// Cars 
+
+brendRegistry.registerPath({
+  method: "post",
+  path: "/brends/{brendId}/car/add",
+  tags: ["Brend"],
+  description : "Not tested yet",
+  request: {
+    query: CreateReviewRequestSchema.shape.query,
+    body:{
+         content  : {  
+            'application/json': {
+              schema:   CreateCarSchema
+            }
+         }
+    }
+  },
+  responses: createApiResponse(z.any(), "Success"),
+});
+
+
+brendRouter.post("/:brendId/car/add", authMiddleware , checkRole(["AGENT"]) ,   validateRequest(z.object({
+     body : CreateCarSchema
+})) , brendController.addReview);
+
+
+// get one car 
+
+brendRegistry.registerPath({
+  method: "get",
+  path: "/brends/{brendId}/car/{carId}",
+  tags: ["Brend"],
+  request: {
+       params : z.object({
+              brendId : z.string(),
+              carId : z.string()
+       })
+  },
+
+  responses: createApiResponse(z.any(), "Success"),
+});
+
+brendRouter.get("/:brendId/car/:carId",  authMiddleware ,  brendController.getCar);
+
+
+

@@ -3,18 +3,32 @@ import bcrypt from "bcrypt"
 
 
 async function createSuperAdmin ( ) {
-   await prisma.user.create({
+
+   await prisma.carColor.create({
        data : {
-             phoneNumber : "+998950018222",
-             role : "SUPER_ADMIN",
-             password : await bcrypt.hash("adminPass123" , 12 )
+              color : "Black"
 
        }
    })
+   
+
+   await prisma.carBrend.create({
+      data : {
+              carBrend: "Bmw"
+
+      }
+  })
+
+  await prisma.model.create({
+      data : {
+              modelName: "Bmw E 32 "
+      }
+  })
+  
 }
 
 createSuperAdmin().then(( res ) => {
-        console.log("Super Admin created successfully")
+        console.log("Fake data done ")
 }).catch((ex ) => {
       console.log(ex)
 })
