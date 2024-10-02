@@ -22,7 +22,7 @@ userRegistry.registerPath({ // get all
   request : {
                 query : z.object({
                   page : z.number(),
-                  role : z.enum(["USSER" , "AGENT"]),
+                  role : z.enum(["USER" , "AGENT"]),
                   pageSize : z.number(),
                 }),
             
@@ -50,7 +50,7 @@ userRegistry.registerPath({  // create user
   request: {
     query : z.object({
       location : z.string(),
-      role : z.string(),
+      role : z.enum(["USER" , "AGENT"]),
     }),
     body: {
       content: {

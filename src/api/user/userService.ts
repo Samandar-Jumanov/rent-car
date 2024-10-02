@@ -59,9 +59,11 @@ export class UserService {
   
       let user;
   
+
+      console.log({ queryData })
       if (!existingUser) {
         user = await prisma.user.create({
-          data: { phoneNumber: data.phoneNumber, role: queryData.role  , password : data.password},
+          data: { phoneNumber: data.phoneNumber, role: queryData.role  , password : data.password },
         });  // if not user create for agent and user 
   
         if (queryData.role === "ADMIN") {
