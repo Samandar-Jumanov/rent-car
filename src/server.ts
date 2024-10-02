@@ -35,7 +35,7 @@ app.use(helmet());
 // Routes
 app.use("/health-check", authMiddleware, healthCheckRouter);
 app.use("/users", userRouter);
-app.use("/brends",  authMiddleware,  brendRouter);
+app.use("/brends",   brendRouter);
 app.use("/discounts",  authMiddleware,  discountRouter);
 app.use("/features" , authMiddleware , featureRouter)
 app.use("/requirements" , authMiddleware , requirementsRouter)

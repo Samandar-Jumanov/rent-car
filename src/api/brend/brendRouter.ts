@@ -23,7 +23,7 @@ brendRegistry.registerPath({
   tags: ["Brend"],
   request : {
        query : z.object({
-            location  : z.string()
+            location  : z.string().optional()
        })
   },
   responses: createApiResponse(z.array(BrendSchema), "Success"),

@@ -132,7 +132,6 @@ export class BrendService {
                 color: { contains: query.color, mode: 'insensitive' }
               } : undefined,
               status: "FREE",
-              isAvailable: true,
               price: {
                 gte: query.minPrice ? parseFloat(query.minPrice) : undefined,
                 lte: query.maxPrice ? parseFloat(query.maxPrice) : undefined,
@@ -154,7 +153,6 @@ export class BrendService {
           cars: {
             where: {
               status: "FREE",
-              isAvailable: true,
             },
             include: {
               requirements: true,

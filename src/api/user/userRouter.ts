@@ -19,6 +19,14 @@ userRegistry.register("User", UserSchema); // register
 userRegistry.registerPath({ // get all 
   method: "get",
   path: "/users",
+  request : {
+                query : z.object({
+                  page : z.number(),
+                  role : z.enum(["USSER" , "AGENT"]),
+                  pageSize : z.number(),
+                }),
+            
+  },
   tags: ["User"],
   responses: createApiResponse(z.array(UserSchema), "Success"),
 });
