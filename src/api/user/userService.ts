@@ -301,11 +301,11 @@ export class UserService {
       
 
       logger.warn({ data })
-      const isPasswordValid = await bcrypt.compare(data.password, String(user.password));
+      const validPassword = await bcrypt.compare(data.password, String(user.password));
 
-     logger.warn(`Password validation result: ${isPasswordValid ? 'Valid' : 'Invalid'}`);
+     logger.warn(`Password validation result: ${validPassword ? 'Valid' : 'Invalid'}`);
 
-    if (!isPasswordValid) {
+    if (!validPassword) {
       return ServiceResponse.failure("Invalid credentials", null, StatusCodes.BAD_REQUEST);
     };
 
