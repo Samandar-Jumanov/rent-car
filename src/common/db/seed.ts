@@ -4,9 +4,9 @@ import bcrypt from "bcrypt";
 async function generateFakeData() {
   await prisma.user.create({
            data : {
-                    phoneNumber : "+998950018222", 
+                    phoneNumber : "+99895 001 82 22", 
                     role : "SUPER_ADMIN",
-                    password : await bcrypt.hash("adminPass123" , 12 )
+                    password : await bcrypt.hash("adminPass123" , 10 )
            }
   })
   console.log("Fake data generation completed successfully!");

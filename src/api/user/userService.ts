@@ -299,6 +299,8 @@ export class UserService {
         return ServiceResponse.failure("User not found", null, StatusCodes.NOT_FOUND);
       }
       
+
+      logger.warn({ data })
       const isPasswordValid = await bcrypt.compare(data.password, String(user.password));
 
      logger.warn(`Password validation result: ${isPasswordValid ? 'Valid' : 'Invalid'}`);
