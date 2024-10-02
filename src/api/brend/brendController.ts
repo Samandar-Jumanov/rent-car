@@ -11,6 +11,16 @@ class BrendController {
     return handleServiceResponse(serviceResponse, res);
   };
 
+
+  public createBrend: RequestHandler = async (req: Request, res: Response) => {
+    const body =  req.body
+    const logo = req.file
+    const userId = req.user?.userId
+
+    const serviceResponse = await brendService.createBrand(body , String(userId) , String(logo?.path)); // location needed 
+    return handleServiceResponse(serviceResponse, res);
+  };
+
   public getTopBrends: RequestHandler = async (req: Request, res: Response) => {
     const serviceResponse = await brendService.getTopBrends("") // location needed 
     return handleServiceResponse(serviceResponse, res);
@@ -32,7 +42,8 @@ class BrendController {
       return res.status(400).json({ error: 'brendId and carId are required query parameters' });
     }
   
-    const body = req.body ;
+    const body = req.body;
+
    
 
     // Handle file uploads

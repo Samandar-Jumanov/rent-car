@@ -2,9 +2,9 @@ import { StatusCodes } from "http-status-codes";
 import { ServiceResponse } from "@/common/models/serviceResponse";
 import { logger } from "@/server";
 import prisma from "@/common/db/prisma";
-import { CreateReviewRequest, IBrend , IReviewSchema, QueryBrend  } from "./brendModel";
+import { CreateReviewRequest, IBrend , IReviewSchema, QueryBrend , CreateBrendRequest   } from "./brendModel";
 import { ITopBrend } from "./topBrend/topBrendModel";
-
+import bcrypt from "bcrypt"
 
 type QueryBrendResult = {
   data: Omit<IBrend, 'password'>[];
@@ -252,6 +252,32 @@ export class BrendService {
     }
     
   }
+
+
+  async createBrand(data:CreateBrendRequest , userId : string  , logo : string  ): Promise<ServiceResponse<any  | null>> {
+    try {
+
+      const hashedPassword = await bcrypt.hash(data.password , 10);
+      data.password = hashedPassword
+
+      const newBrand = await prisma.brand.create({
+        data: {
+          ...data,
+          logo,
+          userId,
+          ratings: [],
+          averageRating: 0,
+        },
+      });
+
+      const { password , ...rest } = newBrand
+      return ServiceResponse.success("Brand created successfully", rest, StatusCodes.CREATED);
+    } catch (error : any ) {
+      const errorMessage = `Error creating brand: ${(error as Error).message}`;
+      logger.error(errorMessage);
+      return ServiceResponse.failure("An error occurred while creating the brand.", null, StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
 }
 
 

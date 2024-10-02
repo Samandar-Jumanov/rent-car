@@ -3,11 +3,10 @@ import { z } from "zod";
 
 extendZodWithOpenApi(z);
 
-const PaymentType = z.enum(["CARD", "TERMINAL", "CASH"]);
-const CarDelivery  = z.enum(['TAKE_AWAY' , "DELIVER"])
-const MirrorType  = z.enum(['STANDARD' , "TINTED" , "ANTI_GLARE" , "HEATED" , "AUTO_DIMMING"])
-const FuelType  = z.enum(['PETROL' , "DIESEL" , "ELECTRIC" , "HYBRID"])
-const CarType  = z.enum(['MANUAL' , "AUTOMATIC" , "ELECTRIC" , "HYBRID"])
+export const PaymentType = z.enum(["CARD", "TERMINAL", "CASH"]);
+export const CarDelivery  = z.enum(['TAKE_AWAY' , "DELIVER"])
+export const MirrorType  = z.enum(['STANDARD' , "TINTED" , "ANTI_GLARE" , "HEATED" , "AUTO_DIMMING"])
+export const FuelType  = z.enum(['PETROL' , "DIESEL" , "ELECTRIC" , "HYBRID"])
 
 
 export interface IBrend {
@@ -19,7 +18,6 @@ export interface IBrend {
   address: string;
   password: string;
   carDelivery : z.infer<typeof CarDelivery>
-  topBrendId: string | null;
   payment: z.infer<typeof PaymentType>;
   ratings : number[];
   averageRating: number
@@ -48,14 +46,11 @@ export const GetBrendSchema = z.object({
 });
 
 export const CreateBrendSchema = z.object({
-  userId: z.string(),
-  logo: z.string(),
   brendName: z.string(),
   ownerNumber: z.string(),
   address: z.string(),
   password: z.string(),
-  isTopBrend: z.boolean(),
-  topBrendId: z.string().nullable().optional(),
+  isTopBrend: z.boolean().default(false),
   payment: PaymentType.optional(),
 });
 

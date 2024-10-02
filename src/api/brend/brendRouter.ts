@@ -1,14 +1,14 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import express, { type Router } from "express";
 import { z } from "zod";
-import multer from "multer";
 import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
 import { GetBrendSchema, BrendSchema, CreateBrendSchema, QueryBrendSchema } from "./brendModel";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { brendController } from "./brendController";
-import { CreateCarSchema, CreateRentalSchema  , DeleteRentalSchema , GetCarSchema  } from "./cars/carsModel";
-import { upload   } from "../aws/multer.service";
+import { CreateCarSchema, CreateRentalSchema, DeleteRentalSchema, GetCarSchema } from "./cars/carsModel";
+import { upload } from "../aws/multer.service";
 import { authMiddleware, checkRole } from "@/common/middleware/auth";
+import { PaymentType } from "./brendModel";
 
 export const brendRegistry = new OpenAPIRegistry();
 export const brendRouter: Router = express.Router();
@@ -21,10 +21,10 @@ brendRegistry.registerPath({
   method: "get",
   path: "/brends",
   tags: ["Brend"],
-  request : {
-       query : z.object({
-            location  : z.string().optional()
-       })
+  request: {
+    query: z.object({
+      location: z.string().optional()
+    })
   },
   responses: createApiResponse(z.array(BrendSchema), "Success"),
 });
@@ -35,16 +35,80 @@ brendRegistry.registerPath({
   method: "get",
   path: "/brends/top",
   tags: ["Brend"],
-  request : {
-    query : z.object({
-         location  : z.string()
+  request: {
+    query: z.object({
+      location: z.string()
     })
-},
+  },
   responses: createApiResponse(z.array(BrendSchema), "Success"),
 });
 brendRouter.get("/top", brendController.getTopBrends);
 
-// Query brends 
+// POST /brends/new (Create new brend)
+brendRegistry.registerPath({
+  method: "post",
+  path: "/brends/new",
+  tags: ["Brend"],
+  request: {
+    // body: {
+    //   content: {
+    //     '': {
+    //       schema: {
+    //         type: "object",
+    //         properties: {
+    //           logo: { type: "string", format: "binary" },
+    //           brendName: { type: "string" },
+    //           ownerNumber: { type: "string" },
+    //           address: { type: "string" },
+    //           password: { type: "string" },
+    //           payment: { 
+    //             type: "string", 
+    //           },
+    //         },
+    //         required: ["logo", "brendName", "ownerNumber", "address", "password", "isTopBrend"]
+    //       }
+    //     }
+    //   }
+    // }
+
+    body: {
+      content: {
+        'multipart/form-data': {
+          schema: {
+            type: "object",
+            properties: {
+              logo: { type: "string", format: "binary" },
+              brendName: { type: "string" },
+              ownerNumber: { type: "string" },
+              address: { type: "string" },
+              password: { type: "string" },
+              payment: { 
+                          type: "string", 
+                        },
+            },
+
+          }
+        },
+      },
+    },
+    
+
+  },
+  responses: createApiResponse(BrendSchema, "Success"),
+});
+
+brendRouter.post(
+  "/new",
+  authMiddleware,
+  checkRole(["SUPER_ADMIN"]),
+  upload.single("logo"),
+  validateRequest(z.object({
+     body : CreateBrendSchema
+  })),
+  brendController.createBrend
+);
+
+// GET /brends/query
 brendRegistry.registerPath({
   method: "get",
   path: "/brends/query",
@@ -66,7 +130,7 @@ brendRegistry.registerPath({
 
 brendRouter.get("/:id", validateRequest(GetBrendSchema), brendController.getBrend);
 
-// Create order 
+// POST /brends/order (Create order)
 brendRegistry.registerPath({
   method: "post",
   path: "/brends/order",
@@ -111,17 +175,17 @@ brendRegistry.registerPath({
                 }
               },
               userImage: {
-                  type: "string",
-                  format: "binary"
-                },
+                type: "string",
+                format: "binary"
+              },
               requirements: {
                 type: "array",
                 items: {
-                  type: "string",
-                  format : "string"
+                  type: "string"
                 }
               }
             },
+            
             required: [
               "rentalStart", "rentalEnd", "pickupTime", "returnTime",
               "travelRegion", "estimatedDistance", "username", "surname",
@@ -146,21 +210,20 @@ brendRouter.post(
   brendController.createOrder
 );
 
-
-// Delete order
+// DELETE /brends/order/:id
 brendRegistry.registerPath({
   method: "delete",
   path: "/brends/order/{id}",
   tags: ["Brend"],
   request: {
-      params : DeleteRentalSchema.shape.params
+    params: DeleteRentalSchema.shape.params
   },
-
   responses: createApiResponse(z.any(), "Success"),
 });
 
-brendRouter.delete("/order/:id",  validateRequest(DeleteRentalSchema) , brendController.cancelOrder);
+brendRouter.delete("/order/:id", validateRequest(DeleteRentalSchema), brendController.cancelOrder);
 
+// POST /brends/reviews
 const CreateReviewRequestSchema = z.object({
   query: z.object({
     carId: z.string().optional(),
@@ -180,65 +243,61 @@ brendRegistry.registerPath({
   tags: ["Brend"],
   request: {
     query: CreateReviewRequestSchema.shape.query,
-    body:{
-         content  : {  
-            'application/json': {
-              schema: CreateReviewRequestSchema
-            }
-         }
+    body: {
+      content: {  
+        'application/json': {
+          schema: CreateReviewRequestSchema.shape.body
+        }
+      }
     }
   },
-
   responses: createApiResponse(z.any(), "Success"),
 });
 
-brendRouter.post("/reviews",  validateRequest(CreateReviewRequestSchema) , brendController.addReview);
+brendRouter.post("/reviews", validateRequest(CreateReviewRequestSchema), brendController.addReview);
 
-// Cars 
-
+// POST /brends/:brendId/car/add
 brendRegistry.registerPath({
   method: "post",
   path: "/brends/{brendId}/car/add",
   tags: ["Brend"],
-  description : "Not tested yet",
+  description: "Not tested yet",
   request: {
     params: z.object({
-       brendId : z.string() 
+      brendId: z.string() 
     }),
-    body:{
-         content  : {  
-            'application/json': {
-              schema:   CreateCarSchema
-            }
-         }
+    body: {
+      content: {  
+        'application/json': {
+          schema: CreateCarSchema
+        }
+      }
     }
   },
   responses: createApiResponse(z.any(), "Success"),
 });
 
+brendRouter.post("/:brendId/car/add", 
+  authMiddleware, 
+  checkRole(["AGENT", "SUPER_ADMIN"]), 
+  validateRequest(z.object({
+    body: CreateCarSchema
+  })), 
+  brendController.addCar
+);
 
-brendRouter.post("/:brendId/car/add", authMiddleware , checkRole(["AGENT" , "SUPER_ADMIN"]) ,   validateRequest(z.object({
-     body : CreateCarSchema
-})) , brendController.addCar);
-
-
-// get one car 
-
+// GET /brends/:brendId/car/:carId
 brendRegistry.registerPath({
   method: "get",
   path: "/brends/{brendId}/car/{carId}",
   tags: ["Brend"],
   request: {
-       params : z.object({
-              brendId : z.string(),
-              carId : z.string()
-       })
+    params: z.object({
+      brendId: z.string(),
+      carId: z.string()
+    })
   },
-
   responses: createApiResponse(z.any(), "Success"),
 });
 
-brendRouter.get("/:brendId/car/:carId",  authMiddleware ,  brendController.getCar);
-
-
-
+brendRouter.get("/:brendId/car/:carId", authMiddleware, brendController.getCar)
