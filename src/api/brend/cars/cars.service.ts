@@ -74,7 +74,7 @@ export class CarService {
     }
   }
 
-  async addCar(data: CreateCarRequest, brandId: string, userId: string): Promise<ServiceResponse<ICar | null>> {
+  async addCar(data: CreateCarRequest,  brandId  : string ,  userId: string): Promise<ServiceResponse<ICar | null>> {
     try {
       const brand = await prisma.brand.findUnique({
         where: { id: brandId }

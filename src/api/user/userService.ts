@@ -291,10 +291,6 @@ export class UserService {
   async adminLogin ( data : { phoneNumber: string , password : string}) {
     try {
 
-      console.log({ 
-         data
-      })
-
      const phoneNumber = data.phoneNumber.startsWith('+') ? data.phoneNumber : `+${data.phoneNumber}`;
      const user = await prisma.user.findUnique({ where: { phoneNumber } });
       

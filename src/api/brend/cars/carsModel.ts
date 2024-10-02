@@ -1,63 +1,60 @@
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 import { z } from "zod";
+import Decimal from "decimal.js";
 
 extendZodWithOpenApi(z);
 
 const CarStatusEnum = z.enum(['FREE', "RENTED"]);
 
+const DecimalSchema = z.instanceof(Decimal).or(z.string()).or(z.number())
+  .transform((value) => new Decimal(value));
+
 export interface ICar {
   id: string;
   brendId: string; 
+  modelId: string;
+  colorId: string;
+  carBrendId  : string 
   title: string;
-  price: any;
+  price: Decimal;
   isDiscounted: boolean;
   discountedPrice?: number | null;
-  isAvailable: boolean;
   images: string[];
   status: z.infer<typeof CarStatusEnum>;
   ratings: number[];
   averageRating: number;
-  modelId?: string;
-  colorId?: string;
-  carBrendId?: string;
-  
   createdAt: Date;
   updatedAt: Date;
 }
 
 export const CarSchema = z.object({
   id: z.string(),
-  brandId: z.string(),
+  brendId: z.string(),
+  modelId: z.string(),
+  colorId: z.string(),
+  carBrendId  : z.string(),
   title: z.string(),
   price: z.number().positive(),
   isDiscounted: z.boolean(),
-  discountedPrice: z.number().int().positive().optional(),
-  isAvailable: z.boolean(),
+  discountedPrice: z.number().int().optional(),
   images: z.array(z.string().url()),
   status: CarStatusEnum,
   ratings: z.array(z.number().int().min(0).max(5)),
   averageRating: z.number().min(0).max(5),
-  modelId: z.string().optional(),
-  colorId: z.string().optional(),
-  carBrendId: z.string().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
 
 export const CreateCarSchema = z.object({
-
+  modelId: z.string(),
+  colorId: z.string(),
+  carBrendId  : z.string(),
   title: z.string(),
   price: z.number().positive(),
   isDiscounted: z.boolean().default(false),
   discountedPrice: z.number().int().positive().optional(),
-  isAvailable: z.boolean().default(true),
-  images: z.array(z.string().url()),
+  images: z.array(z.string()),
   status: CarStatusEnum.default('FREE'),
-  modelId: z.string().optional(),
-  colorId: z.string().optional(),
-  carBrendId: z.string().optional(),
-
-
 });
 
 export const GetCarSchema = z.object({
@@ -65,19 +62,18 @@ export const GetCarSchema = z.object({
 });
 
 export const UpdateCarSchema = z.object({
+  brendId: z.string().optional(),
+  modelId: z.string().optional(),
+  colorId: z.string().optional(),
   title: z.string().optional(),
   price: z.number().positive().optional(),
   isDiscounted: z.boolean().optional(),
   discountedPrice: z.number().int().positive().optional(),
   images: z.array(z.string().url()).optional(),
   status: CarStatusEnum.optional(),
-  modelId: z.string().optional(),
-  colorId: z.string().optional(),
-  carBrendId: z.string().optional(),
 }).refine(data => Object.values(data).some(value => value !== undefined), {
   message: "At least one field must be provided for update"
 });
-
 
 export interface IRental {
   id: string;

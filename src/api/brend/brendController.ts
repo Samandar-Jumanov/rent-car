@@ -89,19 +89,16 @@ class BrendController {
  }
 
  public addCar  : RequestHandler = async (req: Request, res: Response) => {
-  const cardId = req.query.cardId
-  const brandId  = req.query.brandId
+  const brandId  = req.params.brendId
   const body = req.body
 
   const data = {
-       cardId ,
-       brandId,
        ...body
   }
 
 const userId = req.user?.userId
 
-const serviceResponse = await brendService.addReview(data , String(userId))
+const serviceResponse = await carService.addCar(data ,String(brandId) , String(userId))
 return handleServiceResponse(serviceResponse, res);
 }
 

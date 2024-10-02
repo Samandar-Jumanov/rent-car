@@ -202,7 +202,9 @@ brendRegistry.registerPath({
   tags: ["Brend"],
   description : "Not tested yet",
   request: {
-    query: CreateReviewRequestSchema.shape.query,
+    params: z.object({
+       brendId : z.string() 
+    }),
     body:{
          content  : {  
             'application/json': {
@@ -215,9 +217,9 @@ brendRegistry.registerPath({
 });
 
 
-brendRouter.post("/:brendId/car/add", authMiddleware , checkRole(["AGENT"]) ,   validateRequest(z.object({
+brendRouter.post("/:brendId/car/add", authMiddleware , checkRole(["AGENT" , "SUPER_ADMIN"]) ,   validateRequest(z.object({
      body : CreateCarSchema
-})) , brendController.addReview);
+})) , brendController.addCar);
 
 
 // get one car 

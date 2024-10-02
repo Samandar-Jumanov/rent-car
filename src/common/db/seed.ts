@@ -1,34 +1,23 @@
 import prisma from "./prisma";
-import bcrypt from "bcrypt"
+import bcrypt from "bcrypt";
 
-
-async function createSuperAdmin ( ) {
-
-   await prisma.carColor.create({
-       data : {
-              color : "Black"
-
-       }
-   })
-   
-
-   await prisma.carBrend.create({
-      data : {
-              carBrend: "Bmw"
-
-      }
+async function generateFakeData() {
+  await prisma.user.create({
+           data : {
+                    phoneNumber : "+998950018222", 
+                    role : "SUPER_ADMIN",
+                    password : await bcrypt.hash("adminPass123" , 12 )
+           }
   })
-
-  await prisma.model.create({
-      data : {
-              modelName: "Bmw E 32 "
-      }
-  })
-  
+  console.log("Fake data generation completed successfully!");
 }
 
-createSuperAdmin().then(( res ) => {
-        console.log("Fake data done ")
-}).catch((ex ) => {
-      console.log(ex)
-})
+generateFakeData()
+  .then(() => {
+    console.log("Fake data generation process finished.");
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error("Error generating fake data:", error);
+    process.exit(1);
+  });
