@@ -37,8 +37,18 @@ export class CarBrendService {
 
   async deleteCarBrend(id: string): Promise<ServiceResponse<boolean>> {
     try {
+        const existing = await prisma.carBrend.findUnique({
+            where : {
+                id
+            }
+     })
+
+     if(!existing) {
+         return ServiceResponse.failure("Car brend with this name already exists", false , StatusCodes.NOT_FOUND);
+     }
+
       await prisma.carBrend.delete({ where: { id } });
-      return ServiceResponse.success("Car brand deleted successfully", true);
+      return ServiceResponse.success("Car brand deleted successfully", true , StatusCodes.OK);
     } catch (ex) {
       const errorMessage = `Error deleting car brand: ${(ex as Error).message}`;
       logger.error(errorMessage);

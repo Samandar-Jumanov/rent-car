@@ -13,6 +13,7 @@ export class CarColorService {
             color : data.color
         }
       })
+      
       if(existing) {
            return ServiceResponse.failure("Color  with this name already exists", null , StatusCodes.BAD_REQUEST);
        }
@@ -38,6 +39,18 @@ export class CarColorService {
 
   async deleteCarColor(id: string): Promise<ServiceResponse<boolean>> {
     try {
+
+      
+      const existing = await prisma.carColor.findUnique({
+        where : {
+            id
+        }
+      })
+      
+      if(!existing) {
+           return ServiceResponse.failure("Color not found", false , StatusCodes.NOT_FOUND);
+       }
+
       await prisma.carColor.delete({ where: { id } });
       return ServiceResponse.success("Car color deleted successfully", true);
     } catch (ex) {

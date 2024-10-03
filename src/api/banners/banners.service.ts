@@ -21,6 +21,8 @@ export class BannersService {
     }
   }
 
+
+
   async findBanner(id: string): Promise<ServiceResponse<IBanners | null>> {
     try {
       const banner = await prisma.banners.findUnique({ where: { id } });

@@ -8,21 +8,24 @@ import { IModel, CreateModelRequest } from "./models.model";
 export class ModelService {
   async createModel(data: CreateModelRequest): Promise<ServiceResponse<IModel | null>> {
     try {
+
+        const existing = await prisma.model.findUnique({
+            where : {
+                modelName : data.modelName
+            }
+          })
+    
+          if(existing) {
+               return ServiceResponse.failure("Color  with this name already exists", null , StatusCodes.BAD_REQUEST);
+           }
+           
       const model = await prisma.model.create({
         data: {
           ...data,
         },
       });
       
-      const existing = await prisma.model.findUnique({
-        where : {
-            modelName : data.modelName
-        }
-      })
-
-      if(existing) {
-           return ServiceResponse.failure("Color  with this name already exists", null , StatusCodes.BAD_REQUEST);
-       }
+      
  
 
       return ServiceResponse.success<IModel>("Model created successfully", model);
@@ -39,6 +42,16 @@ export class ModelService {
 
   async deleteModel(id: string): Promise<ServiceResponse<boolean>> {
     try {
+        const existing = await prisma.model.findUnique({
+            where : {
+                id
+            }
+          })
+    
+          if(existing) {
+               return ServiceResponse.failure("Model not found", false , StatusCodes.NOT_FOUND);
+           }
+
       await prisma.model.delete({ where: { id } });
       return ServiceResponse.success("Model deleted successfully", true);
     } catch (ex) {
