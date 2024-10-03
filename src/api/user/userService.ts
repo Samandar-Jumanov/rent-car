@@ -13,8 +13,14 @@ export class UserService {
   async findAll(): Promise<ServiceResponse<IUser[] | null>> {
     try {
 
-      const users = await prisma.user.findMany();
-
+      const users = await prisma.user.findMany({
+          where : {  role  : "AGENT"},
+          include : {
+              sessions: true , 
+              rentals : true ,
+              blockedByAdmin : true
+          }
+      });
       return ServiceResponse.success<IUser[]>("Users found", users as IUser[]);
     } catch (ex) {
       const errorMessage = `Error finding all users: ${(ex as Error).message}`;
@@ -104,7 +110,7 @@ export class UserService {
       );
     }
   }
-  
+
   async verifyUser(code: string, phoneNumber: string): Promise<ServiceResponse<{ token : string} | boolean>> {
     try {
       logger.info(`Verifying ${phoneNumber}`)

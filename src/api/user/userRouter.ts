@@ -185,26 +185,22 @@ userRegistry.registerPath({
   responses: createApiResponse(AdminBlockUser, "Success"), // should be changed later 
 });
 
-userRouter.get("/admin/block" , authMiddleware ,  checkRole(["ADMIN"]) ,  userController.getBlockedUsers);
+userRouter.get("/admin/block" , authMiddleware ,  checkRole(["SUPER_ADMIN"]) ,  userController.getBlockedUsers);
 
 
 userRegistry.registerPath({
   method: "post",
-  path: "/users/admin/block",
+  path: "/users/admin/block/{id}",
   tags: ["User"],
   request: {
-    body: {
-      content: {
-        'application/json': {
-          schema: CreateBlockedUsersSchema
-        }
-      }
-    }
+     params : z.object({
+          id : z.string(),
+     })
   },
   responses: createApiResponse(UserSchema, "Success"),
 });
 
-userRouter.post("/admin/block" , authMiddleware ,  checkRole(["ADMIN"]) ,  userController.blockUser);
+userRouter.post("/admin/block/:id" , authMiddleware ,  checkRole(["SUPER_ADMIN"]),  userController.blockAgentUser);
 
 
 userRegistry.registerPath({
@@ -223,7 +219,7 @@ userRegistry.registerPath({
   responses: createApiResponse(UserSchema, "Success"),
 });
 
-userRouter.delete("/admin/block" , authMiddleware ,  checkRole(["ADMIN"]) ,  userController.cancelAgentUserBlock);
+userRouter.delete("/admin/block" , authMiddleware ,  checkRole(["SUPER_ADMIN"]) ,  userController.cancelAgentUserBlock);
 
 
 
@@ -237,7 +233,7 @@ userRegistry.registerPath({
   responses: createApiResponse(AgentBlockSchema, "Success"),
 });
 
-userRouter.get("/agent/block" , authMiddleware ,  checkRole(["ADMIN"]) ,  userController.getAgentBlocked);
+userRouter.get("/agent/block" , authMiddleware ,  checkRole(["AGENT"]) ,  userController.getAgentBlocked);
 
 userRegistry.registerPath({
   method: "post",
@@ -255,7 +251,7 @@ userRegistry.registerPath({
   responses: createApiResponse(UserSchema, "Success"),
 });
 
-userRouter.post("/agent/block" , authMiddleware ,  checkRole(["ADMIN"]) ,  userController.blockUser);
+userRouter.post("/agent/block" , authMiddleware ,  checkRole(["AGENT"]) ,  userController.blockUser);
 
 userRegistry.registerPath({
   method: "delete",
@@ -273,7 +269,7 @@ userRegistry.registerPath({
   responses: createApiResponse(UserSchema, "Success"),
 });
 
-userRouter.delete("/agent/block" , authMiddleware ,  checkRole(["ADMIN"]) ,  userController.blockUser);
+userRouter.delete("/agent/block" , authMiddleware ,  checkRole(["AGENT"]) ,  userController.blockUser);
 
 
 
@@ -291,7 +287,7 @@ userRegistry.registerPath({
   responses: createApiResponse(SessionsSchema, "Success"),
 });
 
-userRouter.delete("/session" , authMiddleware ,  checkRole(["ADMIN"]) ,  userController.deleteSession);
+userRouter.delete("/session" , authMiddleware ,  checkRole(["AGENT"]) ,  userController.deleteSession);
 
 
 

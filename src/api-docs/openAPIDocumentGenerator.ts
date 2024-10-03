@@ -10,6 +10,9 @@ import { requirementsRegistry } from "@/api/requirements/requirement.router";
 import { favoriteRegistry } from "@/api/favorite/favorite.router";
 import { collaboratedCarsRegistry } from "@/api/colloborate/colloborate.router";
 import { bannersRegistry } from "@/api/banners/banners.router";
+import { modelRegistry } from "@/api/models/models.router";
+import { carBrendRegistry } from "@/api/carBrend/car-brend.router";
+import { carColorRegistry } from "@/api/carColor/colors.router";
 
 export function generateOpenAPIDocument() {
   // Combine all registries
@@ -22,7 +25,10 @@ export function generateOpenAPIDocument() {
     requirementsRegistry,
     favoriteRegistry,
     collaboratedCarsRegistry,
-    bannersRegistry
+    bannersRegistry,
+    modelRegistry,
+    carBrendRegistry,
+    carColorRegistry
   ]);
 
   // Register the security scheme

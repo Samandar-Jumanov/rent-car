@@ -8,10 +8,20 @@ class BlockService {
   // Block by admin
   async blockUser(adminId: string, blockUserId : string ): Promise<ServiceResponse<IBlockedUsers | null>> {
     try {
+
+      const exists = await prisma.blockedUsers.findUnique({
+            where : { blockedUserId : blockUserId }
+      });
+      
+      if (exists) {
+        throw new Error("User is already blocked by this admin");
+      }
+
       const blockedUser = await prisma.blockedUsers.create({
         data: {
           adminId,
           blockedUserId: blockUserId,
+
         },
       });
       return ServiceResponse.success<IBlockedUsers>("User blocked successfully by admin", blockedUser);
@@ -80,7 +90,11 @@ class BlockService {
   // Additional helper methods
   async getBlockedUsers(): Promise<ServiceResponse<IBlockedUsers[] | null>> {
     try {
-      const blockedUsers = await prisma.blockedUsers.findMany();
+      const blockedUsers = await prisma.blockedUsers.findMany({
+          include : {
+              blockedUser : true 
+          }
+      });
       return ServiceResponse.success<IBlockedUsers[]>("Blocked users retrieved successfully", blockedUsers);
     } catch (ex) {
       const errorMessage = `Error retrieving blocked users: ${(ex as Error).message}`;

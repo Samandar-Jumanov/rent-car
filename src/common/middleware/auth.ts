@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/jwt';
-
+import { logger } from '@/server';
 interface UserPayload {
   userId: string;
   phoneNumber: string;

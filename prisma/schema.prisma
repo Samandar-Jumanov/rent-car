@@ -282,7 +282,7 @@ model Discount {
 model BlockedUsers {
   id            String  @id @default(cuid())
   adminId       String
-  blockedUserId String
+  blockedUserId String   @unique
 
   admin       User   @relation("AdminWhoBlocked", fields: [adminId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   blockedUser User   @relation("UserBlockedByAdmin", fields: [blockedUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)

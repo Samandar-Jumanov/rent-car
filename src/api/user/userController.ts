@@ -19,13 +19,14 @@ class UserController {
   };
 
 
+
   public createUser: RequestHandler = async (req: Request, res: Response) => {
     const body : CreateUserRequest  =  req.body;
     const query = req.query
 
     const queryData = {
            location : String(query.location),
-           role :   String(query.role)
+           role :  query.role as any
     }
     const serviceResponse = await userService.createUser(body , queryData);
     return handleServiceResponse(serviceResponse, res);
@@ -73,21 +74,15 @@ class UserController {
   // Admin 
 
   public blockAgentUser : RequestHandler  = async (req: Request, res: Response) => {
-
     const blockUserId  = req.params.id 
     const adminid = req.user?.userId
-
-    if(!blockUserId) {
-         return  res.status(404).json({ message : "Block user id is required" });
-    }
-
     const serviceResponse = await blockService.blockUser(String(adminid) , blockUserId);
-
     return handleServiceResponse(serviceResponse, res);
   };
 
   public cancelAgentUserBlock : RequestHandler  = async (req: Request, res: Response) => {
     const blockUserId  = req.params.id 
+
     if(!blockUserId) {
          return  res.status(404).json({ message : "Block user id is required" });
     }
@@ -106,10 +101,10 @@ class UserController {
 
   // agent 
 
-
   public blockUser : RequestHandler  = async (req: Request, res: Response) => {
     const blockUserId  = req.params.userId 
     const agentId = req.user?.userId
+    
     if(!blockUserId) {
          return  res.status(404).json({ message : "Block user id is required" });
     }

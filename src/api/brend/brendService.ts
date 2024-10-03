@@ -286,7 +286,9 @@ export class BrendService {
     try {
       const brend = await prisma.brand.update({
         where : { id },
-        data
+        data : {
+              ...data 
+        }
       })
       
       if(!brend) {

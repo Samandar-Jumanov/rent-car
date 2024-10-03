@@ -2,7 +2,7 @@ import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import express, { type Router } from "express";
 import { z } from "zod";
 import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
-import { GetBrendSchema, BrendSchema, CreateBrendSchema, QueryBrendSchema } from "./brendModel";
+import { GetBrendSchema, BrendSchema, CreateBrendSchema, QueryBrendSchema, UpdateBrendSchema } from "./brendModel";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { brendController } from "./brendController";
 import { CreateCarSchema, CreateRentalSchema, DeleteRentalSchema, GetCarSchema } from "./cars/carsModel";
@@ -118,10 +118,10 @@ brendRegistry.registerPath({
 brendRouter.put(
   "/:id",
   authMiddleware,
-  checkRole(["SUPER_ADMIN"]),
+  // checkRole(["SUPER_ADMIN"]),
   upload.single("logo"),
   validateRequest(z.object({
-     body : CreateBrendSchema
+     body : UpdateBrendSchema
   })),
   brendController.updateBrand
 );
@@ -138,6 +138,7 @@ brendRegistry.registerPath({
   },
   responses: createApiResponse(BrendSchema, "Success"),
 });
+
 brendRouter.delete(
   "/:id",
   authMiddleware,

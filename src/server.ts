@@ -17,6 +17,9 @@ import { requirementsRouter } from "./api/requirements/requirement.router";
 import { favoriteRouter } from "./api/favorite/favorite.router";
 import { colloborateRouter } from "./api/colloborate/colloborate.router";
 import { bannersRouter } from "./api/banners/banners.router";
+import { modelRouter } from "./api/models/models.router";
+import { carBrendRouter } from "./api/carBrend/car-brend.router";
+import { carColorRouter } from "./api/carColor/colors.router";
 
 const logger = pino({ name: "server start" });
 const app: Express = express();
@@ -42,7 +45,9 @@ app.use("/requirements", authMiddleware, requirementsRouter);
 app.use("/favorites", authMiddleware, favoriteRouter);
 app.use("/colloborate", authMiddleware, checkRole(["SUPER_ADMIN"]), colloborateRouter);
 app.use("/banners", bannersRouter);
-
+app.use("/models" , modelRouter)
+ app.use("/car-brend" , carBrendRouter)
+ app.use("/car-colors" , carColorRouter)
 // Swagger UI
 app.use(openAPIRouter);
 
