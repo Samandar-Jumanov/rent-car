@@ -121,6 +121,20 @@ public getCar  : RequestHandler = async (req: Request, res: Response) => {
   const serviceResponse = await carService.getOneCar(carId)
   return handleServiceResponse(serviceResponse, res);
 }
+
+public updateBrand  : RequestHandler = async (req: Request, res: Response) => {
+  const brandId = req.params.id
+  const body = req.body
+  const serviceResponse = await brendService.updateBrend(brandId ,  body)
+  return handleServiceResponse(serviceResponse, res);
+}
+
+public deleteBrand   : RequestHandler = async (req: Request, res: Response) => {
+  const brandId = req.params.id
+  const serviceResponse = await brendService.deleteBrend(brandId)
+  return handleServiceResponse(serviceResponse, res);
+}
+
 }
 
 export const brendController = new BrendController();

@@ -114,10 +114,10 @@ model Car {
   ratings          Int[]     @default([0])
   averageRating    Int       @default(0)
   
-  brand            Brand     @relation(fields: [brendId], references: [id])
-  model            Model   @relation(fields: [modelId], references: [id])
-  carColor         CarColor  @relation(fields: [colorId], references: [id])
-  carBrend         CarBrend  @relation(fields: [carBrendId], references: [id])
+  brand            Brand     @relation(fields: [brendId], references: [id] , onDelete:  Cascade , onUpdate:  Cascade )
+  model            Model   @relation(fields: [modelId], references: [id] ,  onDelete:  Cascade , onUpdate:  Cascade )
+  carColor         CarColor  @relation(fields: [colorId], references: [id] ,  onDelete:  Cascade , onUpdate:  Cascade )
+  carBrend         CarBrend  @relation(fields: [carBrendId], references: [id] ,  onDelete:  Cascade , onUpdate:  Cascade )
   
   favourites       Favorite[]
   requirements     Requirements[]

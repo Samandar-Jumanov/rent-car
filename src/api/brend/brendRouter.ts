@@ -8,7 +8,6 @@ import { brendController } from "./brendController";
 import { CreateCarSchema, CreateRentalSchema, DeleteRentalSchema, GetCarSchema } from "./cars/carsModel";
 import { upload } from "../aws/multer.service";
 import { authMiddleware, checkRole } from "@/common/middleware/auth";
-import { PaymentType } from "./brendModel";
 
 export const brendRegistry = new OpenAPIRegistry();
 export const brendRouter: Router = express.Router();
@@ -50,27 +49,6 @@ brendRegistry.registerPath({
   path: "/brends/new",
   tags: ["Brend"],
   request: {
-    // body: {
-    //   content: {
-    //     '': {
-    //       schema: {
-    //         type: "object",
-    //         properties: {
-    //           logo: { type: "string", format: "binary" },
-    //           brendName: { type: "string" },
-    //           ownerNumber: { type: "string" },
-    //           address: { type: "string" },
-    //           password: { type: "string" },
-    //           payment: { 
-    //             type: "string", 
-    //           },
-    //         },
-    //         required: ["logo", "brendName", "ownerNumber", "address", "password", "isTopBrend"]
-    //       }
-    //     }
-    //   }
-    // }
-
     body: {
       content: {
         'multipart/form-data': {
@@ -107,6 +85,67 @@ brendRouter.post(
   })),
   brendController.createBrend
 );
+
+// update brends 
+brendRegistry.registerPath({
+  method: "put",
+  path: "/brends/{id}",
+  tags: ["Brend"],
+  request: {
+    params :z.object({
+        id : z.string()
+    }),
+    body: {
+      content: {
+        'multipart/form-data': {
+          schema: {
+            type: "object",
+            properties: {
+              logo: { type: "string", format: "binary" },
+              brendName: { type: "string" },
+              ownerNumber: { type: "string" },
+              address: { type: "string" },
+              password: { type: "string" },
+            },
+          }
+        },
+      },
+    },
+  },
+  responses: createApiResponse(BrendSchema, "Success"),
+});
+
+brendRouter.put(
+  "/:id",
+  authMiddleware,
+  checkRole(["SUPER_ADMIN"]),
+  upload.single("logo"),
+  validateRequest(z.object({
+     body : CreateBrendSchema
+  })),
+  brendController.updateBrand
+);
+
+
+brendRegistry.registerPath({
+  method: "delete",
+  path: "/brends/{id}",
+  tags: ["Brend"],
+  request: {
+      params : z.object({
+         id  : z.string(),
+      })
+  },
+  responses: createApiResponse(BrendSchema, "Success"),
+});
+brendRouter.delete(
+  "/:id",
+  authMiddleware,
+  checkRole(["SUPER_ADMIN"]),
+  brendController.deleteBrand
+);
+
+
 
 // GET /brends/query
 brendRegistry.registerPath({

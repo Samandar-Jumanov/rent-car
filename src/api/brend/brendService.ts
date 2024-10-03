@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { ServiceResponse } from "@/common/models/serviceResponse";
 import { logger } from "@/server";
 import prisma from "@/common/db/prisma";
-import { CreateReviewRequest, IBrend , IReviewSchema, QueryBrend , CreateBrendRequest   } from "./brendModel";
+import { CreateReviewRequest, IBrend , IReviewSchema, QueryBrend , CreateBrendRequest, UpdateBrendRequest   } from "./brendModel";
 import { ITopBrend } from "./topBrend/topBrendModel";
 import bcrypt from "bcrypt"
 
@@ -262,6 +262,45 @@ export class BrendService {
       return ServiceResponse.failure("An error occurred while creating the brand.", null, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
+
+
+   async deleteBrend ( id : string ) : Promise<ServiceResponse<any  | null>>  {
+    try {
+      const brend = await prisma.brand.delete({
+          where : { id }
+      })
+
+      if(!brend) {
+           return ServiceResponse.failure("Brend not found", null, StatusCodes.NOT_FOUND)
+      }
+      return ServiceResponse.success("Brand deleted successfully", brend, StatusCodes.CREATED);
+    } catch (error : any ) {
+      const errorMessage = `Error deleting brand: ${(error as Error).message}`;
+      logger.error(errorMessage);
+      return ServiceResponse.failure("An error occurred while deleting the brand.", null, StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+   }
+
+
+   async updateBrend ( id : string  , data : UpdateBrendRequest) : Promise<ServiceResponse<any  | null>>  {
+    try {
+      const brend = await prisma.brand.update({
+        where : { id },
+        data
+      })
+      
+      if(!brend) {
+           return ServiceResponse.failure("Brend not found", null, StatusCodes.NOT_FOUND)
+      }
+
+      return ServiceResponse.success("Brand updated successfully", brend, StatusCodes.CREATED);
+    } catch (error : any ) {
+      const errorMessage = `Error updating brand: ${(error as Error).message}`;
+      logger.error(errorMessage);
+      return ServiceResponse.failure("An error occurred while updating the brand.", null, StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+   }
+   
 }
 
 
