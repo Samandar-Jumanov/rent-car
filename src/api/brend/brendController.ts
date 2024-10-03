@@ -6,8 +6,10 @@ import { carService } from "./cars/cars.service";
 import { QueryBrend } from "./brendModel";
 
 class BrendController {
-  public getBrends: RequestHandler = async (_req: Request, res: Response) => {
-    const serviceResponse = await brendService.getBrends(""); // location needed 
+
+  public getBrends: RequestHandler = async (req: Request, res: Response) => {
+    const location = req.query.locaion
+    const serviceResponse = await brendService.getBrends(String(location)); // location needed 
     return handleServiceResponse(serviceResponse, res);
   };
 

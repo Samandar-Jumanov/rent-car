@@ -16,26 +16,7 @@ export class BrendService {
   async getBrends( location : string ): Promise<ServiceResponse<IBrend[] | null>> {
     try {
 
-      const brends = await prisma.brand.findMany({
-        where: {
-          cars: {
-            some: {
-              rentals: {
-                some: {
-                  address: location
-                }
-              }
-            }
-          }
-        },
-        include: {
-          cars: {
-            include: {
-              rentals: true
-            }
-          }
-        }
-      });
+      const brends = await prisma.brand.findMany();
       
       
       return ServiceResponse.success<IBrend[] | null >("Brends found", brends );
@@ -266,6 +247,9 @@ export class BrendService {
           logo,
           userId,
           ratings: [],
+
+
+
           averageRating: 0,
         },
       });

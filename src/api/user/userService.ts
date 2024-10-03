@@ -41,66 +41,59 @@ export class UserService {
     }
   }
 
-  async  createUser(
+  async createUser(
     data: CreateUserRequest,
-    queryData: { location: string; role: any }
+    queryData: { location: string; role: "USER" | "AGENT"  }
   ): Promise<ServiceResponse<{ token: string } | null>> {
     try {
       const existingUser = await prisma.user.findUnique({
         where: { phoneNumber: data.phoneNumber },
       });
   
-      if (existingUser && data.password) { // compare password for agent 
-        const isValid = await bcrypt.compare(String(data.password), String(existingUser.password));
-        if (!isValid) {
-          return ServiceResponse.failure("Invalid password", null, StatusCodes.UNAUTHORIZED);
-        }
-      }
-  
       let user;
   
-
-      console.log({ queryData })
-      if (!existingUser) {
-        user = await prisma.user.create({
-          data: { phoneNumber: data.phoneNumber, role: queryData.role  , password : data.password },
-        });  // if not user create for agent and user 
-  
-        if (queryData.role === "ADMIN") {
-          await prisma.sessions.create({
-            data: {
-              agentId: user.id,
-              location: queryData.location,
-              isOwner: true,
-            },
-          });// create first session 
+      if (existingUser) {
+        // User exists
+        if (queryData.role === "AGENT") {
+          const isValid = await bcrypt.compare(String(data.password), String(existingUser.password));
+          if (!isValid) {
+            return ServiceResponse.failure("Invalid password", null, StatusCodes.UNAUTHORIZED);
+          }
         }
-      } else {
+        // For USER and AGENT (after password verification), use existing user
         user = existingUser;
-        if (queryData.role === "ADMIN") {
-          await prisma.sessions.create({
+      } else {
+        // User doesn't exist, create new user
+        if (queryData.role === "AGENT") {
+          if (!data.password) {
+            return ServiceResponse.failure("Password required for new agent", null, StatusCodes.BAD_REQUEST);
+          }
+          user = await prisma.user.create({
             data: {
-              agentId: user.id,
-              location: queryData.location,
-              isOwner: false,
+              phoneNumber: data.phoneNumber,
+              role: queryData.role,
+              password: data.password,
             },
           });
-        }  // if user exists just create a session  
+        } else {
+          // For USER role, create without password
+          user = await prisma.user.create({
+            data: {
+              phoneNumber: data.phoneNumber,
+              role: queryData.role,
+            },
+          });
+        }
       }
   
-      // Uncomment the following lines if you want to initiate user verification
-      // const isSent = await userVerificationService.initiateVerification(user.phoneNumber);
-      // if (!isSent) {
-      //   throw new Error("Could not send SMS");
-      // }
-  
+      // Generate token
       const token = generateToken({
         phoneNumber: user.phoneNumber,
         userId: user.id,
         role: user.role,
       });
-    // generate token
-      return ServiceResponse.success("User created successfully", { token });
+  
+      return ServiceResponse.success("User processed successfully", { token });
     } catch (ex) {
       const errorMessage = `Error in createUser: ${(ex as Error).message}`;
       logger.error(errorMessage);
@@ -111,7 +104,7 @@ export class UserService {
       );
     }
   }
-
+  
   async verifyUser(code: string, phoneNumber: string): Promise<ServiceResponse<{ token : string} | boolean>> {
     try {
       logger.info(`Verifying ${phoneNumber}`)
