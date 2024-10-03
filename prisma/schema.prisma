@@ -136,7 +136,7 @@ model Car {
 
 model Model {
   id          String   @id @default(cuid())
-  modelName   String
+  modelName   String   @unique
   cars        Car[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -144,7 +144,7 @@ model Model {
 
 model CarBrend {
   id          String   @id @default(cuid())
-  carBrend    String
+  carBrend    String   @unique
   cars        Car[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -152,7 +152,7 @@ model CarBrend {
 
 model CarColor {
   id          String   @id @default(cuid())
-  color       String
+  color       String   @unique
   cars        Car[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

@@ -6,6 +6,7 @@ import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
 import { CarColorSchema, CreateCarColorSchema, GetCarColorSchema, DeleteCarColorSchema } from "./colors.model";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { carColorController } from "./color.controller";
+import { authMiddleware, checkRole } from "@/common/middleware/auth";
 
 export const carColorRegistry = new OpenAPIRegistry();
 export const carColorRouter: Router = express.Router();
@@ -19,7 +20,7 @@ carColorRegistry.registerPath({
   responses: createApiResponse(z.array(CarColorSchema), "Success"),
 });
 
-carColorRouter.get("/", carColorController.getCarColors);
+carColorRouter.get("/",  authMiddleware , carColorController.getCarColors);
 
 carColorRegistry.registerPath({
   method: "get",
@@ -29,7 +30,7 @@ carColorRegistry.registerPath({
   responses: createApiResponse(CarColorSchema, "Success"),
 });
 
-carColorRouter.get("/:id", validateRequest(GetCarColorSchema), carColorController.getCarColor);
+carColorRouter.get("/:id", authMiddleware , checkRole(["SUPER_ADMIN"]) ,  validateRequest(GetCarColorSchema), carColorController.getCarColor);
 
 carColorRegistry.registerPath({
   method: "post",
@@ -47,7 +48,7 @@ carColorRegistry.registerPath({
   responses: createApiResponse(CarColorSchema, "Success"),
 });
 
-carColorRouter.post("/", validateRequest(z.object({ body: CreateCarColorSchema })), carColorController.createCarColor);
+carColorRouter.post("/",  authMiddleware , checkRole(["SUPER_ADMIN"]) ,  validateRequest(z.object({ body: CreateCarColorSchema })), carColorController.createCarColor);
 
 carColorRegistry.registerPath({
   method: "delete",
@@ -57,4 +58,4 @@ carColorRegistry.registerPath({
   responses: createApiResponse(z.boolean(), "Success"),
 });
 
-carColorRouter.delete("/:id", validateRequest(DeleteCarColorSchema), carColorController.deleteCarColor);
+carColorRouter.delete("/:id", authMiddleware , checkRole(["SUPER_ADMIN"]) ,   validateRequest(DeleteCarColorSchema), carColorController.deleteCarColor);

@@ -6,6 +6,7 @@ import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
 import { ModelSchema, CreateModelSchema, GetModelSchema, DeleteModelSchema } from "./models.model";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { modelController } from "./models.controller";
+import { authMiddleware, checkRole } from "@/common/middleware/auth";
 
 export const modelRegistry = new OpenAPIRegistry();
 export const modelRouter: Router = express.Router();
@@ -19,7 +20,7 @@ modelRegistry.registerPath({
   responses: createApiResponse(z.array(ModelSchema), "Success"),
 });
 
-modelRouter.get("/", modelController.getModels);
+modelRouter.get("/", authMiddleware ,  modelController.getModels);
 
 modelRegistry.registerPath({
   method: "get",
@@ -29,7 +30,7 @@ modelRegistry.registerPath({
   responses: createApiResponse(ModelSchema, "Success"),
 });
 
-modelRouter.get("/:id", validateRequest(GetModelSchema), modelController.getModel);
+modelRouter.get("/:id", authMiddleware , checkRole(["SUPER_ADMIN"]) ,  validateRequest(GetModelSchema), modelController.getModel);
 
 modelRegistry.registerPath({
   method: "post",
@@ -47,7 +48,7 @@ modelRegistry.registerPath({
   responses: createApiResponse(ModelSchema, "Success"),
 });
 
-modelRouter.post("/", validateRequest(z.object({ body: CreateModelSchema })), modelController.createModel);
+modelRouter.post("/", authMiddleware , checkRole(["SUPER_ADMIN"]) ,   validateRequest(z.object({ body: CreateModelSchema })), modelController.createModel);
 
 modelRegistry.registerPath({
   method: "delete",
@@ -57,4 +58,4 @@ modelRegistry.registerPath({
   responses: createApiResponse(z.boolean(), "Success"),
 });
 
-modelRouter.delete("/:id", validateRequest(DeleteModelSchema), modelController.deleteModel);
+modelRouter.delete("/:id", authMiddleware , checkRole(["SUPER_ADMIN"]) ,  validateRequest(DeleteModelSchema), modelController.deleteModel);

@@ -4,6 +4,7 @@ import { logger } from "@/server";
 import prisma from "@/common/db/prisma";
 import { IModel, CreateModelRequest } from "./models.model";
 
+
 export class ModelService {
   async createModel(data: CreateModelRequest): Promise<ServiceResponse<IModel | null>> {
     try {
@@ -13,6 +14,17 @@ export class ModelService {
         },
       });
       
+      const existing = await prisma.model.findUnique({
+        where : {
+            modelName : data.modelName
+        }
+      })
+
+      if(existing) {
+           return ServiceResponse.failure("Color  with this name already exists", null , StatusCodes.BAD_REQUEST);
+       }
+ 
+
       return ServiceResponse.success<IModel>("Model created successfully", model);
     } catch (ex) {
       const errorMessage = `Error creating model: ${(ex as Error).message}`;

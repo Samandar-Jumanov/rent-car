@@ -7,7 +7,17 @@ import { ICarColor, CreateCarColorRequest } from "./colors.model";
 export class CarColorService {
   async createCarColor(data: CreateCarColorRequest): Promise<ServiceResponse<ICarColor | null>> {
     try {
-      
+
+      const existing = await prisma.carColor.findUnique({
+        where : {
+            color : data.color
+        }
+      })
+      if(existing) {
+           return ServiceResponse.failure("Color  with this name already exists", null , StatusCodes.BAD_REQUEST);
+       }
+ 
+
       const carColor = await prisma.carColor.create({
         data: {
           ...data,

@@ -7,6 +7,16 @@ import { ICarBrend, CreateCarBrendRequest } from "./car-brend.model";
 export class CarBrendService {
   async createCarBrend(data: CreateCarBrendRequest): Promise<ServiceResponse<ICarBrend | null>> {
     try {
+
+        const existing = await prisma.carBrend.findUnique({
+               where : {
+                   carBrend : data.carBrend
+               }
+        })
+        if(existing) {
+            return ServiceResponse.failure("Car brend with this name already exists", null , StatusCodes.BAD_REQUEST);
+        }
+        
       const carBrend = await prisma.carBrend.create({
         data: {
           ...data,

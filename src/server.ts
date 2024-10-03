@@ -46,9 +46,8 @@ app.use("/favorites", authMiddleware, favoriteRouter);
 app.use("/colloborate", authMiddleware, checkRole(["SUPER_ADMIN"]), colloborateRouter);
 app.use("/banners", bannersRouter);
 app.use("/models" , modelRouter)
- app.use("/car-brend" , carBrendRouter)
- app.use("/car-colors" , carColorRouter)
-// Swagger UI
+app.use("/car-brands" , carBrendRouter)
+app.use("/car-colors" , carColorRouter)
 app.use(openAPIRouter);
 
 // Error handlers

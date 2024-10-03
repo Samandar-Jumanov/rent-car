@@ -6,7 +6,7 @@ import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
 import { CarBrendSchema, CreateCarBrendSchema, GetCarBrendSchema, DeleteCarBrendSchema } from "./car-brend.model";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { carBrendController } from "./car-brend.controller";
-import { authMiddleware } from "@/common/middleware/auth";
+import { authMiddleware, checkRole } from "@/common/middleware/auth";
 
 export const carBrendRegistry = new OpenAPIRegistry();
 export const carBrendRouter: Router = express.Router();
@@ -20,7 +20,7 @@ carBrendRegistry.registerPath({
   responses: createApiResponse(z.array(CarBrendSchema), "Success"),
 });
 
-carBrendRouter.get("/", carBrendController.getCarBrends);
+carBrendRouter.get("/",  authMiddleware , carBrendController.getCarBrends);
 
 carBrendRegistry.registerPath({
   method: "get",
@@ -30,7 +30,7 @@ carBrendRegistry.registerPath({
   responses: createApiResponse(CarBrendSchema, "Success"),
 });
 
-carBrendRouter.get("/:id", validateRequest(GetCarBrendSchema), carBrendController.getCarBrend);
+carBrendRouter.get("/:id", authMiddleware,  validateRequest(GetCarBrendSchema), carBrendController.getCarBrend);
 
 carBrendRegistry.registerPath({
   method: "post",
@@ -50,6 +50,7 @@ carBrendRegistry.registerPath({
 
 carBrendRouter.post("/", 
   authMiddleware,
+  checkRole(["SUPER_ADMIN"]),
   validateRequest(z.object({ body: CreateCarBrendSchema })), 
   carBrendController.createCarBrend
 );
@@ -64,6 +65,7 @@ carBrendRegistry.registerPath({
 
 carBrendRouter.delete("/:id", 
   authMiddleware,
+  checkRole(["SUPER_ADMIN"]),
   validateRequest(DeleteCarBrendSchema), 
   carBrendController.deleteCarBrend
 );
