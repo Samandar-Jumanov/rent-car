@@ -321,6 +321,43 @@ export class UserService {
       )
    }  
 }
+
+
+
+async adminSettings ( data : { adminPassword : string, password : string } , userId : string ) : Promise<ServiceResponse<boolean>> {
+  try {
+
+    const user = await prisma.user.findUnique({ where: { id : userId } });
+     
+     if (!user) {
+       logger.warn("User not foudn")
+       return ServiceResponse.failure("User not found", false, StatusCodes.NOT_FOUND);
+     }
+     const validPassword = await bcrypt.compare(data.adminPassword, String(user.password));
+     logger.warn(`Password validation result: ${validPassword ? 'Valid' : 'Invalid'}`);
+    if (!validPassword) {
+      return ServiceResponse.failure("Invalid credentials", false, StatusCodes.BAD_REQUEST);
+    };
+  
+    await prisma.user.update({
+        where : {
+            id : userId
+        },
+        data : {
+            password : await bcrypt.hash(data.password, 10)
+        }
+    })
+
+     return ServiceResponse.success("Logged in successfully", true  ,StatusCodes.OK);
+   } catch (ex) {
+     const errorMessage = `Error logging in: ${(ex as Error).message}`;
+     logger.error(errorMessage);
+     return ServiceResponse.failure(
+       "An error occurred while logging in.",
+       false,
+     )
+  }  
+}
 }
 
 

@@ -21,6 +21,7 @@ import { modelRouter } from "./api/models/models.router";
 import { carBrendRouter } from "./api/carBrend/car-brend.router";
 import { carColorRouter } from "./api/carColor/colors.router";
 import { smsTemplateRouter } from "./api/template/template.router";
+import { requestRouter } from "./api/requests/request.router";
 
 const logger = pino({ name: "server start" });
 const app: Express = express();
@@ -49,6 +50,7 @@ app.use("/banners", bannersRouter);
 app.use("/models" , modelRouter)
 app.use("/car-brands" , carBrendRouter)
 app.use("/car-colors" , carColorRouter)
+app.use("/requests" , requestRouter);
 app.use("/sms-templates" , smsTemplateRouter)
 app.use(openAPIRouter);
 

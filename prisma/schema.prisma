@@ -29,6 +29,7 @@ model User {
   reviews          UserReviews[]
   givenReviews     Reviews[]
   templates         SmsTemplates[]
+  requests         Requests[]
   
   // Users blocked by this admin
   blockedUsers     BlockedUsers[] @relation("AdminWhoBlocked")
@@ -361,7 +362,37 @@ model SmsTemplates {
     
 }
 
-// How does colloborated rent cars   work  
+
+model Requests { 
+  id      String @id @default(cuid())
+  type     RequestType @default(DEMAND)
+  userId   String
+  content  String
+
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model Regions {
+    id  String @id @default(cuid())
+    name  String  @unique
+    cities    Cities[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Cities {
+     id String @id @default(cuid())
+     name  String  @unique
+     regionId String
+
+     region    Regions   @relation(fields: [regionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
 
 enum Role {
   USER
@@ -392,4 +423,9 @@ enum RentalType {
      NEW
      ACCEPTED 
      DECLINED
+}
+
+enum RequestType {
+   DEMAND
+   PROPOSAL 
 }
