@@ -15,6 +15,7 @@ import { carBrendRegistry } from "@/api/carBrend/car-brend.router";
 import { carColorRegistry } from "@/api/carColor/colors.router";
 import { smsTemplateRegistry } from "@/api/template/template.router";
 import { requestRegistry } from "@/api/requests/request.router";
+import { regionRegistry } from "@/api/regions/regions.router";
 
 export function generateOpenAPIDocument() {
   // Combine all registries
@@ -32,7 +33,8 @@ export function generateOpenAPIDocument() {
     carBrendRegistry,
     carColorRegistry,
     smsTemplateRegistry,
-    requestRegistry
+    requestRegistry,
+    regionRegistry
   ]);
 
   // Register the security scheme

@@ -10,18 +10,34 @@ import { ISessions } from "./sessions/sessions.model";
 import bcrypt from "bcrypt"
 
 export class UserService {
-  async findAll(): Promise<ServiceResponse<IUser[] | null>> {
+  async findAll(): Promise<ServiceResponse<{ blockedUsers: IUser[], activeUsers: IUser[] } | null>> {
     try {
-
       const users = await prisma.user.findMany({
-          where : {  role  : "AGENT"},
-          include : {
-              sessions: true , 
-              rentals : true ,
-              blockedByAdmin : true
-          }
+        where: { role: "AGENT" },
+        include: {
+          sessions: true,
+          rentals: true,
+          blockedByAdmin: true,
+          blockedByAgent: true
+        }
       });
-      return ServiceResponse.success<IUser[]>("Users found", users as IUser[]);
+  
+      const blockedUsers: IUser[] = [];
+      const activeUsers: IUser[] = [];
+  
+      users.forEach(user => {
+        const { password, ...restUser } = user;
+        if (user.blockedByAdmin.length > 0 || user.blockedByAgent.length > 0) {
+          blockedUsers.push(restUser as IUser);
+        } else {
+          activeUsers.push(restUser as IUser);
+        }
+      });
+  
+      return ServiceResponse.success<{ blockedUsers: IUser[], activeUsers: IUser[] }>(
+        "Users found",
+        { blockedUsers, activeUsers }
+      );
     } catch (ex) {
       const errorMessage = `Error finding all users: ${(ex as Error).message}`;
       logger.error(errorMessage);
@@ -35,7 +51,18 @@ export class UserService {
 
   async findUser(id: string): Promise<ServiceResponse<IUser | null>> {
     try {
-      const user = await prisma.user.findUnique({ where: { id } });
+      const user = await prisma.user.findUnique({ where: { id }  , include : {
+          rentals : {
+               include : {
+                  car : {
+                      include :{
+                          brand : true 
+                      }
+                  }
+               }
+          } 
+      }});
+      
       if (!user) {
         return ServiceResponse.failure("User not found", null, StatusCodes.NOT_FOUND);
       }
@@ -49,7 +76,7 @@ export class UserService {
 
   async createUser(
     data: CreateUserRequest,
-    queryData: { location: string; role: "USER" | "AGENT"  }
+    queryData: { role: "USER" | "AGENT"  }
   ): Promise<ServiceResponse<{ token: string } | null>> {
     try {
       const existingUser = await prisma.user.findUnique({
@@ -61,8 +88,8 @@ export class UserService {
       if (existingUser) {
         // User exists
         if (queryData.role === "AGENT") {
-          const isValid = await bcrypt.compare(String(data.password), String(existingUser.password));
-          if (!isValid) {
+          const invalid = await bcrypt.compare(String(data.password), String(existingUser.password));
+          if (invalid) {
             return ServiceResponse.failure("Invalid password", null, StatusCodes.UNAUTHORIZED);
           }
         }

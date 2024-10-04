@@ -49,7 +49,6 @@ userRegistry.registerPath({  // create user
   tags: ["User"],
   request: {
     query : z.object({
-      location : z.string(),
       role : z.enum(["USER" , "AGENT"]),
     }),
     body: {

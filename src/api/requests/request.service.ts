@@ -81,7 +81,7 @@ export class RequestService {
       const requests = await prisma.requests.findMany({
         include: {
           user: true
-        }
+          }
       });
       
       return ServiceResponse.success<IRequest[]>(

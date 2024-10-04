@@ -65,6 +65,10 @@ export class SmsTemplateService {
     try {
       const smsTemplate = await prisma.smsTemplates.findUnique({ 
         where: { id },
+        include : {
+             user : true 
+         }
+        
       });
       
       if (!smsTemplate) {
@@ -85,7 +89,11 @@ export class SmsTemplateService {
 
   async findAllSmsTemplates(): Promise<ServiceResponse<ISmsTemplate[] | null>> {
     try {
-      const smsTemplates = await prisma.smsTemplates.findMany();
+      const smsTemplates = await prisma.smsTemplates.findMany({
+         include : {
+            user : true 
+         }
+      });
       
       return ServiceResponse.success<ISmsTemplate[]>(
         "SMS templates retrieved successfully",
