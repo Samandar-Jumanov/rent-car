@@ -68,8 +68,8 @@ model Brand {
   user           User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   logo           String
   brendName      String
-  ownerNumber    String           @unique
-  address        String // city id 
+  ownerNumber    String 
+  cityId         String      
   password       String 
   carDelivery    CarDelivery      @default(TAKE_AWAY)
   topBrendId     String?
@@ -77,6 +77,10 @@ model Brand {
   topBrend       TopBrend?
   ratings        Int[]            @default([0])
   averageRating  Int              @default(0)
+  city           Cities          @relation(fields: [cityId], references: [id] , onDelete: Cascade , onUpdate: Cascade)
+
+// longtitue 
+// latitude    
 
   colloboratedCars CollaboratedCars[]
   
@@ -351,6 +355,7 @@ model Cities {
   region   Regions  @relation(fields: [regionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   users    User[]
   sessions Sessions[]
+  brands    Brand[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt  @default(now())

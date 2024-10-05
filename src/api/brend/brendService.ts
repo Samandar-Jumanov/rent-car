@@ -13,10 +13,14 @@ type QueryBrendResult = {
 
 
 export class BrendService {
-  async getBrends( location : string ): Promise<ServiceResponse<IBrend[] | null>> {
+  async getBrends( cityId : string  ): Promise<ServiceResponse<IBrend[] | null>> {
     try {
 
-      const brends = await prisma.brand.findMany();
+      const brends = await prisma.brand.findMany({
+          where : {
+              cityId : cityId
+          }
+      });
       
       
       return ServiceResponse.success<IBrend[] | null >("Brends found", brends );
@@ -82,7 +86,8 @@ export class BrendService {
                   }
              },
              reviews : true ,
-             colloboratedCars : true 
+             colloboratedCars : true ,
+             city : true 
         }
       });
       
@@ -101,7 +106,7 @@ export class BrendService {
     try {
       const brends = await prisma.brand.findMany({
         where: {
-          address: query.address ? { contains: query.address, mode: 'insensitive' } : undefined,
+          cityId: query.cityId ? { contains: query.cityId, mode: 'insensitive' } : undefined,
           payment: query.payment,
           carDelivery: query.carDelivery,
           cars: {

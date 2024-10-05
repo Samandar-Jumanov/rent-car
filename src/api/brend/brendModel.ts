@@ -1,4 +1,5 @@
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
+import { SimResetStatus } from "twilio/lib/rest/wireless/v1/sim";
 import { z } from "zod";
 
 extendZodWithOpenApi(z);
@@ -15,7 +16,7 @@ export interface IBrend {
   logo: string;
   brendName: string;
   ownerNumber: string;
-  address: string;
+  cityId : string;
   password: string;
   carDelivery : z.infer<typeof CarDelivery>
   payment: z.infer<typeof PaymentType>;
@@ -31,8 +32,8 @@ export const BrendSchema = z.object({
   logo: z.string(),
   brendName: z.string(),
   ownerNumber: z.string(),
-  address: z.string(),
   password: z.string(),
+  cityId : z.string(),
   isTopBrend: z.boolean().default(false),
   topBrendId: z.string().nullable(),
   payment: PaymentType,
@@ -48,8 +49,8 @@ export const GetBrendSchema = z.object({
 export const CreateBrendSchema = z.object({
   brendName: z.string(),
   ownerNumber: z.string(),
-  address: z.string(),
   password: z.string(),
+  cityId : z.string(),
   isTopBrend: z.boolean().default(false),
   payment: PaymentType.optional(),
 });
@@ -58,17 +59,17 @@ export const UpdateBrendSchema = z.object({
   logo: z.string().optional(),
   brendName: z.string().optional(),
   ownerNumber: z.string().optional(),
-  address: z.string().optional(),
   password: z.string().optional(),
   isTopBrend: z.boolean().optional(),
   topBrendId: z.string().nullable().optional(),
+  cityId : z.string().optional(),
   payment: PaymentType.optional(),
 }).refine(data => Object.values(data).some(value => value !== undefined), {
   message: "At least one field must be provided for update"
 });
 
 export const QueryBrendSchema = z.object({
-  address: z.string().optional(),
+  cityId: z.string().optional(),
   carBrend: z.string().optional(),
   mirrorType: MirrorType.optional(),
   fuelType: FuelType.optional(),
