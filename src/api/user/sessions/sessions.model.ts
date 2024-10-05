@@ -1,3 +1,4 @@
+import { ICity, IRegion } from "@/api/regions/regions.model";
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 import { z } from "zod";
 
@@ -7,7 +8,7 @@ extendZodWithOpenApi(z);
 export interface ISessions {
   id: string;
   agentId: string;
-  location: string;
+  location: ICity;
   isOwner: boolean;
   createdAt: Date;
   updatedAt: Date;

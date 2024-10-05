@@ -18,7 +18,8 @@ export class UserService {
           sessions: true,
           rentals: true,
           blockedByAdmin: true,
-          blockedByAgent: true
+          blockedByAgent: true,
+          city : true 
         }
       });
   
@@ -51,7 +52,9 @@ export class UserService {
 
   async findUser(id: string): Promise<ServiceResponse<IUser | null>> {
     try {
-      const user = await prisma.user.findUnique({ where: { id }  , include : {
+      const user = await prisma.user.findUnique(
+        { where: { id }  , 
+        include : {
           rentals : {
                include : {
                   car : {
@@ -59,9 +62,23 @@ export class UserService {
                           brand : true 
                       }
                   }
-               }
-          } 
-      }});
+               },
+          } ,
+          city : {
+              include :{
+                region : true 
+              }
+          },
+          blockedByAdmin : true ,
+          blockedByAgent : true ,
+          sessions : true ,
+           brends : true ,
+           favourites : true ,
+           requests : true ,
+           reviews : true,
+           colloboratedCars : true
+      },
+    });
       
       if (!user) {
         return ServiceResponse.failure("User not found", null, StatusCodes.NOT_FOUND);
@@ -288,7 +305,12 @@ export class UserService {
      const session = await prisma.sessions.findUnique({
         where : { id : sessionsId},
         include : {
-           user : true 
+           user : true ,
+           location : {
+              include : {
+                  region : true
+              }
+           } 
         }
      })
 
@@ -303,7 +325,7 @@ export class UserService {
         where : { id : sessionsId}
      })
 
-     return ServiceResponse.success("Session deleted succesfully", session , StatusCodes.OK );
+     return ServiceResponse.success<ISessions>("Session deleted succesfully", session , StatusCodes.OK );
 
   } catch (ex) {
     const errorMessage = `Error refreshing token: ${(ex as Error).message}`;

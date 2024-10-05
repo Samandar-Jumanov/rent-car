@@ -14,10 +14,10 @@ model User {
   surname          String?
   birthday         String?
   verificationCode String?
-  password         String ?
+  password         String?
   image            String?
-
-
+  cityId           String? 
+  city             Cities?  @relation(fields: [cityId], references: [id])
   isVerified       Boolean  @default(false)
   role             Role     @default(USER)
   createdAt        DateTime @default(now())
@@ -28,98 +28,84 @@ model User {
   favourites       Favorite[]
   reviews          UserReviews[]
   givenReviews     Reviews[]
-  templates         SmsTemplates[]
+  templates        SmsTemplates[]
   requests         Requests[]
   
-  // Users blocked by this admin
   blockedUsers     BlockedUsers[] @relation("AdminWhoBlocked")
-  // This user when blocked by an admin
   blockedByAdmin   BlockedUsers[] @relation("UserBlockedByAdmin")
   
-  // Users blocked by this agent
   agentBlocks      AgentBlock[]   @relation("AgentWhoBlocked")
-  // This user when blocked by an agent
   blockedByAgent   AgentBlock[]   @relation("UserBlockedByAgent")
 
-  //Agent history 
-  history      History[]
-
-  // Sessions 
-  sessions      Sessions[]
-
-  // colloborated rent cars 
+  history          History[]
+  sessions         Sessions[]
   colloboratedCars CollaboratedCars[]
 }
 
-model  UserReviews {
-     id   String @id @default(cuid())
-     review     String
-     rating     Int
-     userId    String
-     user     User @relation(fields: [userId], references: [id] , onDelete:  Cascade , onUpdate:  Cascade)
-     
-     createdAt  DateTime @default(now())
-     updatedAt  DateTime @updatedAt
-
+model UserReviews {
+  id        String   @id @default(cuid())
+  review    String
+  rating    Int
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model TopBrend {
   id        String   @id @default(cuid())
   userId    String
   brendId   String   @unique
-  brend     Brand    @relation(fields: [brendId], references: [id] , onDelete: Cascade , onUpdate:  Cascade)
+  brend     Brand    @relation(fields: [brendId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Brand {
-  id           String    @id @default(cuid())
-  userId       String
-  user         User      @relation(fields: [userId], references: [id] , onDelete:  Cascade , onUpdate:  Cascade)
-  logo         String
-  brendName    String
-  ownerNumber  String    @unique
-  address      String //  may be updated later 
-  password     String 
-  carDelivery  CarDelivery  @default(TAKE_AWAY)
-  topBrendId   String ?
-  payment      PaymentType  @default(CARD)
-  topBrend     TopBrend ?
-  ratings          Int[]     @default([0])
-  averageRating    Int @default(0)
-  // ISSUE : ALSO CARS AVERAGE RATING SHOULD BE CALCULATED 
+  id             String           @id @default(cuid())
+  userId         String
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  logo           String
+  brendName      String
+  ownerNumber    String           @unique
+  address        String // city id 
+  password       String 
+  carDelivery    CarDelivery      @default(TAKE_AWAY)
+  topBrendId     String?
+  payment        PaymentType      @default(CARD)
+  topBrend       TopBrend?
+  ratings        Int[]            @default([0])
+  averageRating  Int              @default(0)
 
-  // colloborated rent cars 
   colloboratedCars CollaboratedCars[]
   
-
-  cars         Car[]
-  discounts    Discount ?
-  reviews      Reviews[]
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  cars           Car[]
+  discounts      Discount?
+  reviews        Reviews[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 }
 
-
 model Car {
-  id               String   @id @default(cuid())
+  id               String     @id @default(cuid())
   brendId          String   
   modelId          String 
   colorId          String 
   carBrendId       String 
-  title            String   @default("title")
-  price            Decimal  @default(180.00)
-  isDiscounted     Boolean  @default(true)
+  title            String     @default("title")
+  price            Decimal    @default(180.00)
+  isDiscounted     Boolean    @default(true)
   discountedPrice  Int?
   images           String[]
-  status           CarStatus @default(FREE)
-  ratings          Int[]     @default([0])
-  averageRating    Int       @default(0)
+  status           CarStatus  @default(FREE)
+  ratings          Int[]      @default([0])
+  averageRating    Int        @default(0)
   
-  brand            Brand     @relation(fields: [brendId], references: [id] , onDelete:  Cascade , onUpdate:  Cascade )
-  model            Model   @relation(fields: [modelId], references: [id] ,  onDelete:  Cascade , onUpdate:  Cascade )
-  carColor         CarColor  @relation(fields: [colorId], references: [id] ,  onDelete:  Cascade , onUpdate:  Cascade )
-  carBrend         CarBrend  @relation(fields: [carBrendId], references: [id] ,  onDelete:  Cascade , onUpdate:  Cascade )
+  brand            Brand      @relation(fields: [brendId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  model            Model      @relation(fields: [modelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  carColor         CarColor   @relation(fields: [colorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  carBrend         CarBrend   @relation(fields: [carBrendId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   
   favourites       Favorite[]
   requirements     Requirements[]
@@ -132,8 +118,8 @@ model Car {
   @@index([brendId])
   @@index([modelId])
   @@index([colorId])
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
 }
 
 model Model {
@@ -171,126 +157,114 @@ model Banners {
   updatedAt    DateTime @updatedAt
 }
 
-
-
-
-model  Reviews {
-  id         String  @id @default(cuid())
-  carId      String ?
-  brandId    String ?
+model Reviews {
+  id         String   @id @default(cuid())
+  carId      String?
+  brandId    String?
   userId     String
   review     String
   rating     Int
-  car        Car ? @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  brand      Brand ? @relation(fields: [brandId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user       User  @relation(fields: [userId] , references: [id] , onDelete:  Cascade , onUpdate:  Cascade)
+  car        Car?     @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  brand      Brand?   @relation(fields: [brandId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
 
 model Feature {
-  id           String    @id @default(cuid())
-  carId  String ?
-  title String 
-  icon  String
-  car    Car   ?  @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
+  id     String  @id @default(cuid())
+  carId  String?
+  title  String 
+  icon   String
+  car    Car?    @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Requirements {
-  id  String   @id @default(cuid())
-  title  String  
+  id       String   @id @default(cuid())
+  title    String  
   value    String
-  icon  String
+  icon     String
 
-  carId  String ?
-  car    Car   ?  @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  rentalId   String ?
-  rental    Rental ?  @relation(fields: [rentalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  carId    String?
+  car      Car?     @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  rentalId String?
+  rental   Rental?  @relation(fields: [rentalId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Rental {
-  id              String   @id @default(cuid())
-  userId          String
-  carId           String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  car             Car      @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                String        @id @default(cuid())
+  userId            String
+  carId             String
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  car               Car           @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  rentalStart     String
-  rentalEnd       String
-  pickupTime      String
-  returnTime      String
-  travelRegion    String
+  rentalStart       String
+  rentalEnd         String
+  pickupTime        String
+  returnTime        String
+  travelRegion      String
   estimatedDistance String
-  userImage       String  @default("image")
+  userImage         String        @default("image")
   
+  username          String 
+  surname           String
+  usersFatherName   String
+  driverLicence     String 
+  passport          String
+  address           String 
 
-  //user info
-  username String 
-  surname  String
+  passportImages      String[]
+  driverLicenceImages String[]
+  requirements        Requirements[]
 
-  usersFatherName String
-  driverLicence String 
-  passport  String
-  address   String 
+  status            RentalType    @default(NEW)
 
-  // needed images 
-  passportImages String[]
-  driverLicenceImages  String[]
-  requirements    Requirements[]
-
-
-  status  RentalType  @default(NEW)
-
-  isActive        Boolean  @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  isActive          Boolean       @default(false)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 }
-
 
 model Favorite {
   id     String @id @default(cuid())
-  user   User   @relation(fields: [userId], references: [id] , onDelete: Cascade , onUpdate:  Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String
-  car    Car    @relation(fields: [carId], references: [id] , onDelete: Cascade , onUpdate:  Cascade )
+  car    Car    @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   carId  String
 
   @@unique([userId, carId])
 }
 
-
 model Discount {
-  id        String   @id @default(cuid())
-  carId     String?    @unique
-  brendId   String?    @unique
+  id                 String   @id @default(cuid())
+  carId              String?  @unique
+  brendId            String?  @unique
 
-  car       Car ?    @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate : Cascade)
-  brend     Brand ?     @relation(fields: [brendId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  car                Car?     @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  brend              Brand?   @relation(fields: [brendId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  startDate    DateTime 
-  endDate      DateTime 
+  startDate          DateTime 
+  endDate            DateTime 
   discountPercentage Int
-  discountId    String  @unique
+  discountId         String   @unique
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
-
 model BlockedUsers {
-  id            String  @id @default(cuid())
+  id            String   @id @default(cuid())
   adminId       String
   blockedUserId String   @unique
 
-  admin       User   @relation("AdminWhoBlocked", fields: [adminId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  blockedUser User   @relation("UserBlockedByAdmin", fields: [blockedUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  admin         User     @relation("AdminWhoBlocked", fields: [adminId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  blockedUser   User     @relation("UserBlockedByAdmin", fields: [blockedUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model AgentBlock {
@@ -298,101 +272,89 @@ model AgentBlock {
   agentId   String
   userId    String
 
-  agent     User   @relation("AgentWhoBlocked", fields: [agentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user      User   @relation("UserBlockedByAgent", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  agent     User     @relation("AgentWhoBlocked", fields: [agentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user      User     @relation("UserBlockedByAgent", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
 }
-
-// What happans to blocked users and admin blocked users 
-
 
 model History {
-   id     String @id @default(cuid())
-   agentId  String
-   agent   User  @relation(fields: [agentId ] , references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id       String   @id @default(cuid())
+  agentId  String
+  agent    User     @relation(fields: [agentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
 }
-
-// How does history work , for agents 
-// for now just write each action ( logged in , created a car , ....)
-
 
 model Sessions {
-     id  String  @id @default(cuid())
-     agentId     String
-     location     String
-     isOwner    Boolean
-     user       User    @relation(fields: [agentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id       String   @id @default(cuid())
+  agentId  String
+  cityId   String
+  location Cities   @relation(fields: [cityId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  isOwner  Boolean
+  user     User     @relation(fields: [agentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
      
-     // Who is the one that manages session 
-     // for now just write isOwner 
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-
 model CollaboratedCars {
-  id     String @id @default(cuid())
-  agentId  String
+  id      String   @id @default(cuid())
+  agentId String
   brandId String
 
-  user    User   @relation(fields: [agentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  brand    Brand   @relation(fields: [brandId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user    User     @relation(fields: [agentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  brand   Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model SmsTemplates {
-    id String  @id @default(cuid())
-    title String  @unique
-    userId   String
-    user    User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    content String
-
-     createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    
-}
-
-
-model Requests { 
-  id      String @id @default(cuid())
-  type     RequestType @default(DEMAND)
-  userId   String
-  content  String
-
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id      String   @id @default(cuid())
+  title   String   @unique
+  userId  String
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  content String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+model Requests { 
+  id      String      @id @default(cuid())
+  type    RequestType @default(DEMAND)
+  userId  String
+  content String
+
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
 
 model Regions {
-    id  String @id @default(cuid())
-    name  String  @unique
-    cities    Cities[]
+  id        String    @id @default(cuid())
+  name      String    @unique
+  cities    Cities[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Cities {
-     id String @id @default(cuid())
-     name  String  @unique
-     regionId String
+  id       String   @id @default(cuid())
+  name     String   @unique
+  regionId String
+  region   Regions  @relation(fields: [regionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  users    User[]
+  sessions Sessions[]
 
-     region    Regions   @relation(fields: [regionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt  @default(now())
 }
-
 
 enum Role {
   USER
@@ -400,32 +362,29 @@ enum Role {
   SUPER_ADMIN
 }
 
-
 enum PaymentType {
-    CARD 
-    TERMINAL
-    CASH
+  CARD 
+  TERMINAL
+  CASH
 }
 
-
-enum  CarDelivery {
-    TAKE_AWAY
-    DELIVER
+enum CarDelivery {
+  TAKE_AWAY
+  DELIVER
 }
-
 
 enum CarStatus {
-      FREE
-      RENTED
+  FREE
+  RENTED
 }
 
 enum RentalType {
-     NEW
-     ACCEPTED 
-     DECLINED
+  NEW
+  ACCEPTED 
+  DECLINED
 }
 
 enum RequestType {
-   DEMAND
-   PROPOSAL 
+  DEMAND
+  PROPOSAL 
 }

@@ -51,6 +51,7 @@ export const VerifyUserSchema = z.object({
 export const UpdateUserSchema = z.object({
     name: z.string().min(1).max(100).optional(),
     surname: z.string().min(1).max(100).optional(),
+    cityId : z.string().optional(),
     birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   }).refine(data => Object.values(data).some(value => value !== undefined), {
     message: "At least one field must be provided for update"

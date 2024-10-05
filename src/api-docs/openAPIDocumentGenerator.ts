@@ -22,6 +22,7 @@ export function generateOpenAPIDocument() {
   const registry = new OpenAPIRegistry([
     healthCheckRegistry,
     userRegistry,
+    regionRegistry,
     brendRegistry,
     discountRegistry,
     featureRegistry,
@@ -33,8 +34,7 @@ export function generateOpenAPIDocument() {
     carBrendRegistry,
     carColorRegistry,
     smsTemplateRegistry,
-    requestRegistry,
-    regionRegistry
+    requestRegistry
   ]);
 
   // Register the security scheme
