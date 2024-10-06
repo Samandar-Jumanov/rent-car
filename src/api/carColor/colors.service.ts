@@ -25,6 +25,7 @@ export class CarColorService {
         },
       });
       
+
       return ServiceResponse.success<ICarColor>("Car color created successfully", carColor);
     } catch (ex) {
       const errorMessage = `Error creating car color: ${(ex as Error).message}`;
@@ -39,13 +40,12 @@ export class CarColorService {
 
   async deleteCarColor(id: string): Promise<ServiceResponse<boolean>> {
     try {
-
-      
       const existing = await prisma.carColor.findUnique({
         where : {
             id
         }
       })
+      
       
       if(!existing) {
            return ServiceResponse.failure("Color not found", false , StatusCodes.NOT_FOUND);

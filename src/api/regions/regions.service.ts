@@ -57,7 +57,7 @@ export class RegionService {
     }
   }
 
-  async findRegion(id: string): Promise<ServiceResponse<IRegion | null>> {
+  async findRegion(id: string) : Promise<ServiceResponse<IRegion | null>> {
     try {
       const region = await prisma.regions.findUnique({
         where: { id },
@@ -80,7 +80,7 @@ export class RegionService {
     }
   }
 
-  async findAllRegions(currentPage : number , pageSize : number ): Promise<ServiceResponse<{ regions: IRegion[], totalCount: number } | null>> {
+  async findAllRegions(currentPage : number  , pageSize : number  ): Promise<ServiceResponse<{ regions: IRegion[], totalCount: number } | null>> {
     try {
       const skip = (currentPage - 1) * pageSize;
 
@@ -112,6 +112,30 @@ export class RegionService {
       );
     }
   }
-}
+
+  async getAllRegions ( )  : Promise<ServiceResponse<IRegion[] | null>>  {  
+    try {
+      const regions = await prisma.regions.findMany({
+        include: {
+          cities: true
+        },
+      });
+      return ServiceResponse.success(
+        "Regions found",
+         regions
+      );
+      
+    } catch (ex) {
+      const errorMessage = `Error finding regions: ${(ex as Error).message}`;
+      logger.error(errorMessage);
+      return ServiceResponse.success(
+        "Regions found",
+         null
+      );
+    }
+  }
+  
+ }
+
 
 export const  regionService = new RegionService()

@@ -7,6 +7,7 @@ export interface IRegion {
   id: string;
   name: string;
   cities: ICity[];
+  
   createdAt: Date;
   updatedAt: Date;
 }

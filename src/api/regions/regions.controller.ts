@@ -5,6 +5,11 @@ import { regionService } from "./regions.service";
 
 
 class RegionController {
+  public getAllRegions: RequestHandler = async (_req: Request, res: Response) => {
+    const serviceResponse = await regionService.getAllRegions();
+    return handleServiceResponse(serviceResponse, res);
+  };
+
   public getRegions: RequestHandler = async (req: Request, res: Response) => {
 
     const currentPage = req.query.currentPage;
@@ -30,6 +35,8 @@ class RegionController {
     const serviceResponse = await regionService.deleteRegion(id);
     return handleServiceResponse(serviceResponse, res);
   };
+
+  
 }
 
 export const regionController = new RegionController();

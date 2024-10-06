@@ -28,7 +28,23 @@ regionRegistry.registerPath({
   responses: createApiResponse(z.array(RegionSchema), "Success"),
 });
 
+
 regionRouter.get("/", regionController.getRegions);
+regionRegistry.registerPath({
+  method: "get",
+  path: "/regions/all",
+  request : {
+    query: z.object({
+      currentPage: z.number().int().positive(),
+      pageSize: z.number().int().positive(),
+    })
+  },
+  tags: ["Region"],
+  responses: createApiResponse(z.array(RegionSchema), "Success"),
+});
+
+regionRouter.get("/all", regionController.getAllRegions);
+
 
 regionRegistry.registerPath({
   method: "get",
