@@ -15,14 +15,37 @@ type QueryBrendResult = {
 export class BrendService {
   async getBrends( cityId : string  ): Promise<ServiceResponse<IBrend[] | null>> {
     try {
-
       const brends = await prisma.brand.findMany({
           where : {
               cityId : cityId
           }
       });
-      
-      
+      return ServiceResponse.success<IBrend[] | null >("Brends found", brends );
+    } catch (ex) {
+      const errorMessage = `Error finding all users: ${(ex as Error).message}`;
+      logger.error(errorMessage);
+      return ServiceResponse.failure(
+        "An error occurred while retrieving users.",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getAllBrends ( ) : Promise<ServiceResponse<IBrend[] | null>> {
+    try {
+      const brends = await prisma.brand.findMany({
+          include : {
+            city : {
+                include : {
+                    region : true 
+                }
+            } ,
+            cars : true ,
+            reviews : true ,
+            user : true
+          }
+      });
       return ServiceResponse.success<IBrend[] | null >("Brends found", brends );
     } catch (ex) {
       const errorMessage = `Error finding all users: ${(ex as Error).message}`;
@@ -245,7 +268,6 @@ export class BrendService {
 
       const hashedPassword = await bcrypt.hash(data.password , 10);
       data.password = hashedPassword
-
       const newBrand = await prisma.brand.create({
         data: {
           ...data,

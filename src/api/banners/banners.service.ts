@@ -8,7 +8,11 @@ import { IBanners, CreateBannersRequest, UpdateBannersRequest } from "./banners.
 export class BannersService {
   async findAll(): Promise<ServiceResponse<IBanners[] | null>> {
     try {
-      const banners = await prisma.banners.findMany();
+      const banners = await prisma.banners.findMany({
+         include : {
+           car : true 
+         }
+      });
       return ServiceResponse.success<IBanners[]>("Banners found", banners as IBanners[]);
     } catch (ex) {
       const errorMessage = `Error finding all banners: ${(ex as Error).message}`;

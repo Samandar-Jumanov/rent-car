@@ -48,7 +48,7 @@ export class ModelService {
             }
           })
     
-          if(existing) {
+          if(!existing) {
                return ServiceResponse.failure("Model not found", false , StatusCodes.NOT_FOUND);
            }
 

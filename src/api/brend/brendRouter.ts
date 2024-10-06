@@ -29,6 +29,16 @@ brendRegistry.registerPath({
 });
 brendRouter.get("/", brendController.getBrends);
 
+
+// GET /all/brends
+brendRegistry.registerPath({
+  method: "get",
+  path: "/brends/all",
+  tags: ["Brend"],
+  responses: createApiResponse(z.array(BrendSchema), "Success"),
+});
+brendRouter.get("/all", brendController.getAllBrends);
+
 // GET /brends/top
 brendRegistry.registerPath({
   method: "get",

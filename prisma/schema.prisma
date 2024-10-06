@@ -69,7 +69,7 @@ model Brand {
   logo           String
   brendName      String
   ownerNumber    String 
-  cityId         String      
+  cityId         String  
   password       String 
   carDelivery    CarDelivery      @default(TAKE_AWAY)
   topBrendId     String?

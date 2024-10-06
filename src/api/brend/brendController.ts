@@ -9,7 +9,7 @@ class BrendController {
 
   public getBrends: RequestHandler = async (req: Request, res: Response) => {
     const location = req.query.locaion
-    const serviceResponse = await brendService.getBrends(String(location)); // location needed 
+    const serviceResponse = await brendService.getBrends(String(location));
     return handleServiceResponse(serviceResponse, res);
   };
 
@@ -19,7 +19,11 @@ class BrendController {
     const logo = req.file
     const userId = req.user?.userId
 
-    const serviceResponse = await brendService.createBrand(body , String(userId) , String(logo?.path)); // location needed 
+    const serviceResponse = await brendService.createBrand(body , String(userId) , String(logo?.path));
+    return handleServiceResponse(serviceResponse, res);
+  };
+  public getAllBrends: RequestHandler = async (req: Request, res: Response) => {
+    const serviceResponse = await brendService.getAllBrends()
     return handleServiceResponse(serviceResponse, res);
   };
 
@@ -128,6 +132,7 @@ public updateBrand  : RequestHandler = async (req: Request, res: Response) => {
   const serviceResponse = await brendService.updateBrend(brandId ,  body)
   return handleServiceResponse(serviceResponse, res);
 }
+
 
 public deleteBrand   : RequestHandler = async (req: Request, res: Response) => {
   const brandId = req.params.id
