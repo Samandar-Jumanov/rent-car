@@ -5,8 +5,12 @@ import { CreateFeatureRequest, UpdateFeatureRequest } from "./feature.model";
 import { logger } from "@/server";
 
 class FeatureController {
-  public getFeatures: RequestHandler = async (_req: Request, res: Response) => {
-    const serviceResponse = await featureService.findAll();
+  public getFeatures: RequestHandler = async (req: Request, res: Response) => {
+
+    const currentPage = req.query.currentPage;
+    const pageSize = req.query.pageSize
+
+    const serviceResponse = await featureService.findAll(Number(currentPage) , Number(pageSize));
     return handleServiceResponse(serviceResponse, res);
   };
 

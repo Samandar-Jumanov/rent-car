@@ -18,6 +18,12 @@ regionRegistry.register("City", CitySchema);
 regionRegistry.registerPath({
   method: "get",
   path: "/regions",
+  request : {
+    query: z.object({
+      currentPage: z.number().int().positive(),
+      pageSize: z.number().int().positive(),
+    })
+  },
   tags: ["Region"],
   responses: createApiResponse(z.array(RegionSchema), "Success"),
 });

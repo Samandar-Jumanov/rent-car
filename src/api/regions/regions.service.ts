@@ -80,15 +80,27 @@ export class RegionService {
     }
   }
 
-  async findAllRegions(): Promise<ServiceResponse<IRegion[] | null>> {
+  async findAllRegions(currentPage : number , pageSize : number ): Promise<ServiceResponse<{ regions: IRegion[], totalCount: number } | null>> {
     try {
-      const regions = await prisma.regions.findMany({
-        include: { cities: true }
-      });
+      const skip = (currentPage - 1) * pageSize;
 
-      return ServiceResponse.success<IRegion[]>(
-        "Regions retrieved successfully",
-        regions
+      const [regions, totalCount] = await prisma.$transaction([
+        prisma.regions.findMany({
+          skip,
+          take: pageSize,
+          include: {
+               cities : true 
+            },
+        }),
+        prisma.regions.count()
+      ]);
+
+      return ServiceResponse.success<{ regions : IRegion[], totalCount: number }>(
+        "Models found",
+        { 
+          regions: regions, 
+          totalCount 
+        }
       );
     } catch (ex) {
       const errorMessage = `Error finding regions: ${(ex as Error).message}`;

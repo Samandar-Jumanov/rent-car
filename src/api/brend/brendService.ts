@@ -32,21 +32,40 @@ export class BrendService {
     }
   }
 
-  async getAllBrends ( ) : Promise<ServiceResponse<IBrend[] | null>> {
+  async getAllBrends (currentPage : number , pageSize : number  ) :Promise<ServiceResponse<{ brands: IBrend[], totalCount: number } | null>> {
     try {
-      const brends = await prisma.brand.findMany({
-          include : {
-            city : {
-                include : {
-                    region : true 
-                }
-            } ,
-            cars : true ,
-            reviews : true ,
-            user : true
+
+      const skip = (currentPage - 1) * pageSize;
+
+      const [brends, totalCount] = await prisma.$transaction([
+        prisma.brand.findMany({
+          skip,
+          take: pageSize,
+          include: {
+            city: {
+              include : {
+                  region : true 
+              }
+            },
+            cars: true,
+            reviews: true,
+          },
+          orderBy: {
+            createdAt: 'desc' 
           }
-      });
-      return ServiceResponse.success<IBrend[] | null >("Brends found", brends );
+        }),
+
+        prisma.brand.count()
+      ]);
+
+      return ServiceResponse.success<{ brands: IBrend[], totalCount: number }>(
+        "Brands found",
+        { 
+          brands: brends, 
+          totalCount 
+        }
+      );
+
     } catch (ex) {
       const errorMessage = `Error finding all users: ${(ex as Error).message}`;
       logger.error(errorMessage);

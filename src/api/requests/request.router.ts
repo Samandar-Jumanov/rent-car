@@ -16,6 +16,12 @@ requestRegistry.register("Request", RequestSchema);
 requestRegistry.registerPath({
   method: "get",
   path: "/requests",
+  request : {
+    query: z.object({
+      currentPage: z.number().int().positive(),
+      pageSize: z.number().int().positive(),
+    })
+  },
   tags: ["Request"],
   responses: createApiResponse(z.array(RequestSchema), "Success"),
 });

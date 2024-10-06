@@ -16,6 +16,12 @@ smsTemplateRegistry.register("SmsTemplate", SmsTemplateSchema);
 smsTemplateRegistry.registerPath({
   method: "get",
   path: "/sms-templates",
+  request : {
+    query: z.object({
+      currentPage: z.number().int().positive(),
+      pageSize: z.number().int().positive(),
+    })
+  },
   tags: ["SmsTemplate"],
   responses: createApiResponse(z.array(SmsTemplateSchema), "Success"),
 });

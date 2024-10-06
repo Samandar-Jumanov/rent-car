@@ -4,8 +4,11 @@ import { handleServiceResponse } from "@/common/utils/httpHandlers";
 import { CreateCarColorRequest } from "./colors.model";
 
 class CarColorController {
-  public getCarColors: RequestHandler = async (_req: Request, res: Response) => {
-    const serviceResponse = await carColorService.findAllCarColors();
+  public getCarColors: RequestHandler = async (req: Request, res: Response) => {
+    const currentPage = req.query.currentPage;
+    const pageSize = req.query.pageSize
+
+    const serviceResponse = await carColorService.findAllCarColors(Number(currentPage) , Number(pageSize));
     return handleServiceResponse(serviceResponse, res);
   };
 

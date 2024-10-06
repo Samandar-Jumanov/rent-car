@@ -16,19 +16,22 @@ export const userRouter: Router = express.Router();
 
 userRegistry.register("User", UserSchema); // register
 
-userRegistry.registerPath({ // get all 
+userRegistry.registerPath({
   method: "get",
   path: "/users",
-  request : {
-                query : z.object({
-                  page : z.number(),
-                  role : z.enum(["USER" , "AGENT"]),
-                  pageSize : z.number(),
-                }),
-            
+  request: {
+    query: z.object({
+      currentPage: z.number().int().positive(),
+      pageSize: z.number().int().positive(),
+      role: z.enum(["USER", "AGENT"]),
+    }),
   },
   tags: ["User"],
-  responses: createApiResponse(z.array(UserSchema), "Success"),
+  responses: createApiResponse(z.object({
+    activeUsers: z.array(UserSchema),
+    blockedUsers: z.array(UserSchema),
+    totalCount: z.number(),
+  }), "Success"),
 });
 
 userRouter.get("/", userController.getUsers);

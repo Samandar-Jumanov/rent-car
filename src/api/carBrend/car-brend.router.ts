@@ -16,6 +16,12 @@ carBrendRegistry.register("CarBrend", CarBrendSchema);
 carBrendRegistry.registerPath({
   method: "get",
   path: "/car-brands",
+  request : {
+              query : z.object({
+                  pageSize : z.number(),
+                  currentPage : z.number(),
+              })
+  },
   tags: ["CarBrend"],
   responses: createApiResponse(z.array(CarBrendSchema), "Success"),
 });

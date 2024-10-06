@@ -4,8 +4,10 @@ import { handleServiceResponse } from "@/common/utils/httpHandlers";
 import { CreateBannersRequest, UpdateBannersRequest } from "./banners.model";
 
 class BannersController {
-  public getBanners: RequestHandler = async (_req: Request, res: Response) => {
-    const serviceResponse = await bannersService.findAll();
+  public getBanners: RequestHandler = async (req: Request, res: Response) => {
+    const currentPage = req.query.currentPage;
+    const pageSize = req.query.pageSize
+    const serviceResponse = await bannersService.findAll(Number(currentPage), Number(pageSize));
     return handleServiceResponse(serviceResponse, res);
   };
 

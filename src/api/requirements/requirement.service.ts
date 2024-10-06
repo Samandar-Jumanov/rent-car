@@ -5,10 +5,28 @@ import prisma from "@/common/db/prisma";
 import { IRequirements, CreateRequirementsRequest, UpdateRequirementsRequest, ApplyRequirement } from "./requirement.model";
 
 export class RequirementsService {
-  async findAll(): Promise<ServiceResponse<IRequirements[] | null>> {
+  async findAll(currentPage : number , pageSize : number ): Promise<ServiceResponse<{ requirements: IRequirements[], totalCount: number } | null>>{
     try {
-      const requirements = await prisma.requirements.findMany();
-      return ServiceResponse.success<IRequirements[]>("Requirements found", requirements as IRequirements[]);
+      const skip = (currentPage - 1) * pageSize;
+
+      const [requirements, totalCount] = await prisma.$transaction([
+        prisma.requirements.findMany({
+          skip,
+          take: pageSize,
+          include: {
+               car : true 
+            },
+        }),
+        prisma.requirements.count()
+      ]);
+
+      return ServiceResponse.success<{ requirements : IRequirements[], totalCount: number }>(
+        "Models found",
+        { 
+          requirements, 
+          totalCount 
+        }
+      );
     } catch (ex) {
       const errorMessage = `Error finding all requirements: ${(ex as Error).message}`;
       logger.error(errorMessage);

@@ -23,7 +23,9 @@ class BrendController {
     return handleServiceResponse(serviceResponse, res);
   };
   public getAllBrends: RequestHandler = async (req: Request, res: Response) => {
-    const serviceResponse = await brendService.getAllBrends()
+    const currentPage = req.query.currentPage
+    const pageSize = req.query.pageSize
+    const serviceResponse = await brendService.getAllBrends(Number(currentPage) , Number(pageSize))
     return handleServiceResponse(serviceResponse, res);
   };
 

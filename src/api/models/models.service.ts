@@ -90,17 +90,28 @@ export class ModelService {
     }
   }
 
-  async findAllModels(): Promise<ServiceResponse<IModel[] | null>> {
+  async findAllModels( currentPage : number , pageSize : number ): Promise<ServiceResponse<{ models: IModel[], totalCount: number } | null>>{
     try {
-      const models = await prisma.model.findMany({
-        include: {
-          cars: true
+      const skip = (currentPage - 1) * pageSize;
+
+      const [models, totalCount] = await prisma.$transaction([
+        prisma.model.findMany({
+          skip,
+          take: pageSize,
+          include: {
+               cars : true 
+            },
+        }),
+
+        prisma.model.count()
+      ]);
+
+      return ServiceResponse.success<{ models: IModel[], totalCount: number }>(
+        "Models found",
+        { 
+          models: models, 
+          totalCount 
         }
-      });
-      
-      return ServiceResponse.success<IModel[]>(
-        "Models retrieved successfully",
-        models
       );
     } catch (ex) {
       const errorMessage = `Error finding models: ${(ex as Error).message}`;

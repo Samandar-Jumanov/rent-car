@@ -16,6 +16,12 @@ modelRegistry.register("Model", ModelSchema);
 modelRegistry.registerPath({
   method: "get",
   path: "/models",
+  request : {
+    query: z.object({
+      currentPage: z.number().int().positive(),
+      pageSize: z.number().int().positive(),
+    })
+  },
   tags: ["Model"],
   responses: createApiResponse(z.array(ModelSchema), "Success"),
 });

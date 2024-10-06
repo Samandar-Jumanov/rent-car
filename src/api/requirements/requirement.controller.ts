@@ -4,8 +4,10 @@ import { handleServiceResponse } from "@/common/utils/httpHandlers";
 import { CreateRequirementsRequest, UpdateRequirementsRequest } from "./requirement.model";
 
 class RequirementsController {
-  public getRequirements: RequestHandler = async (_req: Request, res: Response) => {
-    const serviceResponse = await requirementsService.findAll();
+  public getRequirements: RequestHandler = async (req: Request, res: Response) => {
+    const currentPage = req.query.currentPage;
+    const pageSize = req.query.pageSize
+    const serviceResponse = await requirementsService.findAll(Number(currentPage) , Number(pageSize));
     return handleServiceResponse(serviceResponse, res);
   };
 

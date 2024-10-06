@@ -16,6 +16,12 @@ carColorRegistry.register("CarColor", CarColorSchema);
 carColorRegistry.registerPath({
   method: "get",
   path: "/car-colors",
+  request : {
+    query : z.object({
+        pageSize : z.number(),
+        currentPage : z.number(),
+    })
+},
   tags: ["CarColor"],
   responses: createApiResponse(z.array(CarColorSchema), "Success"),
 });

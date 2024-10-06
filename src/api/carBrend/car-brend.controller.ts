@@ -4,8 +4,10 @@ import { handleServiceResponse } from "@/common/utils/httpHandlers";
 import { CreateCarBrendRequest } from "./car-brend.model";
 
 class CarBrendController {
-  public getCarBrends: RequestHandler = async (_req: Request, res: Response) => {
-    const serviceResponse = await carBrendService.findAllCarBrends();
+  public getCarBrends: RequestHandler = async (req: Request, res: Response) => {
+    const currentPage = req.query.currentPage;
+    const pageSize = req.query.pageSize
+    const serviceResponse = await carBrendService.findAllCarBrends(Number(currentPage) , Number(pageSize));
     return handleServiceResponse(serviceResponse, res);
   };
 

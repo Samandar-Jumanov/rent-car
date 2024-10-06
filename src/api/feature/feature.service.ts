@@ -6,10 +6,29 @@ import prisma from "@/common/db/prisma";
 import { IFeature, CreateFeatureRequest, UpdateFeatureRequest, ApplyFeature } from "./feature.model";
 
 export class FeatureService {
-  async findAll(): Promise<ServiceResponse<IFeature[] | null>> {
+  async findAll( currentPage : number , pageSize : number ) : Promise<ServiceResponse<{ features: IFeature[], totalCount: number } | null>> {
     try {
-      const features = await prisma.feature.findMany();
-      return ServiceResponse.success<IFeature[]>("Features found", features as IFeature[]);
+      const skip = (currentPage - 1) * pageSize;
+
+      const [features, totalCount] = await prisma.$transaction([
+        prisma.feature.findMany({
+          skip,
+          take: pageSize,
+          include: {
+             car : true
+            },
+        }),
+
+        prisma.feature.count()
+      ]);
+
+      return ServiceResponse.success<{ features: IFeature[], totalCount: number }>(
+        "Features found",
+        { 
+          features: features, 
+          totalCount 
+        }
+      );
     } catch (ex) {
       const errorMessage = `Error finding all features: ${(ex as Error).message}`;
       logger.error(errorMessage);
@@ -55,6 +74,7 @@ export class FeatureService {
     }
   }
 
+  
   async updateFeature(id: string, data: UpdateFeatureRequest): Promise<ServiceResponse<IFeature | null>> {
     try {
       const feature = await prisma.feature.update({

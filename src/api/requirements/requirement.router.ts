@@ -15,6 +15,12 @@ requirementsRegistry.register("Requirements", RequirementsSchema);
 requirementsRegistry.registerPath({
   method: "get",
   path: "/requirements",
+  request : {
+    query: z.object({
+      currentPage: z.number().int().positive(),
+      pageSize: z.number().int().positive(),
+    })
+  },
   tags: ["Requirements"],
   responses: createApiResponse(z.array(RequirementsSchema), "Success"),
 });

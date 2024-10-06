@@ -87,18 +87,30 @@ export class SmsTemplateService {
     }
   }
 
-  async findAllSmsTemplates(): Promise<ServiceResponse<ISmsTemplate[] | null>> {
+  async findAllSmsTemplates( currentPage : number , pageSize : number ): Promise<ServiceResponse<{ smsTemplates: ISmsTemplate[], totalCount: number } | null>> {
     try {
-      const smsTemplates = await prisma.smsTemplates.findMany({
-         include : {
-            user : true 
-         }
-      });
-      
-      return ServiceResponse.success<ISmsTemplate[]>(
-        "SMS templates retrieved successfully",
-        smsTemplates
+      const skip = (currentPage - 1) * pageSize;
+
+      const [smsTemplates, totalCount] = await prisma.$transaction([
+        prisma.smsTemplates.findMany({
+          skip,
+          take: pageSize,
+          include: {
+               user : true 
+            },
+        }),
+
+        prisma.smsTemplates.count()
+      ]);
+
+      return ServiceResponse.success<{ smsTemplates: ISmsTemplate[], totalCount: number }>(
+        "Sms templates  found",
+        { 
+          smsTemplates: smsTemplates, 
+          totalCount 
+        }
       );
+    
     } catch (ex) {
       const errorMessage = `Error finding SMS templates: ${(ex as Error).message}`;
       logger.error(errorMessage);

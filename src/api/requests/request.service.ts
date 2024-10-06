@@ -76,18 +76,30 @@ export class RequestService {
     }
   }
 
-  async findAllRequests(): Promise<ServiceResponse<IRequest[] | null>> {
+  async findAllRequests(currentPage : number , pageSize : number ): Promise<ServiceResponse<{ requests: IRequest[], totalCount: number } | null>> {
     try {
-      const requests = await prisma.requests.findMany({
-        include: {
-          user: true
-          }
-      });
-      
-      return ServiceResponse.success<IRequest[]>(
-        "Requests retrieved successfully",
-        requests as IRequest[]
+      const skip = (currentPage - 1) * pageSize;
+
+      const [requests, totalCount] = await prisma.$transaction([
+        prisma.requests.findMany({
+          skip,
+          take: pageSize,
+          include: {
+               user : true 
+            },
+        }),
+
+        prisma.requests.count()
+      ]);
+
+      return ServiceResponse.success<{ requests: IRequest[], totalCount: number }>(
+        "Models found",
+        { 
+          requests, 
+          totalCount 
+        }
       );
+    
     } catch (ex) {
       const errorMessage = `Error finding requests: ${(ex as Error).message}`;
       logger.error(errorMessage);

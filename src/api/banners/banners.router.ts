@@ -17,6 +17,12 @@ bannersRegistry.registerPath({
   method: "get",
   path: "/banners",
   tags: ["Banners"],
+  request : {
+    query: z.object({
+      currentPage: z.number().int().positive(),
+      pageSize: z.number().int().positive(),
+    })
+  },
   responses: createApiResponse(z.array(BannersSchema), "Success"),
 });
 

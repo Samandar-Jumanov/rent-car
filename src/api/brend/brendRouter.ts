@@ -34,6 +34,12 @@ brendRouter.get("/", brendController.getBrends);
 brendRegistry.registerPath({
   method: "get",
   path: "/brends/all",
+  request : {
+      query : z.object({
+              currentPage : z.number(),
+              pageSize : z.number()
+      })
+  },
   tags: ["Brend"],
   responses: createApiResponse(z.array(BrendSchema), "Success"),
 });

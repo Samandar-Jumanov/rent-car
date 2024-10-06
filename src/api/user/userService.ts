@@ -10,8 +10,35 @@ import { ISessions } from "./sessions/sessions.model";
 import bcrypt from "bcrypt"
 
 export class UserService {
-  async findAll(): Promise<ServiceResponse<{ blockedUsers: IUser[], activeUsers: IUser[] } | null>> {
+  async findAll(currentPage: number, pageSize: number): Promise<ServiceResponse<{ blockedUsers: IUser[], activeUsers: IUser[], totalCount: number, activeCount: number, blockedCount: number } | null>> {
     try {
+      if (!Number.isInteger(currentPage) || currentPage < 1 || !Number.isInteger(pageSize) || pageSize < 1) {
+        return ServiceResponse.failure(
+          "Invalid page number or page size. Both must be positive integers.",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
+  
+      const skip = (currentPage - 1) * pageSize;
+  
+      // Get total counts
+      const [totalCount, blockedCount] = await Promise.all([
+        prisma.user.count({ where: { role: "AGENT" } }),
+        prisma.user.count({
+          where: {
+            role: "AGENT",
+            OR: [
+              { blockedByAdmin: { some: {} } },
+              { blockedByAgent: { some: {} } }
+            ]
+          }
+        })
+      ]);
+  
+      const activeCount = totalCount - blockedCount;
+  
+      // Fetch all users for the current page
       const users = await prisma.user.findMany({
         where: { role: "AGENT" },
         include: {
@@ -19,8 +46,11 @@ export class UserService {
           rentals: true,
           blockedByAdmin: true,
           blockedByAgent: true,
-          city : true 
-        }
+          city: true
+        },
+        skip: skip,
+        take: pageSize,
+        orderBy: { createdAt: 'desc' } // Assuming you want the most recent users first
       });
   
       const blockedUsers: IUser[] = [];
@@ -35,9 +65,9 @@ export class UserService {
         }
       });
   
-      return ServiceResponse.success<{ blockedUsers: IUser[], activeUsers: IUser[] }>(
+      return ServiceResponse.success<{ blockedUsers: IUser[], activeUsers: IUser[], totalCount: number, activeCount: number, blockedCount: number }>(
         "Users found",
-        { blockedUsers, activeUsers }
+        { blockedUsers, activeUsers, totalCount, activeCount, blockedCount }
       );
     } catch (ex) {
       const errorMessage = `Error finding all users: ${(ex as Error).message}`;

@@ -3,11 +3,8 @@ import { z } from "zod";
 
 extendZodWithOpenApi(z);
 
-export enum RequestType {
-  DEMAND = "DEMAND",
-  PROPOSAL="PROPOSAL"
-}
-
+export const  RequestTypeSchema = z.enum(["DEMAND" , "PROPOSAL"])
+export type  RequestType = z.infer<typeof RequestTypeSchema>
 export interface IRequest {
   id: string;
   type: RequestType;
@@ -19,7 +16,7 @@ export interface IRequest {
 
 export const RequestSchema = z.object({
   id: z.string(),
-  type: z.nativeEnum(RequestType),
+  type: RequestTypeSchema,
   userId: z.string(),
   content: z.string(),
   createdAt: z.date(),
@@ -27,7 +24,7 @@ export const RequestSchema = z.object({
 });
 
 export const CreateRequestSchema = z.object({
-  type: z.nativeEnum(RequestType).optional(),
+  type: RequestTypeSchema.optional(),
   content: z.string(),
 });
 

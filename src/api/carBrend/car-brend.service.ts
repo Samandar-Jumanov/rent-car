@@ -85,17 +85,31 @@ export class CarBrendService {
     }
   }
 
-  async findAllCarBrends(): Promise<ServiceResponse<ICarBrend[] | null>> {
+     
+  async findAllCarBrends( currentPage : number , pageSize : number ): Promise<ServiceResponse<{ carBrands : ICarBrend[] , totalCount : number  } | null >> {
     try {
-      const carBrends = await prisma.carBrend.findMany({
-        include: {
-          cars: true
+      const skip = (currentPage - 1) * pageSize;
+  
+      const [carBrands, totalCount] = await prisma.$transaction([
+        prisma.carBrend.findMany({
+          skip,
+          take: pageSize,
+          include: {
+              cars : true
+          },
+          orderBy: {
+            createdAt: 'desc' 
+          }
+        }),
+        prisma.carBrend.count()
+      ]);
+  
+      return ServiceResponse.success<{ carBrands: ICarBrend[], totalCount: number }>(
+        "Banners found",
+        { 
+          carBrands: carBrands as ICarBrend[], 
+          totalCount 
         }
-      });
-      
-      return ServiceResponse.success<ICarBrend[]>(
-        "Car brands retrieved successfully",
-        carBrends
       );
     } catch (ex) {
       const errorMessage = `Error finding car brands: ${(ex as Error).message}`;

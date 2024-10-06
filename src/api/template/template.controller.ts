@@ -4,8 +4,10 @@ import { handleServiceResponse } from "@/common/utils/httpHandlers";
 import { CreateSmsTemplateRequest } from "./template.model";
 
 class SmsTemplateController {
-  public getSmsTemplates: RequestHandler = async (_req: Request, res: Response) => {
-    const serviceResponse = await smsTemplateService.findAllSmsTemplates();
+  public getSmsTemplates: RequestHandler = async (req: Request, res: Response) => {
+    const currentPage = req.query.currentPage;
+    const pageSize = req.query.pageSize
+    const serviceResponse = await smsTemplateService.findAllSmsTemplates(Number(currentPage) , Number(pageSize));
     return handleServiceResponse(serviceResponse, res);
   };
 

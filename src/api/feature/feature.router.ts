@@ -15,6 +15,12 @@ featureRegistry.register("Feature", FeatureSchema);
 featureRegistry.registerPath({
   method: "get",
   path: "/features",
+  request : {
+    query: z.object({
+      currentPage: z.number().int().positive(),
+      pageSize: z.number().int().positive(),
+    })
+  },
   tags: ["Feature"],
   responses: createApiResponse(z.array(FeatureSchema), "Success"),
 });

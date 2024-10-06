@@ -4,8 +4,12 @@ import { handleServiceResponse } from "@/common/utils/httpHandlers";
 import { CreateRequestRequest } from "./request.model";
 
 class RequestController {
-  public getRequests: RequestHandler = async (_req: Request, res: Response) => {
-    const serviceResponse = await requestService.findAllRequests();
+  public getRequests: RequestHandler = async (req: Request, res: Response) => {
+    const currentPage = req.query.currentPage;
+    const pageSize = req.query.pageSize
+
+
+    const serviceResponse = await requestService.findAllRequests(Number(currentPage) , Number(pageSize));
     return handleServiceResponse(serviceResponse, res);
   };
 

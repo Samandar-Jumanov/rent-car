@@ -6,14 +6,31 @@ import prisma from "@/common/db/prisma";
 import { IBanners, CreateBannersRequest, UpdateBannersRequest } from "./banners.model";
 
 export class BannersService {
-  async findAll(): Promise<ServiceResponse<IBanners[] | null>> {
+  async findAll(currentPage: number, pageSize: number) : Promise<ServiceResponse<{ banners: IBanners[], totalCount: number } | null>> {
     try {
-      const banners = await prisma.banners.findMany({
-         include : {
-           car : true 
-         }
-      });
-      return ServiceResponse.success<IBanners[]>("Banners found", banners as IBanners[]);
+      const skip = (currentPage - 1) * pageSize;
+  
+      const [banners, totalCount] = await prisma.$transaction([
+        prisma.banners.findMany({
+          skip,
+          take: pageSize,
+          include: {
+            car: true
+          },
+          orderBy: {
+            createdAt: 'desc' 
+          }
+        }),
+        prisma.banners.count()
+      ]);
+  
+      return ServiceResponse.success<{ banners: IBanners[], totalCount: number }>(
+        "Banners found",
+        { 
+          banners: banners as IBanners[], 
+          totalCount 
+        }
+      );
     } catch (ex) {
       const errorMessage = `Error finding all banners: ${(ex as Error).message}`;
       logger.error(errorMessage);
@@ -24,7 +41,6 @@ export class BannersService {
       );
     }
   }
-
 
 
   async findBanner(id: string): Promise<ServiceResponse<IBanners | null>> {

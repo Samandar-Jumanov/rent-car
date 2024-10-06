@@ -89,18 +89,32 @@ export class CarColorService {
     }
   }
 
-  async findAllCarColors(): Promise<ServiceResponse<ICarColor[] | null>> {
+  async findAllCarColors(currentPage : number , pageSize : number ): Promise<ServiceResponse<{ carColors : ICarColor[] , totalCount : number  } | null >> {
     try {
-      const carColors = await prisma.carColor.findMany({
-        include: {
-          cars: true
+      const skip = (currentPage - 1) * pageSize;
+  
+      const [carColors, totalCount] = await prisma.$transaction([
+        prisma.carColor.findMany({
+          skip,
+          take: pageSize,
+          include: {
+              cars : true
+          },
+          orderBy: {
+            createdAt: 'desc' 
+          }
+        }),
+        prisma.carColor.count()
+      ]);
+  
+      return ServiceResponse.success<{ carColors: ICarColor[], totalCount: number }>(
+        "Colors  found",
+        { 
+          carColors: carColors as ICarColor[], 
+          totalCount 
         }
-      });
-      
-      return ServiceResponse.success<ICarColor[]>(
-        "Car colors retrieved successfully",
-        carColors
       );
+    
     } catch (ex) {
       const errorMessage = `Error finding car colors: ${(ex as Error).message}`;
       logger.error(errorMessage);

@@ -7,8 +7,10 @@ import { blockService } from "./block/block.service";
 import { logger } from "@/server";
 
 class UserController {
-  public getUsers: RequestHandler = async (_req: Request, res: Response) => {
-    const serviceResponse = await userService.findAll();
+  public getUsers: RequestHandler = async (req: Request, res: Response) => {
+    const currentPage = req.query.currentPage;
+    const pageSize = req.query.pageSize
+    const serviceResponse = await userService.findAll(Number(currentPage) , Number(pageSize));
     return handleServiceResponse(serviceResponse, res);
   };
 
