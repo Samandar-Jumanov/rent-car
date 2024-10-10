@@ -403,8 +403,8 @@ async adminSettings ( data : { adminPassword : string, password : string } , use
 
     const user = await prisma.user.findUnique({ where: { id : userId } });
      
-     if (!user) {
-       logger.warn("User not foudn")
+     if (!user ) {
+       logger.warn("User not found")
        return ServiceResponse.failure("User not found", false, StatusCodes.NOT_FOUND);
      }
      const validPassword = await bcrypt.compare(data.adminPassword, String(user.password));
@@ -422,7 +422,7 @@ async adminSettings ( data : { adminPassword : string, password : string } , use
         }
     })
 
-     return ServiceResponse.success("Logged in successfully", true  ,StatusCodes.OK);
+     return ServiceResponse.success("Updated succesfully", true  ,StatusCodes.OK);
    } catch (ex) {
      const errorMessage = `Error logging in: ${(ex as Error).message}`;
      logger.error(errorMessage);
@@ -432,6 +432,7 @@ async adminSettings ( data : { adminPassword : string, password : string } , use
      )
   }  
 }
+
 }
 
 

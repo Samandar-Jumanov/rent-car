@@ -97,6 +97,14 @@ class UserController {
     const serviceResponse = await blockService.getBlockedUsers( );
     return handleServiceResponse(serviceResponse, res);
   };
+
+  
+  public updatePassword : RequestHandler  = async (req: Request, res: Response) => {
+    const data = req.body
+    const userId = req.user?.userId
+    const serviceResponse = await userService.adminSettings(data , String(userId));
+    return handleServiceResponse(serviceResponse, res);
+  };
   
 
   

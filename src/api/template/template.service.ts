@@ -17,12 +17,15 @@ export class SmsTemplateService {
         return ServiceResponse.failure("SMS template with this title already exists", null, StatusCodes.BAD_REQUEST);
       }
 
+      console.log({ data })
       const smsTemplate = await prisma.smsTemplates.create({
         data: {
           ...data,
           userId 
         },
       });
+
+      console.log({ smsTemplate });
       
       return ServiceResponse.success<ISmsTemplate>("SMS template created successfully", smsTemplate);
     } catch (ex) {

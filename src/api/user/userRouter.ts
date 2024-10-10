@@ -181,6 +181,31 @@ userRouter.post("/admin/login" , validateRequest(z.object({  body : AdminLoginSc
 
 
 userRegistry.registerPath({
+  method: "post",
+  path: "/users/admin/settings/password",
+  tags: ["User"],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+              adminPassword : z.string(),
+              password   : z.string()
+          })
+        }
+      }
+    }
+  },
+  responses: createApiResponse(UserSchema, "Success"),
+});
+
+userRouter.post("/admin/settings/password" ,  authMiddleware , checkRole(['SUPER_ADMIN'])  ,  validateRequest(z.object({  body : z.object({
+  adminPassword : z.string(),
+  password   : z.string()
+})})),  userController.updatePassword);
+
+
+userRegistry.registerPath({
   method: "get",
   path: "/users/admin/block",
   tags: ["User"],

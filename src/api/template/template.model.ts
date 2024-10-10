@@ -20,8 +20,8 @@ export const SmsTemplateSchema = z.object({
 });
 
 export const CreateSmsTemplateSchema = z.object({
-  title: z.string(),
-  content: z.string(),
+  title: z.string().nonempty(),
+  content: z.string().nonempty(),
 });
 
 export const GetSmsTemplateSchema = z.object({
