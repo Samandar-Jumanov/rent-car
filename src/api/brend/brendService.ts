@@ -13,7 +13,7 @@ type QueryBrendResult = {
 
 
 export class BrendService {
-  async getBrends( cityId : string  ): Promise<ServiceResponse<IBrend[] | null>> {
+  async getBrends( regionId : string  ): Promise<ServiceResponse<IBrend[] | null>> {
     try {
       const brends = await prisma.brand.findMany({
           include : {
@@ -21,6 +21,11 @@ export class BrendService {
                 city : true ,
                 discounts : true ,
                 reviews : true
+          },
+          where : {
+               city : {
+                 regionId 
+               }
           }
       });
 
@@ -82,36 +87,36 @@ export class BrendService {
     }
   }
 
-  async getTopBrends( cityId : string ): Promise<ServiceResponse<ITopBrend[] | null>> {
-    try {
-      const topBrends = await prisma.topBrend.findMany({
-        where: {
-          brend: {
-              cityId : cityId
+ async getTopBrends(regionId: string): Promise<ServiceResponse<ITopBrend[] | null >> {
+  try {
+    const topBrends = await prisma.topBrend.findMany({
+      where: {
+        brend: {
+          city: {
+            regionId: regionId
           }
-        },
-        include: {
-          brend: {
-            include: {
-              cars: {
-                include: {
-                  rentals: true
-                }
+        }
+      },
+      include: {
+        brend: {
+          include: {
+            cars: {
+              include: {
+                rentals: true
               }
             }
           }
         }
-      });
-      
-     return ServiceResponse.success<ITopBrend[] | null >("Brends found", topBrends );
-    
-    } catch (ex) {
-      const errorMessage = `Error finding top brends ${(ex as Error).message}`;
-      logger.error(errorMessage);
-      return ServiceResponse.failure("An error occurred while finding user.", null, StatusCodes.INTERNAL_SERVER_ERROR);
-    }
-  }
+      }
+    });
 
+    return ServiceResponse.success<ITopBrend[]>("Top brands found", topBrends);
+  } catch (ex) {
+    const errorMessage = `Error finding top brands: ${(ex as Error).message}`;
+    logger.error(errorMessage);
+    return ServiceResponse.failure("An error occurred while finding top brands.", null, StatusCodes.INTERNAL_SERVER_ERROR);
+  }
+}
 
   async getBrendById(brendId: string): Promise<ServiceResponse<IBrend | null>> {
     try {

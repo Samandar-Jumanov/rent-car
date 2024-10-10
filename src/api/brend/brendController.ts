@@ -8,11 +8,16 @@ import { QueryBrend } from "./brendModel";
 class BrendController {
 
   public getBrends: RequestHandler = async (req: Request, res: Response) => {
-    const cityId = req.query.cityId
-    const serviceResponse = await brendService.getBrends(String(cityId));
+    const regionId = req.query.regionId
+    const serviceResponse = await brendService.getBrends(String(regionId));
     return handleServiceResponse(serviceResponse, res);
   };
-
+  
+  public getTopBrends: RequestHandler = async (req: Request, res: Response) => {
+      const regionId = req.query.regionId
+      const serviceResponse = await brendService.getTopBrends(String(regionId)) 
+      return handleServiceResponse(serviceResponse, res);
+    };
   public createBrend: RequestHandler = async (req: Request, res: Response) => {
     const body =  req.body
     const logo = req.file
@@ -28,18 +33,11 @@ class BrendController {
     return handleServiceResponse(serviceResponse, res);
   };
 
-  public getTopBrends: RequestHandler = async (req: Request, res: Response) => {
-    const cityId = req.query.cityId
-    const serviceResponse = await brendService.getTopBrends(String(cityId)) 
-    return handleServiceResponse(serviceResponse, res);
-  };
-
   public getBrend: RequestHandler = async (req: Request, res: Response) => {
     const id = req.params.id;
     const serviceResponse = await brendService.getBrendById(id)
     return handleServiceResponse(serviceResponse, res);
   };
-
 
   public createOrder: RequestHandler = async (req: Request, res: Response) => {
     const user = req.user;
@@ -76,7 +74,6 @@ class BrendController {
   
     return handleServiceResponse(serviceResponse, res);
   }
-
 
   public cancelOrder : RequestHandler = async (req: Request, res: Response) => {
     const id = req.params.id;
