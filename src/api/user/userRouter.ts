@@ -210,18 +210,14 @@ userRegistry.registerPath({
   path: "/users/admin/block",
   tags: ["User"],
   request: {
-    body: {
-      content: {
-        'application/json': {
-          schema: GetBlockedUsersSchema
-        }
-      }
-    }
+    params : z.object({
+      id : z.string(),
+ })
   },
   responses: createApiResponse(UserSchema, "Success"),
 });
 
-userRouter.delete("/admin/block" , authMiddleware ,  checkRole(["SUPER_ADMIN"]) ,  userController.cancelAgentUserBlock);
+userRouter.delete("/admin/block/:id" , authMiddleware ,  checkRole(["SUPER_ADMIN"]) ,  userController.cancelAgentUserBlock);
 
 
 

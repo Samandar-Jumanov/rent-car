@@ -22,7 +22,7 @@ brendRegistry.registerPath({
   tags: ["Brend"],
   request: {
     query: z.object({
-      location: z.string().optional()
+      cityId: z.string().optional()
     })
   },
   responses: createApiResponse(z.array(BrendSchema), "Success"),
@@ -30,7 +30,7 @@ brendRegistry.registerPath({
 brendRouter.get("/", brendController.getBrends);
 
 
-// GET /all/brends
+// GET /all/brends // query 
 brendRegistry.registerPath({
   method: "get",
   path: "/brends/all",
@@ -52,7 +52,7 @@ brendRegistry.registerPath({
   tags: ["Brend"],
   request: {
     query: z.object({
-      location: z.string()
+      cityId: z.string()
     })
   },
   responses: createApiResponse(z.array(BrendSchema), "Success"),

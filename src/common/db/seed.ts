@@ -1,46 +1,48 @@
-import prisma from "./prisma";
+import { PrismaClient } from '@prisma/client';
+import { faker } from '@faker-js/faker';
 
-async function main() {
-  const regions = [
-    { name: "Toshkent shahri", cities: ["Toshkent"] },
-    { name: "Qoraqalpog'iston Respublikasi", cities: ["Nukus", "Mo'ynoq", "Xo'jayli"] },
-    { name: "Andijon viloyati", cities: ["Andijon", "Asaka", "Xonobod"] },
-    { name: "Buxoro viloyati", cities: ["Buxoro", "G'ijduvon", "Kogon"] },
-    { name: "Farg'ona viloyati", cities: ["Farg'ona", "Marg'ilon", "Qo'qon"] },
-    { name: "Jizzax viloyati", cities: ["Jizzax", "G'allaorol", "Dustlik"] },
-    { name: "Xorazm viloyati", cities: ["Urganch", "Xiva", "Pitnak"] },
-    { name: "Namangan viloyati", cities: ["Namangan", "Chust", "Pop"] },
-    { name: "Navoiy viloyati", cities: ["Navoiy", "Zarafshon", "Uchquduq"] },
-    { name: "Qashqadaryo viloyati", cities: ["Qarshi", "Shahrisabz", "Muborak"] },
-    { name: "Samarqand viloyati", cities: ["Samarqand", "Kattaqo'rg'on", "Urgut"] },
-    { name: "Sirdaryo viloyati", cities: ["Guliston", "Yangiyer", "Shirin"] },
-    { name: "Surxondaryo viloyati", cities: ["Termiz", "Denov", "Sho'rchi"] },
-    { name: "Toshkent viloyati", cities: ["Nurafshon", "Angren", "Chirchiq", "Olmaliq"] }
-  ];
+const prisma = new PrismaClient();
 
-  for (const region of regions) {
-    const createdRegion = await prisma.regions.create({
-      data: {
-        name: region.name,
-      },
+async function createBanners() {
+  try {
+    // Fetch all existing cars
+    const cars = await prisma.car.findMany({
+      select: { id: true, title: true }
     });
 
-    for (const city of region.cities) {
-      await prisma.cities.create({
-        data: {
-          name: city,
-          regionId: createdRegion.id,
-        },
-      });
-    }
-  }
+    console.log(`Found ${cars.length} cars. Creating banners...`);
 
-  console.log('Seed data inserted successfully.');
+    const banners = await Promise.all(
+      cars.map(car => 
+        prisma.banners.create({
+          data: {
+            title: `Featured: ${car.title}`,
+            carId: car.id,
+            choosenImage: faker.image.url({ width: 1024, height: 480 }),  // Banner-sized image
+          },
+        })
+      )
+    );
+
+    console.log(`Successfully created ${banners.length} banners.`);
+
+    // Log some sample banners
+    console.log('Sample banners created:');
+    banners.slice(0, 5).forEach(banner => {
+      console.log(`- Banner ID: ${banner.id}, Title: ${banner.title}, Car ID: ${banner.carId}`);
+    });
+
+  } catch (error) {
+    console.error('Error creating banners:', error);
+  } finally {
+    await prisma.$disconnect();
+  }
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
+// Run the banner creation function
+createBanners()
+  .catch((error) => {
+    console.error(error);
     process.exit(1);
   })
   .finally(async () => {

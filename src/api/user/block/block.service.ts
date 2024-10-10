@@ -38,7 +38,7 @@ class BlockService {
 
   async cancelBlock(id: string): Promise<ServiceResponse<boolean>> {
     try {
-      await prisma.blockedUsers.delete({ where: { id } });
+      await prisma.blockedUsers.delete({ where: { blockedUserId : id  } });
       return ServiceResponse.success("Block cancelled successfully", true);
     } catch (ex) {
       const errorMessage = `Error cancelling block: ${(ex as Error).message}`;

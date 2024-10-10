@@ -45,12 +45,11 @@ export class UserService {
           sessions: true,
           rentals: true,
           blockedByAdmin: true,
-          blockedByAgent: true,
           city: true
         },
         skip: skip,
         take: pageSize,
-        orderBy: { createdAt: 'desc' } // Assuming you want the most recent users first
+        orderBy: { createdAt: 'desc' }
       });
   
       const blockedUsers: IUser[] = [];
@@ -58,7 +57,7 @@ export class UserService {
   
       users.forEach(user => {
         const { password, ...restUser } = user;
-        if (user.blockedByAdmin.length > 0 || user.blockedByAgent.length > 0) {
+        if (user.blockedByAdmin.length > 0 ) {
           blockedUsers.push(restUser as IUser);
         } else {
           activeUsers.push(restUser as IUser);
@@ -214,7 +213,6 @@ export class UserService {
       );
     }
   }
-
   
   async updateUser(data : UpdateUserRequest  , id : string) : Promise<ServiceResponse<IUser | null>> {
     
@@ -274,7 +272,6 @@ export class UserService {
       );
     }
   }
-
 
   async getRentals( userId : string  , role : string ) : Promise<ServiceResponse<IRental[] | null>> {
     try {
@@ -400,8 +397,6 @@ export class UserService {
       )
    }  
 }
-
-
 
 async adminSettings ( data : { adminPassword : string, password : string } , userId : string ) : Promise<ServiceResponse<boolean>> {
   try {

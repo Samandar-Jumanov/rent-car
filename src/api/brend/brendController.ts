@@ -8,11 +8,10 @@ import { QueryBrend } from "./brendModel";
 class BrendController {
 
   public getBrends: RequestHandler = async (req: Request, res: Response) => {
-    const location = req.query.locaion
-    const serviceResponse = await brendService.getBrends(String(location));
+    const cityId = req.query.cityId
+    const serviceResponse = await brendService.getBrends(String(cityId));
     return handleServiceResponse(serviceResponse, res);
   };
-
 
   public createBrend: RequestHandler = async (req: Request, res: Response) => {
     const body =  req.body
@@ -30,7 +29,8 @@ class BrendController {
   };
 
   public getTopBrends: RequestHandler = async (req: Request, res: Response) => {
-    const serviceResponse = await brendService.getTopBrends("") // location needed 
+    const cityId = req.query.cityId
+    const serviceResponse = await brendService.getTopBrends(String(cityId)) 
     return handleServiceResponse(serviceResponse, res);
   };
 

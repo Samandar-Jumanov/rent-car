@@ -16,11 +16,16 @@ export class BrendService {
   async getBrends( cityId : string  ): Promise<ServiceResponse<IBrend[] | null>> {
     try {
       const brends = await prisma.brand.findMany({
-          where : {
-              cityId : cityId
+          include : {
+                cars : true,
+                city : true ,
+                discounts : true ,
+                reviews : true
           }
       });
+
       return ServiceResponse.success<IBrend[] | null >("Brends found", brends );
+      
     } catch (ex) {
       const errorMessage = `Error finding all users: ${(ex as Error).message}`;
       logger.error(errorMessage);
@@ -77,21 +82,12 @@ export class BrendService {
     }
   }
 
-  async getTopBrends(location : string): Promise<ServiceResponse<ITopBrend[] | null>> {
+  async getTopBrends( cityId : string ): Promise<ServiceResponse<ITopBrend[] | null>> {
     try {
-
       const topBrends = await prisma.topBrend.findMany({
         where: {
           brend: {
-            cars: {
-              some: {
-                rentals: {
-                  some: {
-                    address: location
-                  }
-                }
-              }
-            }
+              cityId : cityId
           }
         },
         include: {
