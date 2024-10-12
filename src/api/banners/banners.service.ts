@@ -24,6 +24,44 @@ export class BannersService {
     }
   }
 
+  async getBanners ( currentPage : number , pageSize : number ) : Promise<ServiceResponse<{ banners :  IBanners[]  , totalCount : number } | null >> {
+    try {
+
+      const skip = (currentPage - 1) * pageSize;
+
+      const [banners, totalCount] = await prisma.$transaction([
+        prisma.banners.findMany({
+          skip,
+          take: pageSize,
+          include: {
+             car : true 
+          },
+          orderBy: {
+            createdAt: 'desc' 
+          }
+        }),
+
+        prisma.brand.count()
+      ]);
+
+      return ServiceResponse.success<{ banners: IBanners[], totalCount: number }>(
+        "Banners  found",
+        { 
+          banners: banners, 
+          totalCount  : banners.length
+        }
+      );
+      
+  }catch( ex ) {
+    const errorMessage = `Error finding all banners : ${(ex as Error).message}`;
+    logger.error(errorMessage);
+    return ServiceResponse.failure(
+      "An error occurred while retrieving users.",
+      null,
+      StatusCodes.INTERNAL_SERVER_ERROR,
+    );
+  }
+  }
 
   async findBanner(id: string): Promise<ServiceResponse<IBanners | null>> {
     try {

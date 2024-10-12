@@ -29,6 +29,14 @@ class CarColorController {
     const serviceResponse = await carColorService.deleteCarColor(id);
     return handleServiceResponse(serviceResponse, res);
   };
+  
+  public updateColor: RequestHandler = async (req: Request, res: Response) => {
+    const id = req.params.id;
+    const body = req.body;
+    const serviceResponse = await carColorService.updateColor(id , body );
+    return handleServiceResponse(serviceResponse, res);
+  };
+
 }
 
 export const carColorController = new CarColorController();

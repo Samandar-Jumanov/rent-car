@@ -38,6 +38,40 @@ export class CarColorService {
     }
   }
 
+  async updateColor( id : string , data: CreateCarColorRequest): Promise<ServiceResponse<ICarColor | null>> {
+    try {
+
+      const existing = await prisma.carColor.findUnique({
+        where : {
+              id
+        }
+      })
+      
+      if(!existing) {
+           return ServiceResponse.failure("Color not found ", null , StatusCodes.NOT_FOUND);
+       }
+
+      const carColor = await prisma.carColor.update({
+        data: {
+          ...data,
+        },
+        where : { id }
+      });
+      
+
+      return ServiceResponse.success<ICarColor>("Car color updated successfully", carColor);
+    } catch (ex) {
+      const errorMessage = `Error creating car color: ${(ex as Error).message}`;
+      logger.error(errorMessage);
+      return ServiceResponse.failure(
+        "An error occurred while updating  the car color.",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+
   async deleteCarColor(id: string): Promise<ServiceResponse<boolean>> {
     try {
       const existing = await prisma.carColor.findUnique({

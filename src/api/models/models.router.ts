@@ -56,6 +56,9 @@ modelRegistry.registerPath({
 
 modelRouter.post("/", authMiddleware , checkRole(["SUPER_ADMIN"]) ,   validateRequest(z.object({ body: CreateModelSchema })), modelController.createModel);
 
+
+
+
 modelRegistry.registerPath({
   method: "delete",
   path: "/models/{id}",
@@ -65,3 +68,24 @@ modelRegistry.registerPath({
 });
 
 modelRouter.delete("/:id", authMiddleware , checkRole(["SUPER_ADMIN"]) ,  validateRequest(DeleteModelSchema), modelController.deleteModel);
+
+
+
+modelRegistry.registerPath({
+  method: "put",
+  path: "/models",
+  tags: ["Model"],
+  request: {
+    params: GetModelSchema.shape.params,
+    body: {
+      content: {
+        'application/json': {
+          schema: CreateModelSchema
+        }
+      }
+    }
+  },
+  responses: createApiResponse(ModelSchema, "Success"),
+});
+
+modelRouter.put("/:id",  authMiddleware , checkRole(["SUPER_ADMIN"]) ,   validateRequest(z.object({ body: CreateModelSchema })) , modelController.updateModel);

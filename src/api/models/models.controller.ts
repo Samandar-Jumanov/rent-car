@@ -2,6 +2,7 @@ import type { Request, RequestHandler, Response } from "express";
 import { modelService } from "./models.service";
 import { handleServiceResponse } from "@/common/utils/httpHandlers";
 import { CreateModelRequest } from "./models.model";
+import { logger } from "@/server";
 
 class ModelController {
   public getModels: RequestHandler = async (req: Request, res: Response) => {
@@ -23,6 +24,15 @@ class ModelController {
     const serviceResponse = await modelService.createModel(body);
     return handleServiceResponse(serviceResponse, res);
   };
+
+  public updateModel: RequestHandler = async (req: Request, res: Response) => {
+    const body: CreateModelRequest = req.body;
+    const id = req.params.id;
+    console.log({ id })
+    const serviceResponse = await modelService.updateModel( id , body);
+    return handleServiceResponse(serviceResponse, res);
+  };
+
 
   public deleteModel: RequestHandler = async (req: Request, res: Response) => {
     const id = req.params.id;

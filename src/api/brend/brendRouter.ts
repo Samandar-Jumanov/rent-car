@@ -15,25 +15,36 @@ export const brendRouter: Router = express.Router();
 // Brend routes
 brendRegistry.register("Brend", BrendSchema);
 
-// GET /brends
-brendRegistry.registerPath({
-  method: "get",
-  path: "/brends",
-  tags: ["Brend"],
-  request: {
-    query: z.object({
-      regionId: z.string()
-    })
-  },
-  responses: createApiResponse(z.array(BrendSchema), "Success"),
-});
-brendRouter.get("/", brendController.getBrends);
-
-
-// GET /all/brends // query 
+// for super addmin 
 brendRegistry.registerPath({
   method: "get",
   path: "/brends/all",
+  tags: ["Brend"],
+  responses: createApiResponse(z.array(BrendSchema), "Success"),
+});
+brendRouter.get("/all", brendController.getAllBrends);
+
+
+
+brendRegistry.registerPath({
+  method: "get",
+  path: "/brends",
+  request : {
+       query : z.object({
+           regionId : z.string().nonempty()
+       })
+  },
+  tags: ["Brend"],
+  responses: createApiResponse(z.array(BrendSchema), "Success"),
+});
+
+brendRouter.get("/", brendController.getBrends);
+
+
+// GET /some breands  // query 
+brendRegistry.registerPath({
+  method: "get",
+  path: "/brends/some",
   request : {
       query : z.object({
               currentPage : z.number(),
@@ -43,7 +54,9 @@ brendRegistry.registerPath({
   tags: ["Brend"],
   responses: createApiResponse(z.array(BrendSchema), "Success"),
 });
-brendRouter.get("/all", brendController.getAllBrends);
+
+brendRouter.get("/some", brendController.getSomeBrends);
+
 // GET /brends/top
 brendRegistry.registerPath({
   method: "get",

@@ -24,13 +24,43 @@ export class ModelService {
           ...data,
         },
       });
-      
-      
- 
-
       return ServiceResponse.success<IModel>("Model created successfully", model);
     } catch (ex) {
       const errorMessage = `Error creating model: ${(ex as Error).message}`;
+      logger.error(errorMessage);
+      return ServiceResponse.failure(
+        "An error occurred while creating the model.",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateModel( id : string , data: CreateModelRequest): Promise<ServiceResponse<IModel | null>> {
+    try {
+
+      logger.info({ id , data  })
+
+        const existing = await prisma.model.findUnique({
+            where : {
+                id 
+            }
+          })
+    
+          if(!existing) {
+               return ServiceResponse.failure("Model not found", null , StatusCodes.BAD_REQUEST);
+           }
+           
+      const newModel = await prisma.model.update({
+        data: {
+          ...data,
+        },
+        where : { id }
+      });
+      
+      return ServiceResponse.success<IModel>("Model updated successfully", newModel);
+    } catch (ex) {
+      const errorMessage = `Error updating model: ${(ex as Error).message}`;
       logger.error(errorMessage);
       return ServiceResponse.failure(
         "An error occurred while creating the model.",

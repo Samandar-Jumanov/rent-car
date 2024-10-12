@@ -3,6 +3,7 @@ import { ServiceResponse } from "@/common/models/serviceResponse";
 import { logger } from "@/server";
 import prisma from "@/common/db/prisma";
 import { ICarBrend, CreateCarBrendRequest } from "./car-brend.model";
+import { ICar } from "../brend/cars/carsModel";
 
 export class CarBrendService {
   async createCarBrend(data: CreateCarBrendRequest): Promise<ServiceResponse<ICarBrend | null>> {
@@ -111,6 +112,36 @@ export class CarBrendService {
           totalCount 
         }
       );
+    } catch (ex) {
+      const errorMessage = `Error finding car brands: ${(ex as Error).message}`;
+      logger.error(errorMessage);
+      return ServiceResponse.failure(
+        "An error occurred while finding car brands.",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+
+  async updateCarBrend (  id : string , data : { brandName : string} ): Promise<ServiceResponse<ICarBrend | null>> {
+    try {
+
+      const carBrand  = await prisma.carBrend.findUnique({
+          where : {
+              id : id 
+          }
+      });
+      if(!carBrand) {
+          return ServiceResponse.failure("Car brend not found", null , StatusCodes.NOT_FOUND);
+      }
+      const updatedCarBrand = await prisma.carBrend.update({
+          where : { id },
+          data : {
+           carBrend : data.brandName
+          }
+      })
+      return ServiceResponse.success("Car brend updated ", updatedCarBrand  as ICarBrend, StatusCodes.OK);
     } catch (ex) {
       const errorMessage = `Error finding car brands: ${(ex as Error).message}`;
       logger.error(errorMessage);

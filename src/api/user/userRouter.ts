@@ -244,10 +244,7 @@ userRegistry.registerPath({
 
 userRouter.delete("/admin/block/:id" , authMiddleware ,  checkRole(["SUPER_ADMIN"]) ,  userController.cancelAgentUserBlock);
 
-
-
 // Agent 
-
 
 userRegistry.registerPath({
   method: "get",

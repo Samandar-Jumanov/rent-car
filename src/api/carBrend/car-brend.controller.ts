@@ -17,6 +17,13 @@ class CarBrendController {
     return handleServiceResponse(serviceResponse, res);
   };
 
+  public updateCarBrand: RequestHandler = async (req: Request, res: Response) => {
+    const id = req.params.id;
+    const body = req.body;
+    const serviceResponse = await carBrendService.updateCarBrend(id , body);
+    return handleServiceResponse(serviceResponse, res);
+  };
+
   public createCarBrend: RequestHandler = async (req: Request, res: Response) => {
     const body: CreateCarBrendRequest = req.body;
     const serviceResponse = await carBrendService.createCarBrend(body);

@@ -32,11 +32,41 @@ carBrendRegistry.registerPath({
   method: "get",
   path: "/car-brands/{id}",
   tags: ["CarBrend"],
-  request: { params: GetCarBrendSchema.shape.params },
+  request: {
+     params: GetCarBrendSchema.shape.params 
+    
+   },
   responses: createApiResponse(CarBrendSchema, "Success"),
 });
 
 carBrendRouter.get("/:id", authMiddleware,  validateRequest(GetCarBrendSchema), carBrendController.getCarBrend);
+
+
+carBrendRegistry.registerPath({
+  method: "put",
+  path: "/car-brands/{id}",
+  tags: ["CarBrend"],
+  request: { 
+    params: GetCarBrendSchema.shape.params,
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            brandName : z.string()
+          })
+        }
+      }
+    }
+  },
+  responses: createApiResponse(CarBrendSchema, "Success"),
+});
+
+carBrendRouter.put("/:id", authMiddleware,  validateRequest(z.object({
+    body : z.object({
+      brandName : z.string()
+    })
+    
+})), carBrendController.updateCarBrand);
 
 carBrendRegistry.registerPath({
   method: "post",

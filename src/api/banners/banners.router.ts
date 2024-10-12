@@ -22,6 +22,17 @@ bannersRegistry.registerPath({
 
 bannersRouter.get("/",  authMiddleware  , bannersController.getBanners);
 
+
+
+bannersRegistry.registerPath({
+  method: "get",
+  path: "/banners/all",
+  tags: ["Banners"],
+  responses: createApiResponse(z.array(BannersSchema), "Success"),
+});
+
+bannersRouter.get("/all",  authMiddleware  , bannersController.getAllBanners);
+
 bannersRegistry.registerPath({
   method: "get",
   path: "/banners/{id}",

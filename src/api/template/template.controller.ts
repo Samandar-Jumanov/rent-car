@@ -29,6 +29,13 @@ class SmsTemplateController {
     const serviceResponse = await smsTemplateService.deleteSmsTemplate(id);
     return handleServiceResponse(serviceResponse, res);
   };
+
+  public updateSmsTemplate: RequestHandler = async (req: Request, res: Response) => {
+    const id = req.params.id;
+    const body = req.body
+    const serviceResponse = await smsTemplateService.updateSmsTemplate(id , body );
+    return handleServiceResponse(serviceResponse, res);
+  };
 }
 
 export const smsTemplateController = new SmsTemplateController();

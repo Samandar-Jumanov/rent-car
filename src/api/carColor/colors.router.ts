@@ -65,3 +65,21 @@ carColorRegistry.registerPath({
 });
 
 carColorRouter.delete("/:id", authMiddleware , checkRole(["SUPER_ADMIN"]) ,   validateRequest(DeleteCarColorSchema), carColorController.deleteCarColor);
+
+carColorRegistry.registerPath({
+  method: "put",
+  path: "/car-colors/{id}",
+  tags: ["CarColor"],
+  request: { 
+    params: DeleteCarColorSchema.shape.params,
+    body: {
+      content: {
+        'application/json': {
+          schema: CreateCarColorSchema
+        }
+      }
+    }
+  },
+  responses: createApiResponse(z.boolean(), "Success"),
+});
+carColorRouter.put("/:id", authMiddleware , checkRole(["SUPER_ADMIN"]) ,    validateRequest(DeleteCarColorSchema), carColorController.updateColor);

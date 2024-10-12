@@ -12,24 +12,22 @@ class BrendController {
     const serviceResponse = await brendService.getBrends(String(regionId));
     return handleServiceResponse(serviceResponse, res);
   };
+
+  public getAllBrends: RequestHandler = async (req: Request, res: Response) => {
+    const serviceResponse = await brendService.getAllBrands();
+    return handleServiceResponse(serviceResponse, res);
+  };
   
   public getTopBrends: RequestHandler = async (req: Request, res: Response) => {
       const regionId = req.query.regionId
       const serviceResponse = await brendService.getTopBrends(String(regionId)) 
       return handleServiceResponse(serviceResponse, res);
     };
-  public createBrend: RequestHandler = async (req: Request, res: Response) => {
-    const body =  req.body
-    const logo = req.file
-    const userId = req.user?.userId
-
-    const serviceResponse = await brendService.createBrand(body , String(userId) , String(logo?.path));
-    return handleServiceResponse(serviceResponse, res);
-  };
-  public getAllBrends: RequestHandler = async (req: Request, res: Response) => {
+ 
+  public getSomeBrends: RequestHandler = async (req: Request, res: Response) => {
     const currentPage = req.query.currentPage
     const pageSize = req.query.pageSize
-    const serviceResponse = await brendService.getAllBrends(Number(currentPage) , Number(pageSize))
+    const serviceResponse = await brendService.getSomeBrands(Number(currentPage) , Number(pageSize))
     return handleServiceResponse(serviceResponse, res);
   };
 
@@ -38,6 +36,16 @@ class BrendController {
     const serviceResponse = await brendService.getBrendById(id)
     return handleServiceResponse(serviceResponse, res);
   };
+  
+  public createBrend: RequestHandler = async (req: Request, res: Response) => {
+    const body =  req.body
+    const logo = req.file
+    const userId = req.user?.userId
+
+    const serviceResponse = await brendService.createBrand(body , String(userId) , String(logo?.path));
+    return handleServiceResponse(serviceResponse, res);
+  };
+
 
   public createOrder: RequestHandler = async (req: Request, res: Response) => {
     const user = req.user;

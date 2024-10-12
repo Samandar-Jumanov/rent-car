@@ -68,3 +68,35 @@ smsTemplateRegistry.registerPath({
 
 smsTemplateRouter.delete("/:id", authMiddleware, checkRole(["SUPER_ADMIN"]),
   validateRequest(DeleteSmsTemplateSchema), smsTemplateController.deleteSmsTemplate);
+
+  
+smsTemplateRegistry.registerPath({
+  method: "put",
+  path: "/sms-templates/{id}",
+  tags: ["SmsTemplate"],
+  request: { 
+    params: DeleteSmsTemplateSchema.shape.params ,
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+             title : z.string().optional() , 
+             content : z.string().optional()
+          })
+        }
+      }
+    }
+  },
+  responses: createApiResponse(z.boolean(), "Success"),
+});
+
+smsTemplateRouter.put("/:id",
+  validateRequest(z.object({
+        body :   z.object({
+          title : z.string().optional() , 
+          content : z.string().optional()
+       })
+  })), 
+  smsTemplateController.updateSmsTemplate);
+
+  // authMiddleware, checkRole(["SUPER_ADMIN"]),

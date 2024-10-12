@@ -24,15 +24,42 @@ export class SmsTemplateService {
           userId 
         },
       });
-
-      console.log({ smsTemplate });
-      
       return ServiceResponse.success<ISmsTemplate>("SMS template created successfully", smsTemplate);
     } catch (ex) {
       const errorMessage = `Error creating SMS template: ${(ex as Error).message}`;
       logger.error(errorMessage);
       return ServiceResponse.failure(
         "An error occurred while creating the SMS template.",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+  async updateSmsTemplate( id  : string , data: { title ? : string  , content ? : string }  ): Promise<ServiceResponse<ISmsTemplate | null>> {
+    try {
+      const existing = await prisma.smsTemplates.findUnique({
+        where: {
+            id 
+        }
+      });
+      
+      if (!existing) {
+        return ServiceResponse.failure("SMS template not found", null, StatusCodes.NOT_FOUND);
+      }
+
+      const smsTemplate = await prisma.smsTemplates.update({
+        data: {
+          ...data,
+        },
+        where : { id }
+      });
+      
+      return ServiceResponse.success<ISmsTemplate>("SMS template UPDATED successfully", smsTemplate);
+    } catch (ex) {
+      const errorMessage = `Error creating SMS template: ${(ex as Error).message}`;
+      logger.error(errorMessage);
+      return ServiceResponse.failure(
+        "An error occurred while UPDATING the SMS template.",
         null,
         StatusCodes.INTERNAL_SERVER_ERROR,
       );

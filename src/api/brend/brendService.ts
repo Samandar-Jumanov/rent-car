@@ -13,36 +13,63 @@ type QueryBrendResult = {
 
 
 export class BrendService {
-  async getBrends( regionId : string  ): Promise<ServiceResponse<IBrend[] | null>> {
-    try {
-      const brends = await prisma.brand.findMany({
-          include : {
-                cars : true,
-                city : true ,
-                discounts : true ,
-                reviews : true
-          },
-          where : {
-               city : {
-                 regionId 
-               }
-          }
-      });
-
-      return ServiceResponse.success<IBrend[] | null >("Brends found", brends );
-      
-    } catch (ex) {
-      const errorMessage = `Error finding all users: ${(ex as Error).message}`;
-      logger.error(errorMessage);
-      return ServiceResponse.failure(
-        "An error occurred while retrieving users.",
-        null,
-        StatusCodes.INTERNAL_SERVER_ERROR,
-      );
-    }
+ async  getBrends( regionId : string ) : Promise<ServiceResponse<IBrend[] | null>> {
+  try {
+    const brands = await prisma.brand.findMany({
+      include: {
+        cars: true,
+        city: true,
+        discounts: true,
+        reviews: true
+      },
+      where : {
+         city : {
+            regionId: regionId
+         }
+      }
+    });
+    return ServiceResponse.success<IBrend[] | null>("Brands found", brands);
+  } catch (ex) {
+    const errorMessage = `Error finding all brands : ${(ex as Error).message}`;
+    logger.error(errorMessage);
+    return ServiceResponse.failure(
+      "An error occurred while retrieving brands.",
+      null,
+      StatusCodes.INTERNAL_SERVER_ERROR,
+    );
   }
+}
 
-  async getAllBrends (currentPage : number , pageSize : number  ) :Promise<ServiceResponse<{ brands: IBrend[], totalCount: number } | null>> {
+async  getAllBrands (  ) : Promise<ServiceResponse<IBrend[] | null>> {
+  try {
+    const brands = await prisma.brand.findMany({
+      where: {
+        cars: {
+          some: {} 
+        }
+      },
+      include: {
+        cars: true,
+        city: true,
+        discounts: true,
+        reviews: true
+      }
+    });
+
+    return ServiceResponse.success<IBrend[] | null>("Brands found", brands);
+  } catch (ex) {
+    const errorMessage = `Error finding all brands : ${(ex as Error).message}`;
+    logger.error(errorMessage);
+    return ServiceResponse.failure(
+      "An error occurred while retrieving brands.",
+      null,
+      StatusCodes.INTERNAL_SERVER_ERROR,
+    );
+  }
+}
+
+
+  async getSomeBrands (currentPage : number , pageSize : number  ) : Promise<ServiceResponse<{ brands: IBrend[], totalCount: number } | null>> {
     try {
 
       const skip = (currentPage - 1) * pageSize;
@@ -68,6 +95,8 @@ export class BrendService {
         prisma.brand.count()
       ]);
 
+      logger.info('Requet comne ')
+
       return ServiceResponse.success<{ brands: IBrend[], totalCount: number }>(
         "Brands found",
         { 
@@ -77,10 +106,10 @@ export class BrendService {
       );
 
     } catch (ex) {
-      const errorMessage = `Error finding all users: ${(ex as Error).message}`;
+      const errorMessage = `Error finding all brands : ${(ex as Error).message}`;
       logger.error(errorMessage);
       return ServiceResponse.failure(
-        "An error occurred while retrieving users.",
+        "An error occurred while retrieving brands .",
         null,
         StatusCodes.INTERNAL_SERVER_ERROR,
       );
