@@ -86,28 +86,25 @@ brendRegistry.registerPath({
               logo: { type: "string", format: "binary" },
               brendName: { type: "string" },
               ownerNumber: { type: "string" },
-              address: { type: "string" },
+              cityId: { type: "string" },
               password: { type: "string" },
               payment: { 
                           type: "string", 
                         },
             },
-
           }
         },
       },
     },
-    
-
   },
   responses: createApiResponse(BrendSchema, "Success"),
 });
 
 brendRouter.post(
   "/new",
+  upload.single("logo"),
   authMiddleware,
   checkRole(["SUPER_ADMIN"]),
-  upload.single("logo"),
   validateRequest(z.object({
      body : CreateBrendSchema
   })),

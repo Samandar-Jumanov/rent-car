@@ -6,6 +6,8 @@ import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
 import { FeatureSchema, CreateFeatureSchema, GetFeatureSchema, UpdateFeatureSchema, ApplyFeatureSchema } from "./feature.model";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { featureController } from "./feature.controller";
+import { upload } from "../aws/multer.service";
+import { authMiddleware, checkRole } from "@/common/middleware/auth";
 
 export const featureRegistry = new OpenAPIRegistry();
 export const featureRouter: Router = express.Router();
@@ -44,8 +46,14 @@ featureRegistry.registerPath({
   request: {
     body: {
       content: {
-        'application/json': {
-          schema: CreateFeatureSchema
+        'multipart/form-data': {
+          schema: {
+               type : "object", 
+               properties : {
+                  title : { type : "string",  },
+                  icon : { type: "string", format: "binary"} 
+               }
+          }
         }
       }
     }
@@ -53,7 +61,7 @@ featureRegistry.registerPath({
   responses: createApiResponse(FeatureSchema, "Success"),
 });
 
-featureRouter.post("/",  validateRequest(z.object({ body : CreateFeatureSchema})), featureController.createFeature);
+featureRouter.post("/",  upload.single("icon") ,  validateRequest(z.object({ body : z.object({ title : z.string()})})), featureController.createFeature);
 
 
 featureRegistry.registerPath({
@@ -84,7 +92,12 @@ featureRegistry.registerPath({
     body: {
       content: {
         'application/json': {
-          schema: UpdateFeatureSchema
+          schema: {
+               type : "object", 
+               properties : {
+                  title : { type : "string",  },
+               }
+          }
         }
       }
     }
@@ -92,7 +105,7 @@ featureRegistry.registerPath({
   responses: createApiResponse(FeatureSchema, "Success"),
 });
 
-featureRouter.put("/:id",  validateRequest(z.object({ body : UpdateFeatureSchema})), featureController.updateFeature);
+featureRouter.put("/:id", validateRequest(z.object({ body : z.object({ title : z.string()})})),  featureController.updateFeature);
 
 featureRegistry.registerPath({
   method: "delete",

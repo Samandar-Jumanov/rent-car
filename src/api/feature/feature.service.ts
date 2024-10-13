@@ -75,12 +75,15 @@ export class FeatureService {
   }
 
   
-  async updateFeature(id: string, data: UpdateFeatureRequest): Promise<ServiceResponse<IFeature | null>> {
+  async updateFeature(id: string, title : string ): Promise<ServiceResponse<IFeature | null>> {
     try {
       const feature = await prisma.feature.update({
         where: { id },
-        data,
+        data : {
+            title : title,
+        },
       });
+
       return ServiceResponse.success<IFeature>("Feature updated successfully", feature as IFeature);
     } catch (ex) {
       const errorMessage = `Error updating feature: ${(ex as Error).message}`;

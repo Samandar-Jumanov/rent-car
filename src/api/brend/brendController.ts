@@ -4,6 +4,7 @@ import { handleServiceResponse } from "@/common/utils/httpHandlers";
 import { brendService } from "./brendService";
 import { carService } from "./cars/cars.service";
 import { QueryBrend } from "./brendModel";
+import { logger } from "@/server";
 
 class BrendController {
 
@@ -41,7 +42,6 @@ class BrendController {
     const body =  req.body
     const logo = req.file
     const userId = req.user?.userId
-
     const serviceResponse = await brendService.createBrand(body , String(userId) , String(logo?.path));
     return handleServiceResponse(serviceResponse, res);
   };

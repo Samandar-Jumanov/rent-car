@@ -26,7 +26,12 @@ class BannersController {
   public createBanner: RequestHandler = async (req: Request, res: Response) => {
     const body: CreateBannersRequest = req.body;
     const carId = req.params.carId;
-    const serviceResponse = await bannersService.createBanner(body , String(carId));
+    const data = {
+         title : body.title,
+         choosenImage : req.file?.path
+    }
+    
+    const serviceResponse = await bannersService.createBanner(data , String(carId));
     return handleServiceResponse(serviceResponse, res);
   };
 

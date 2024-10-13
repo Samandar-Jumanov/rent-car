@@ -94,9 +94,6 @@ async  getAllBrands (  ) : Promise<ServiceResponse<IBrend[] | null>> {
 
         prisma.brand.count()
       ]);
-
-      logger.info('Requet comne ')
-
       return ServiceResponse.success<{ brands: IBrend[], totalCount: number }>(
         "Brands found",
         { 
@@ -323,14 +320,12 @@ async  getAllBrands (  ) : Promise<ServiceResponse<IBrend[] | null>> {
           logo,
           userId,
           ratings: [],
-
-
-
           averageRating: 0,
         },
       });
 
       const { password , ...rest } = newBrand
+
       return ServiceResponse.success("Brand created successfully", rest, StatusCodes.CREATED);
     } catch (error : any ) {
       const errorMessage = `Error creating brand: ${(error as Error).message}`;
@@ -339,13 +334,11 @@ async  getAllBrands (  ) : Promise<ServiceResponse<IBrend[] | null>> {
     }
 }
 
-
    async deleteBrend ( id : string ) : Promise<ServiceResponse<any  | null>>  {
     try {
       const brend = await prisma.brand.delete({
           where : { id }
       })
-
       if(!brend) {
            return ServiceResponse.failure("Brend not found", null, StatusCodes.NOT_FOUND)
       }
@@ -360,16 +353,20 @@ async  getAllBrands (  ) : Promise<ServiceResponse<IBrend[] | null>> {
 
    async updateBrend ( id : string  , data : UpdateBrendRequest) : Promise<ServiceResponse<any  | null>>  {
     try {
-      const brend = await prisma.brand.update({
+      const brend = await prisma.brand.findUnique({
         where : { id },
-        data : {
-              ...data 
-        }
       })
       
       if(!brend) {
            return ServiceResponse.failure("Brend not found", null, StatusCodes.NOT_FOUND)
       }
+
+      await prisma.brand.update({
+        where : { id },
+        data : {
+             ...data 
+        }
+      })
 
       return ServiceResponse.success("Brand updated successfully", brend, StatusCodes.CREATED);
     } catch (error : any ) {
@@ -380,7 +377,4 @@ async  getAllBrands (  ) : Promise<ServiceResponse<IBrend[] | null>> {
    }
    
 }
-
-
-
 export const brendService = new BrendService();

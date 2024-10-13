@@ -22,14 +22,21 @@ class FeatureController {
 
   public createFeature: RequestHandler = async (req: Request, res: Response) => {
     const body: CreateFeatureRequest = req.body;
-    const serviceResponse = await featureService.createFeature(body);
+    const file = req.file
+    const data = {
+        title : body.title,
+        icon : String(file?.path)
+    }
+    const serviceResponse = await featureService.createFeature(data);
     return handleServiceResponse(serviceResponse, res);
   };
 
   public updateFeature: RequestHandler = async (req: Request, res: Response) => {
     const id = req.params.id;
-    const body: UpdateFeatureRequest = req.body;
-    const serviceResponse = await featureService.updateFeature(id, body);
+    const body: { title : string } = req.body;
+    
+
+    const serviceResponse = await featureService.updateFeature(id, body.title);
     return handleServiceResponse(serviceResponse, res);
   };
 

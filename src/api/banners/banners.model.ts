@@ -24,7 +24,6 @@ export const BannersSchema = z.object({
 
 export const CreateBannersSchema = z.object({
   title: z.string(),
-  choosenImage : z.string(),
 });
 
 export const GetBannersSchema = z.object({
