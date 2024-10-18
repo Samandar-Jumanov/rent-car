@@ -6,6 +6,35 @@ import { CreateCarRequest, UpdateCarRequest, CreateRentalRequest, ICar, IRental 
 import { JwtPayload } from "jsonwebtoken";
 
 export class CarService {
+
+
+  async getAllCars ( ) {
+    try {
+      const cars = await prisma.car.findMany({
+         include :  {
+            rentals : true ,
+            banners : true ,
+            brand : true ,
+            discounts : true ,
+            reviews : true ,
+            model : true ,
+            carBrend : true, 
+            carColor : true
+         }
+      });
+
+      return ServiceResponse.success("Cars found", cars);
+    } catch (ex) {
+      const errorMessage = `Error finding all cars : ${(ex as Error).message}`;
+      logger.error(errorMessage);
+      return ServiceResponse.failure(
+        "An error occurred while retrieving cars.",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
+    }
+    }
+
   async orderBrendCar(
     brandId: string,
     carId: string,

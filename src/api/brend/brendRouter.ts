@@ -15,6 +15,16 @@ export const brendRouter: Router = express.Router();
 // Brend routes
 brendRegistry.register("Brend", BrendSchema);
 
+
+// GET all cars 
+brendRegistry.registerPath({
+  method: "get",
+  path: "/brends/cars",
+  tags: ["Brend"],
+  responses: createApiResponse(z.any(), "Success"),
+});
+brendRouter.get("/cars", brendController.getAllCars)
+
 // for super addmin 
 brendRegistry.registerPath({
   method: "get",
@@ -351,6 +361,8 @@ brendRouter.post("/:brendId/car/add",
   brendController.addCar
 );
 
+
+
 // GET /brends/:brendId/car/:carId
 brendRegistry.registerPath({
   method: "get",
@@ -366,3 +378,5 @@ brendRegistry.registerPath({
 });
 
 brendRouter.get("/:brendId/car/:carId", authMiddleware, brendController.getCar)
+
+

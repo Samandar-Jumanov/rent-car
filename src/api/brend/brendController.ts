@@ -133,6 +133,11 @@ public getCar  : RequestHandler = async (req: Request, res: Response) => {
   return handleServiceResponse(serviceResponse, res);
 }
 
+public getAllCars  : RequestHandler = async (req: Request, res: Response) => {
+  const serviceResponse = await carService.getAllCars()
+  return handleServiceResponse(serviceResponse, res);
+}
+
 public updateBrand  : RequestHandler = async (req: Request, res: Response) => {
   const brandId = req.params.id
   const body = req.body

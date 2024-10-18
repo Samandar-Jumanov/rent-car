@@ -6,9 +6,6 @@ extendZodWithOpenApi(z);
 
 const CarStatusEnum = z.enum(['FREE', "RENTED"]);
 
-const DecimalSchema = z.instanceof(Decimal).or(z.string()).or(z.number())
-  .transform((value) => new Decimal(value));
-
 export interface ICar {
   id: string;
   brendId: string; 
