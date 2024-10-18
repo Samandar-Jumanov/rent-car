@@ -9,12 +9,44 @@ import { validateRequest } from "@/common/utils/httpHandlers";
 import { userController } from "./userController";
 import { authMiddleware, checkRole } from "@/common/middleware/auth";
 import { upload } from "../aws/multer.service";
-import { CreateBlockedUsersSchema, GetBlockedUsersSchema , CreateAgentBlockSchema, AdminBlockUser, AgentBlockSchema  } from "./block/block.model";
+import { CreateAgentBlockSchema, AdminBlockUser, AgentBlockSchema  } from "./block/block.model";
 import { SessionsSchema } from "./sessions/sessions.model";
 export const userRegistry = new OpenAPIRegistry();
 export const userRouter: Router = express.Router();
 
 userRegistry.register("User", UserSchema); // register
+
+userRegistry.registerPath({
+  method: "get",
+  path: "/users/rentals",
+  tags: ["User"],
+  responses: createApiResponse(z.any() ,"Success" )
+});
+
+userRouter.get("/rentals", authMiddleware , userController.getUserRentals);
+
+
+userRegistry.registerPath({
+  method: "post",
+  path: "/users/agent",
+  description : "Agent uchun login",
+  tags: ["User"],
+  request : {
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+              ownerNumber : z.string(),
+              password : z.string()
+          })
+        }
+      }
+    }
+  },
+  responses: createApiResponse(z.any() ,"Success" )
+});
+userRouter.post("/agent" , userController.brandLogin);
+
 
 userRegistry.registerPath({
   method: "get",
@@ -38,13 +70,12 @@ userRouter.get("/", userController.getUsers);
 
 userRegistry.registerPath({ // get single 
   method: "get",
-  path: "/users/{id}",
+  path: "/users/single",
   tags: ["User"],
-  request: { params: GetUserSchema.shape.params },
   responses: createApiResponse(UserSchema, "Success"),
 });
 
-userRouter.get("/:id", authMiddleware ,  validateRequest(GetUserSchema), userController.getUser);
+userRouter.get("/single", authMiddleware , userController.getUser);
 
 userRegistry.registerPath({  // create user 
   method: "post",

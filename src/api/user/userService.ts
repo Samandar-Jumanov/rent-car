@@ -273,12 +273,15 @@ export class UserService {
     }
   }
 
-  async getRentals( userId : string  , role : string ) : Promise<ServiceResponse<IRental[] | null>> {
+  async getRentals( userId : string  ) : Promise<ServiceResponse<IRental[] | null>> {
     try {
         const user = await prisma.user.findUnique({ where :  {id : userId} , include : { rentals : {
             include : {
-                  user : role === "ADMIN",
-                  car : true,
+                  car : {
+                      include : {
+                           brand : true 
+                      }
+                  },
                   requirements  : true 
             }
         } }});
@@ -375,9 +378,7 @@ export class UserService {
         logger.warn("User not foudn")
         return ServiceResponse.failure("User not found", null, StatusCodes.NOT_FOUND);
       }
-      
 
-      logger.warn({ data })
       const validPassword = await bcrypt.compare(data.password, String(user.password));
 
      logger.warn(`Password validation result: ${validPassword ? 'Valid' : 'Invalid'}`);
@@ -400,7 +401,6 @@ export class UserService {
 
 async adminSettings ( data : { adminPassword : string, password : string } , userId : string ) : Promise<ServiceResponse<boolean>> {
   try {
-
     const user = await prisma.user.findUnique({ where: { id : userId } });
      
      if (!user ) {
@@ -431,6 +431,35 @@ async adminSettings ( data : { adminPassword : string, password : string } , use
        false,
      )
   }  
+}
+
+
+async  brandLogin (  data : { ownerNumber : string , password : string }) {
+  try {
+    const brandOwner  = await prisma.brand.findUnique({ where: {  ownerNumber : data.ownerNumber } });
+
+    if(!brandOwner) {
+          return ServiceResponse.failure('Could not find owner' , null , StatusCodes.NOT_FOUND)
+    }
+
+    // const isValidPassword  = await bcrypt.compare(data.password , brandOwner.password)
+
+    // if(!isValidPassword) {
+    //     return ServiceResponse.success("Invalid password ", true  ,StatusCodes.BAD_REQUEST);
+    // };
+
+    // TO DO UNCOMMENT TO CHECK PASSWORD 
+
+    
+     return ServiceResponse.success("Logged in succesfully ", brandOwner  ,StatusCodes.OK);
+   } catch (ex) {
+     const errorMessage = `Error logging in: ${(ex as Error).message}`;
+     logger.error(errorMessage);
+     return ServiceResponse.failure(
+       "An error occurred while logging in.",
+       false,
+     )
+  } 
 }
 
 }

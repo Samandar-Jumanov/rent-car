@@ -32,8 +32,7 @@ brendRegistry.registerPath({
   tags: ["Brend"],
   responses: createApiResponse(z.array(BrendSchema), "Success"),
 });
-brendRouter.get("/all", brendController.getAllBrends);
-
+brendRouter.get("/all", authMiddleware ,  brendController.getAllBrends);
 
 
 brendRegistry.registerPath({

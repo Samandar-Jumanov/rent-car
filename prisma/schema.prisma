@@ -63,12 +63,14 @@ model TopBrend {
 }
 
 model Brand {
+  // rentals should be here also 
+  
   id             String           @id @default(cuid())
   userId         String
   user           User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   logo           String
   brendName      String
-  ownerNumber    String 
+  ownerNumber    String           @unique
   cityId         String  
   password       String 
   carDelivery    CarDelivery      @default(TAKE_AWAY)
@@ -87,6 +89,7 @@ model Brand {
   cars           Car[]
   discounts      Discount?
   reviews        Reviews[]
+  rentals        Rental[]
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
 }
@@ -203,12 +206,16 @@ model Requirements {
 }
 
 model Rental {
+
   id                String        @id @default(cuid())
   userId            String
   carId             String
+  brandId           String
   user              User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   car               Car           @relation(fields: [carId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  brand             Brand         @relation(fields: [brandId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
+  isReturned          Boolean        @default(false)
   rentalStart       String
   rentalEnd         String
   pickupTime        String

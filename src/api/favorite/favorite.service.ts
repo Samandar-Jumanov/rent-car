@@ -7,16 +7,12 @@ import { IFavorite } from "./favorite.model";
 export class FavoriteService {
   async createFavorite(userId : string , carId : string ): Promise<ServiceResponse<IFavorite | null>> {
     try {
-      
-
       const favorite = await prisma.favorite.create({
         data: {
              carId ,
              userId
         },
       });
-
-
       return ServiceResponse.success<IFavorite>("Favorite created successfully", favorite);
     } catch (ex) {
       const errorMessage = `Error creating favorite: ${(ex as Error).message}`;

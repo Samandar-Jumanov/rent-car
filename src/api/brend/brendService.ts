@@ -16,11 +16,27 @@ export class BrendService {
  async  getBrends( regionId : string ) : Promise<ServiceResponse<IBrend[] | null>> {
   try {
     const brands = await prisma.brand.findMany({
-      include: {
+      select: {
         cars: true,
         city: true,
         discounts: true,
-        reviews: true
+        reviews: true,
+        rentals: true,
+        topBrend : true,
+        colloboratedCars : true,
+        
+
+        password : false,
+        payment: true,
+        logo : true,
+        brendName : true,
+        ownerNumber : true ,
+        averageRating : true,
+        ratings : true,
+        userId : false,
+        carDelivery : true,
+        createdAt : true ,
+        updatedAt : true,
       },
       where : {
          city : {
@@ -28,7 +44,9 @@ export class BrendService {
          }
       }
     });
-    return ServiceResponse.success<IBrend[] | null>("Brands found", brands);
+
+
+    return ServiceResponse.success<IBrend[] | null>("Brands found", brands as any[]);
   } catch (ex) {
     const errorMessage = `Error finding all brands : ${(ex as Error).message}`;
     logger.error(errorMessage);
@@ -48,15 +66,31 @@ async  getAllBrands (  ) : Promise<ServiceResponse<IBrend[] | null>> {
           some: {} 
         }
       },
-      include: {
+      select: {
         cars: true,
         city: true,
         discounts: true,
-        reviews: true
+        reviews: true,
+        rentals: true,
+        topBrend : true,
+        colloboratedCars : true,
+        
+
+        password : false,
+        payment: true,
+        logo : true,
+        brendName : true,
+        ownerNumber : true ,
+        averageRating : true,
+        ratings : true,
+        userId : false,
+        carDelivery : true,
+        createdAt : true ,
+        updatedAt : true,
       }
     });
 
-    return ServiceResponse.success<IBrend[] | null>("Brands found", brands);
+    return ServiceResponse.success<IBrend[] | null>("Brands found", brands as any );
   } catch (ex) {
     const errorMessage = `Error finding all brands : ${(ex as Error).message}`;
     logger.error(errorMessage);
@@ -78,14 +112,27 @@ async  getAllBrands (  ) : Promise<ServiceResponse<IBrend[] | null>> {
         prisma.brand.findMany({
           skip,
           take: pageSize,
-          include: {
-            city: {
-              include : {
-                  region : true 
-              }
-            },
+          select: {
             cars: true,
+            city: true,
+            discounts: true,
             reviews: true,
+            rentals: true,
+            topBrend : true,
+            colloboratedCars : true,
+            
+    
+            password : false,
+            payment: true,
+            logo : true,
+            brendName : true,
+            ownerNumber : true ,
+            averageRating : true,
+            ratings : true,
+            userId : false,
+            carDelivery : true,
+            createdAt : true ,
+            updatedAt : true,
           },
           orderBy: {
             createdAt: 'desc' 
@@ -97,7 +144,7 @@ async  getAllBrands (  ) : Promise<ServiceResponse<IBrend[] | null>> {
       return ServiceResponse.success<{ brands: IBrend[], totalCount: number }>(
         "Brands found",
         { 
-          brands: brends, 
+          brands: brends as any , 
           totalCount 
         }
       );
@@ -113,36 +160,54 @@ async  getAllBrands (  ) : Promise<ServiceResponse<IBrend[] | null>> {
     }
   }
 
- async getTopBrends(regionId: string): Promise<ServiceResponse<ITopBrend[] | null >> {
-  try {
-    const topBrends = await prisma.topBrend.findMany({
-      where: {
-        brend: {
-          city: {
-            regionId: regionId
+  async getTopBrends(regionId: string): Promise<ServiceResponse<ITopBrend[] | null>> {
+    try {
+      const topBrends = await prisma.topBrend.findMany({
+        where: {
+          brend: {
+            city: {
+              regionId: regionId
+            }
           }
-        }
-      },
-      include: {
-        brend: {
-          include: {
-            cars: {
-              include: {
-                rentals: true
-              }
+        },
+        include: {
+          brend: {
+            select: {
+              id: true,
+              logo: true,
+              brendName: true,
+              ownerNumber: true,
+              cityId: true,
+              carDelivery: true,
+              topBrendId: true,
+              payment: true,
+              ratings: true,
+              averageRating: true,
+              createdAt: true,
+              updatedAt: true,
+              cars: {
+                include: {
+                  rentals: true
+                }
+              },
+              city: true,
+              discounts: true,
+              reviews: true,
+              rentals: true,
+              topBrend: true,
+              colloboratedCars: true,
             }
           }
         }
-      }
-    });
-
-    return ServiceResponse.success<ITopBrend[]>("Top brands found", topBrends);
-  } catch (ex) {
-    const errorMessage = `Error finding top brands: ${(ex as Error).message}`;
-    logger.error(errorMessage);
-    return ServiceResponse.failure("An error occurred while finding top brands.", null, StatusCodes.INTERNAL_SERVER_ERROR);
+      });
+      
+      return ServiceResponse.success<ITopBrend[]>("Top brands found", topBrends);
+    } catch (ex) {
+      const errorMessage = `Error finding top brands: ${(ex as Error).message}`;
+      logger.error(errorMessage);
+      return ServiceResponse.failure("An error occurred while finding top brands.", null, StatusCodes.INTERNAL_SERVER_ERROR);
+    }
   }
-}
 
   async getBrendById(brendId: string): Promise<ServiceResponse<IBrend | null>> {
     try {

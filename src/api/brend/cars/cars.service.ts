@@ -8,6 +8,8 @@ import { JwtPayload } from "jsonwebtoken";
 export class CarService {
 
 
+  // here liked cars on users 
+
   async getAllCars ( ) {
     try {
       const cars = await prisma.car.findMany({
@@ -78,10 +80,11 @@ export class CarService {
           },
           user: { connect: { id: existingUser.id } },
           car: { connect: { id: carId } },
+          brand : { connect : { id: brandId }}
         }
       });
 
-      return ServiceResponse.success<IRental | null>("Order created successfully", newRental as IRental, StatusCodes.CREATED);
+      return ServiceResponse.success<IRental | null>("Order created successfully", newRental as any , StatusCodes.CREATED); //  TO DO should be changed later to correct type
     } catch (ex) {
       logger.error(`Error creating order: ${(ex as Error).message}`);
       return ServiceResponse.failure(
@@ -95,7 +98,10 @@ export class CarService {
   async cancelOrder(rentalId: string): Promise<ServiceResponse<IRental | null>> {
     try {
       const cancelled = await prisma.rental.delete({
-        where: { id: rentalId }
+        where: { id: rentalId },
+        include : {
+             requirements : true 
+        }
       });
       return ServiceResponse.success<IRental | null>("Order cancelled", cancelled as IRental, StatusCodes.OK);
     } catch (ex) {

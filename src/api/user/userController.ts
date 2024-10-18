@@ -4,7 +4,6 @@ import { userService } from "@/api/user/userService";
 import { handleServiceResponse } from "@/common/utils/httpHandlers";
 import { CreateUserRequest, UpdateUserRequest, VerifyUserSchemaRequest , AdminLoginRequest} from "./userModel";
 import { blockService } from "./block/block.service";
-import { logger } from "@/server";
 
 class UserController {
   public getUsers: RequestHandler = async (req: Request, res: Response) => {
@@ -15,11 +14,19 @@ class UserController {
   };
 
   public getUser: RequestHandler = async (req: Request, res: Response) => {
-    const id = req.params.id 
-    const serviceResponse = await userService.findUser(id);
+    const user = req.user
+    const serviceResponse = await userService.findUser(String(user?.userId));
     return handleServiceResponse(serviceResponse, res);
   };
 
+  public getUserRentals : RequestHandler = async (req: Request, res: Response) => {
+    const user = req.user
+    const serviceResponse = await userService.getRentals(String(user?.userId));
+    return handleServiceResponse(serviceResponse, res);
+  };
+
+
+  // agent / brand login should here also
 
 
   public createUser: RequestHandler = async (req: Request, res: Response) => {
@@ -152,6 +159,12 @@ class UserController {
   public adminLogin : RequestHandler = async (req: Request, res: Response) => {
     const body : AdminLoginRequest  =  req.body;
     const serviceResponse = await userService.adminLogin(body);
+    return handleServiceResponse(serviceResponse, res);
+  }
+
+  public brandLogin : RequestHandler = async (req: Request, res: Response) => {
+    const body : { ownerNumber : string , password : string }  =  req.body;
+    const serviceResponse = await userService.brandLogin(body);
     return handleServiceResponse(serviceResponse, res);
   }
 }
