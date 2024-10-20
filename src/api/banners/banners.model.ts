@@ -31,11 +31,8 @@ export const GetBannersSchema = z.object({
 });
 
 export const UpdateBannersSchema = z.object({
-  title: z.string().optional(),
-  choosenImage : z.string().optional(),
-}).refine(data => Object.values(data).some(value => value !== undefined), {
-  message: "At least one field must be provided for update"
-});
+  title: z.string(),
+})
 
 export type CreateBannersRequest = z.infer<typeof CreateBannersSchema>;
 export type UpdateBannersRequest = z.infer<typeof UpdateBannersSchema>;

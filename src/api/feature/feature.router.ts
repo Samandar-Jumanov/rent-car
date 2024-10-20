@@ -6,7 +6,7 @@ import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
 import { FeatureSchema, CreateFeatureSchema, GetFeatureSchema, UpdateFeatureSchema, ApplyFeatureSchema } from "./feature.model";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { featureController } from "./feature.controller";
-import { upload } from "../aws/multer.service";
+import { upload } from "../supabase/multer.service";
 import { authMiddleware, checkRole } from "@/common/middleware/auth";
 
 export const featureRegistry = new OpenAPIRegistry();

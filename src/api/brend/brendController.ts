@@ -5,6 +5,7 @@ import { brendService } from "./brendService";
 import { carService } from "./cars/cars.service";
 import { QueryBrend } from "./brendModel";
 import { logger } from "@/server";
+import { uploadFile } from "../supabase/storage";
 
 class BrendController {
 
@@ -40,9 +41,19 @@ class BrendController {
   
   public createBrend: RequestHandler = async (req: Request, res: Response) => {
     const body =  req.body
-    const logo = req.file
+    const file = req.file
+    
+    if (!file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+ 
+    if (!file.mimetype.startsWith('image/')) {
+        return res.status(400).json({ message: 'Uploaded file is not an image' });
+    }
+
+    const logoUrl = await uploadFile(file)
     const userId = req.user?.userId
-    const serviceResponse = await brendService.createBrand(body , String(userId) , String(logo?.path));
+    const serviceResponse = await brendService.createBrand(body , String(userId) , logoUrl);
     return handleServiceResponse(serviceResponse, res);
   };
 

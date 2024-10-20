@@ -6,7 +6,7 @@ import { GetBrendSchema, BrendSchema, CreateBrendSchema, QueryBrendSchema, Updat
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { brendController } from "./brendController";
 import { CreateCarSchema, CreateRentalSchema, DeleteRentalSchema, GetCarSchema } from "./cars/carsModel";
-import { upload } from "../aws/multer.service";
+import { upload } from "../supabase/multer.service";
 import { authMiddleware, checkRole } from "@/common/middleware/auth";
 
 export const brendRegistry = new OpenAPIRegistry();

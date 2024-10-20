@@ -3,7 +3,8 @@ import { StatusCodes } from "http-status-codes";
 import { ServiceResponse } from "@/common/models/serviceResponse";
 import { logger } from "@/server";
 import prisma from "@/common/db/prisma";
-import { IBanners, CreateBannersRequest, UpdateBannersRequest } from "./banners.model";
+import { IBanners, UpdateBannersRequest } from "./banners.model";
+import { deleteFile } from "../supabase/storage";
 
 export class BannersService {
   async findAll() : Promise<ServiceResponse< IBanners[] | null >> {
@@ -48,7 +49,7 @@ export class BannersService {
         "Banners  found",
         { 
           banners: banners, 
-          totalCount  : banners.length
+          totalCount  : totalCount
         }
       );
       
@@ -77,7 +78,7 @@ export class BannersService {
     }
   }
 
-  async createBanner(data: CreateBannersRequest , carId : string ): Promise<ServiceResponse<IBanners | null>> {
+  async createBanner(data: { title : string , choosenImage : string} , carId : string ): Promise<ServiceResponse<IBanners | null>> {
     try {
       const banner = await prisma.banners.create({ data : {
              ...data , carId
@@ -95,16 +96,39 @@ export class BannersService {
     }
   }
 
-  async updateBanner(id: string, data: UpdateBannersRequest): Promise<ServiceResponse<IBanners | null>> {
+  async updateBanner(id: string, data: { title?: string, choosenImage?: string }): Promise<ServiceResponse<IBanners | null>> {
     try {
-      const banner = await prisma.banners.update({
+      const existingBanner = await prisma.banners.findUnique({ where: { id } });
+      
+      if (!existingBanner) {
+        return ServiceResponse.failure("Banner not found", null, StatusCodes.NOT_FOUND);
+      }
+  
+      const newData = {
+        ...(data.title && { title: data.title }),
+        ...(data.choosenImage && { choosenImage: data.choosenImage })
+      };
+  
+      if (Object.keys(newData).length === 0) {
+        return ServiceResponse.failure("No valid update data provided", null, StatusCodes.BAD_REQUEST);
+      }
+  
+      const updatedBanner = await prisma.banners.update({
         where: { id },
-        data,
+        data: newData,
       });
-      return ServiceResponse.success<IBanners>("Banner updated successfully", banner as IBanners);
+  
+      if (data.choosenImage && existingBanner.choosenImage) {
+        const oldFileName = existingBanner.choosenImage.split("/").pop();
+        if (oldFileName) {
+          await deleteFile(oldFileName);
+        }
+      }
+  
+      return ServiceResponse.success<IBanners>("Banner updated successfully", updatedBanner as IBanners);
     } catch (ex) {
       const errorMessage = `Error updating banner: ${(ex as Error).message}`;
-      logger.error(errorMessage);
+      logger.error({ action: 'updateBanner', error: errorMessage });
       return ServiceResponse.failure(
         "An error occurred while updating the banner.",
         null,
@@ -115,7 +139,10 @@ export class BannersService {
 
   async deleteBanner(id: string): Promise<ServiceResponse<boolean>> {
     try {
-      await prisma.banners.delete({ where: { id } });
+      const banner = await prisma.banners.delete({ where: { id } });
+
+      await deleteFile(String(banner.choosenImage.split("/").pop())) // delete file from supabase 
+
       return ServiceResponse.success("Banner deleted successfully", true);
     } catch (ex) {
       const errorMessage = `Error deleting banner: ${(ex as Error).message}`;

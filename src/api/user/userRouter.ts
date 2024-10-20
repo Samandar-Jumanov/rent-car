@@ -8,7 +8,7 @@ import { GetUserSchema, UserSchema, CreateUserSchema, VerifyUserSchema, UpdateUs
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { userController } from "./userController";
 import { authMiddleware, checkRole } from "@/common/middleware/auth";
-import { upload } from "../aws/multer.service";
+import { upload } from "../supabase/multer.service";
 import { CreateAgentBlockSchema, AdminBlockUser, AgentBlockSchema  } from "./block/block.model";
 import { SessionsSchema } from "./sessions/sessions.model";
 export const userRegistry = new OpenAPIRegistry();

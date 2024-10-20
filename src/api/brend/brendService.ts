@@ -5,6 +5,7 @@ import prisma from "@/common/db/prisma";
 import { CreateReviewRequest, IBrend , IReviewSchema, QueryBrend , CreateBrendRequest, UpdateBrendRequest   } from "./brendModel";
 import { ITopBrend } from "./topBrend/topBrendModel";
 import bcrypt from "bcrypt"
+import { deleteFile } from "../supabase/storage";
 
 type QueryBrendResult = {
   data: Omit<IBrend, 'password'>[];
@@ -404,9 +405,12 @@ async  getAllBrands (  ) : Promise<ServiceResponse<IBrend[] | null>> {
       const brend = await prisma.brand.delete({
           where : { id }
       })
+
       if(!brend) {
            return ServiceResponse.failure("Brend not found", null, StatusCodes.NOT_FOUND)
       }
+      await deleteFile(String(brend.logo.split("/").pop())) // delete file from supabase 
+
       return ServiceResponse.success("Brand deleted successfully", brend, StatusCodes.CREATED);
     } catch (error : any ) {
       const errorMessage = `Error deleting brand: ${(error as Error).message}`;

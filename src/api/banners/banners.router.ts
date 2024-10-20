@@ -7,7 +7,7 @@ import { BannersSchema, CreateBannersSchema, GetBannersSchema, UpdateBannersSche
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { bannersController } from "./banners.controller";
 import { authMiddleware, checkRole } from "@/common/middleware/auth";
-import { upload } from "../aws/multer.service";
+import { upload } from "../supabase/multer.service";
 
 export const bannersRegistry = new OpenAPIRegistry();
 export const bannersRouter: Router = express.Router();
@@ -22,8 +22,6 @@ bannersRegistry.registerPath({
 });
 
 bannersRouter.get("/",  authMiddleware  , bannersController.getBanners);
-
-
 
 bannersRegistry.registerPath({
   method: "get",
@@ -57,19 +55,22 @@ bannersRegistry.registerPath({
         'multipart/form-data': {
           schema: {
             type: "object",
-           properties: {
-            choosenImage: { type: "string", format: "binary" },
-           title: { type: "string" },
+            properties: {
+            choosenImage: { type: "string", format: "binary"  },
+            title: { type: "string" },
+              },
+      required : ['choosenImage' , 'title']
+          }
+       }
       }
-    }
   }
-}
-    }
   },
   responses: createApiResponse(BannersSchema, "Success"),
 });
 
-bannersRouter.post("/:carId", authMiddleware , upload.single("choosenImage") ,  checkRole(["SUPER_ADMIN"]),  validateRequest(z.object({ body: CreateBannersSchema })), bannersController.createBanner);
+bannersRouter.post("/:carId", authMiddleware , upload.single("choosenImage") ,
+ checkRole(["SUPER_ADMIN"]), 
+  validateRequest(z.object({ body: CreateBannersSchema })), bannersController.createBanner);
 
 bannersRegistry.registerPath({
   method: "put",
@@ -79,8 +80,15 @@ bannersRegistry.registerPath({
     params: GetBannersSchema.shape.params,
     body: {
       content: {
-        'application/json': {
-          schema: UpdateBannersSchema
+        'multipart/form-data': {
+          schema: {
+            type: "object",
+            properties: {
+            choosenImage: { type: "string", format: "binary"  },
+            title: { type: "string" },
+              },
+             required : [ 'title']
+          }
         }
       }
     }
@@ -88,7 +96,11 @@ bannersRegistry.registerPath({
   responses: createApiResponse(BannersSchema, "Success"),
 });
 
-bannersRouter.put("/:id", authMiddleware , checkRole(["SUPER_ADMIN"]),  validateRequest(z.object({ params: GetBannersSchema.shape.params, body: UpdateBannersSchema })), bannersController.updateBanner);
+bannersRouter.put("/:id", authMiddleware ,
+  upload.single("choosenImage") ,  // checkRole(["SUPER_ADMIN"]),  // required for update image
+   checkRole(["SUPER_ADMIN"]), 
+    validateRequest(z.object({ params: GetBannersSchema.shape.params })), 
+    bannersController.updateBanner);
 
 bannersRegistry.registerPath({
   method: "delete",
