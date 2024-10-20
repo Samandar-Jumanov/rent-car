@@ -26,6 +26,10 @@ function returnFileUrl(path: string): string {
 
 export const uploadFile = async (file: Express.Multer.File): Promise<string> => {
     try {
+
+      if(!file) {
+          throw new Error("No file provided");
+      }
         const filePath = generateRandomFilePath("Unique", file);
 
         const { data, error } = await supabase.storage

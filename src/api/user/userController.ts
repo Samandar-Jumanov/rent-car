@@ -4,8 +4,10 @@ import { userService } from "@/api/user/userService";
 import { handleServiceResponse } from "@/common/utils/httpHandlers";
 import { CreateUserRequest, UpdateUserRequest, VerifyUserSchemaRequest , AdminLoginRequest} from "./userModel";
 import { blockService } from "./block/block.service";
+import { uploadFile } from "../supabase/storage";
 
 class UserController {
+
   public getUsers: RequestHandler = async (req: Request, res: Response) => {
     const currentPage = req.query.currentPage;
     const pageSize = req.query.pageSize
@@ -26,18 +28,17 @@ class UserController {
   };
 
 
-  // agent / brand login should here also
-
 
   public createUser: RequestHandler = async (req: Request, res: Response) => {
     const body : CreateUserRequest  =  req.body;
     const query = req.query
 
-    const queryData = {
-           location : String(query.location),
-           role :  query.role as any
+    const data = {
+         ...body ,
+         location : String(query.location)
     }
-    const serviceResponse = await userService.createUser(body , queryData);
+
+    const serviceResponse = await userService.createUser(data);
     return handleServiceResponse(serviceResponse, res);
   };
 
@@ -62,10 +63,9 @@ class UserController {
       return res.status(400).json({ message: 'No file uploaded' });
     }
     
-    // Use the actual path where the file was saved
-    const imagePath = file.path;
+    const imageUrl = await uploadFile(file)
     
-    const serviceResponse = await userService.uploadImage(imagePath, String(userId));
+    const serviceResponse = await userService.uploadImage(imageUrl, String(userId));
     return handleServiceResponse(serviceResponse, res);
   };
 
@@ -104,7 +104,6 @@ class UserController {
     const serviceResponse = await blockService.getBlockedUsers( );
     return handleServiceResponse(serviceResponse, res);
   };
-
   
   public updatePassword : RequestHandler  = async (req: Request, res: Response) => {
     const data = req.body
@@ -113,7 +112,6 @@ class UserController {
     return handleServiceResponse(serviceResponse, res);
   };
   
-
   
 
   // agent 

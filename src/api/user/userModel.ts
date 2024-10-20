@@ -39,7 +39,6 @@ export const GetUserSchema = z.object({
 
 export const CreateUserSchema = z.object({
   phoneNumber: z.string(),
-  password : z.string().optional(),
 });
 
 

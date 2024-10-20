@@ -57,37 +57,49 @@ class BrendController {
     return handleServiceResponse(serviceResponse, res);
   };
 
-
   public createOrder: RequestHandler = async (req: Request, res: Response) => {
     const user = req.user;
     const brendId = req.query.brendId as string;
     const carId = req.query.carId as string;
-  
-    if (!brendId || !carId || !user) {
-      return res.status(400).json({ error: 'brendId and carId are required query parameters' });
+
+    if(!brendId || !carId) {
+      return res.status(400).json({ error: 'Brend Id and carId is required' });
+    }
+    if (!user) {
+      return res.status(400).json({ error: 'User is not  logged in ' });
     }
   
     const body = req.body;
-
    
 
     // Handle file uploads
+
+    if(!req.files) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+
     const passportImages = (req.files as { [fieldname: string]: Express.Multer.File[] })['passportImages'] || [];
     const driverLicenceImages = (req.files as { [fieldname: string]: Express.Multer.File[] })['driverLicenceImages'] || [];
-  
-    // Convert file information to a format that can be stored (e.g., file paths or URLs)
-    const passportImagePaths = passportImages.map(file => file.path);
-    const driverLicenceImagePaths = driverLicenceImages.map(file => file.path);
+
+    // Upload passport images
+    const passportImageUrls = await Promise.all(
+      passportImages.map(file => uploadFile(file))
+    );
+
+    // Upload driver license images
+    const driverLicenceImageUrls = await Promise.all(
+      driverLicenceImages.map(file => uploadFile(file))
+    );
   
     const serviceResponse = await carService.orderBrendCar(
       brendId, 
       carId, 
       { 
         ...body,
-        passportImages: passportImagePaths, 
-        driverLicenceImages: driverLicenceImagePaths 
+        passportImages: passportImageUrls, 
+        driverLicenceImages: driverLicenceImageUrls 
       },
-
       user
     );
   
@@ -123,19 +135,40 @@ class BrendController {
     return handleServiceResponse(serviceResponse, res);
  }
 
- public addCar  : RequestHandler = async (req: Request, res: Response) => {
-  const brandId  = req.params.brendId
-  const body = req.body
+ public addCar: RequestHandler = async (req: Request, res: Response) => {
+  try {
+    const brandId = req.params.brendId; // Note: Consider renaming this to 'brandId' for consistency
+    const body = req.body;
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
 
-  const data = {
-       ...body
+    if (!files ) {
+      return res.status(400).json({ message: 'No images uploaded' });
+    }
+
+
+    const images = (req.files as { [fieldname: string]: Express.Multer.File[] })['images'] || []
+    const imageUrls: string[] = await Promise.all(images.map(file => uploadFile(file)));
+
+    const carData = {
+      modelId: body.modelId,
+      colorId: body.colorId,
+      carBrendId: body.carBrendId, 
+      title: body.title,
+      price: Number(body.price),
+      isDiscounted: body.isDiscounted === 'true',
+      discountedPrice: body.discountedPrice ? Number(body.discountedPrice) : undefined,
+      status: body.status,
+      images: imageUrls
+    };
+
+    const userId = req.user?.userId;
+    
+    const serviceResponse = await carService.addCar(carData, brandId, String(userId));
+    return handleServiceResponse(serviceResponse, res);
+  } catch (error) {
+    return res.status(500).json({ message: 'Internal server error' });
   }
-
-const userId = req.user?.userId
-
-const serviceResponse = await carService.addCar(data ,String(brandId) , String(userId))
-return handleServiceResponse(serviceResponse, res);
-}
+};
 
 
 public getCar  : RequestHandler = async (req: Request, res: Response) => {

@@ -6,6 +6,7 @@ import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
 import { RequirementsSchema, CreateRequirementsSchema, GetRequirementsSchema, UpdateRequirementsSchema, ApplyRequirementsSchema } from "./requirement.model";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { requirementsController } from "./requirement.controller";
+import { upload } from "../supabase/multer.service";
 
 export const requirementsRegistry = new OpenAPIRegistry();
 export const requirementsRouter: Router = express.Router();
@@ -44,8 +45,16 @@ requirementsRegistry.registerPath({
   request: {
     body: {
       content: {
-        'application/json': {
-          schema: CreateRequirementsSchema
+        'multipart/form-data': {
+          schema: {
+            type: "object",
+            properties: {
+            icon: { type: "string", format: "binary"  },
+            title: { type: "string" },
+            value : { type: "string" }
+              },
+             required : [ 'title' , "icon" , "value"]
+          }
         }
       }
     }
@@ -53,7 +62,7 @@ requirementsRegistry.registerPath({
   responses: createApiResponse(RequirementsSchema, "Success"),
 });
 
-requirementsRouter.post("/",  validateRequest(z.object({ body : CreateRequirementsSchema})), requirementsController.createRequirements);
+requirementsRouter.post("/",  upload.single("icon") ,  validateRequest(z.object({ body : CreateRequirementsSchema})), requirementsController.createRequirements);
 
 requirementsRegistry.registerPath({
   method: "patch",

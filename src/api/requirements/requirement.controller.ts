@@ -2,6 +2,7 @@ import type { Request, RequestHandler, Response } from "express";
 import { requirementsService } from "./requirement.service";
 import { handleServiceResponse } from "@/common/utils/httpHandlers";
 import { CreateRequirementsRequest, UpdateRequirementsRequest } from "./requirement.model";
+import { uploadFile } from "../supabase/storage";
 
 class RequirementsController {
   public getRequirements: RequestHandler = async (req: Request, res: Response) => {
@@ -18,8 +19,25 @@ class RequirementsController {
   };
 
   public createRequirements: RequestHandler = async (req: Request, res: Response) => {
-    const body: CreateRequirementsRequest = req.body;
-    const serviceResponse = await requirementsService.createRequirements(body);
+    const body: CreateRequirementsRequest  = req.body;
+    const file = req.file 
+
+    if (!file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+ 
+    if (!file.mimetype.startsWith('image/')) {
+        return res.status(400).json({ message: 'Uploaded file is not an image' });
+    }
+
+    const imageUrl = await uploadFile(file) 
+
+    const data = {
+         ...body,
+         icon : imageUrl
+    }
+ 
+    const serviceResponse = await requirementsService.createRequirements(data);
     return handleServiceResponse(serviceResponse, res);
   };
 
@@ -40,6 +58,7 @@ class RequirementsController {
     const serviceResponse = await requirementsService.applyRequirements(req.body);
     return handleServiceResponse(serviceResponse, res);
   };
+  
 }
 
 export const requirementsController = new RequirementsController();

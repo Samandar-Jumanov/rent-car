@@ -276,6 +276,7 @@ brendRegistry.registerPath({
 
 brendRouter.post(
   "/order",
+  authMiddleware,
   upload.fields([
     { name: 'userImage', maxCount: 1 },
     { name: 'passportImages', maxCount: 5 },
@@ -335,31 +336,56 @@ brendRegistry.registerPath({
   method: "post",
   path: "/brends/{brendId}/car/add",
   tags: ["Brend"],
-  description: "Not tested yet",
+  summary: "Add a new car to a brand",
+  description: "Add a new car with details to a specific brand",
   request: {
     params: z.object({
-      brendId: z.string() 
+      brendId: z.string()
     }),
     body: {
-      content: {  
-        'application/json': {
-          schema: CreateCarSchema
-        }
-      }
-    }
+      content: {
+        'multipart/form-data': {
+          schema: {
+            type: "object",
+            properties: {
+              modelId: { type: "string" },
+              colorId: { type: "string" },
+              carBrendId: { type: "string" },
+              title: { type: "string" },
+              price: { type: "number" },
+              isDiscounted: { type: "boolean" },
+              discountedPrice: { type: "number" },
+              images: {
+                type: "array",
+                items: {
+                  type: "string",
+                  format: "binary"
+                }
+              },
+
+              status: { 
+                type: "string",
+                enum: ["FREE", "RENTED", "MAINTENANCE"],
+                default: "FREE"
+              }
+            },
+            required: [
+              "modelId", "colorId", "carBrendId", "title", "price","images" 
+            ]
+          }
+        },
+      },
+    },
   },
   responses: createApiResponse(z.any(), "Success"),
 });
 
-brendRouter.post("/:brendId/car/add", 
+brendRouter.post("/:brendId/car/add",
+  upload.fields([ { name : "images" , maxCount : 7}]),
   authMiddleware, 
   checkRole(["AGENT", "SUPER_ADMIN"]), 
-  validateRequest(z.object({
-    body: CreateCarSchema
-  })), 
   brendController.addCar
 );
-
 
 
 // GET /brends/:brendId/car/:carId

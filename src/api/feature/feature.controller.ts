@@ -2,7 +2,7 @@ import type { Request, RequestHandler, Response } from "express";
 import { featureService } from "./feature.service";
 import { handleServiceResponse } from "@/common/utils/httpHandlers";
 import { CreateFeatureRequest, UpdateFeatureRequest } from "./feature.model";
-import { logger } from "@/server";
+import { uploadFile } from "../supabase/storage";
 
 class FeatureController {
   public getFeatures: RequestHandler = async (req: Request, res: Response) => {
@@ -22,11 +22,23 @@ class FeatureController {
 
   public createFeature: RequestHandler = async (req: Request, res: Response) => {
     const body: CreateFeatureRequest = req.body;
-    const file = req.file
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+ 
+    if (!file.mimetype.startsWith('image/')) {
+        return res.status(400).json({ message: 'Uploaded file is not an image' });
+    }
+
+    const imageUrl = await uploadFile(file) 
+
     const data = {
         title : body.title,
-        icon : String(file?.path)
+        icon : imageUrl
     }
+
     const serviceResponse = await featureService.createFeature(data);
     return handleServiceResponse(serviceResponse, res);
   };

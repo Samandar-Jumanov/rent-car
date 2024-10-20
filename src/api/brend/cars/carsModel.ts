@@ -50,7 +50,6 @@ export const CreateCarSchema = z.object({
   price: z.number().positive(),
   isDiscounted: z.boolean().default(false),
   discountedPrice: z.number().int().positive().optional(),
-  images: z.array(z.string()),
   status: CarStatusEnum.default('FREE'),
 });
 

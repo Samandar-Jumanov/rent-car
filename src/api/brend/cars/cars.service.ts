@@ -4,6 +4,7 @@ import { logger } from "@/server";
 import prisma from "@/common/db/prisma";
 import { CreateCarRequest, UpdateCarRequest, CreateRentalRequest, ICar, IRental } from "./carsModel";
 import { JwtPayload } from "jsonwebtoken";
+import { deleteFile } from "@/api/supabase/storage";
 
 export class CarService {
 
@@ -59,7 +60,9 @@ export class CarService {
 
       if (!car) {
         return ServiceResponse.failure("Car not found", null, StatusCodes.NOT_FOUND);
-      }
+      };
+
+
 
       const existingUser = await prisma.user.findUnique({
         where: { phoneNumber: user.phoneNumber }
@@ -97,23 +100,44 @@ export class CarService {
 
   async cancelOrder(rentalId: string): Promise<ServiceResponse<IRental | null>> {
     try {
-      const cancelled = await prisma.rental.delete({
+      const rental = await prisma.rental.findUnique({
         where: { id: rentalId },
-        include : {
-             requirements : true 
-        }
       });
-      return ServiceResponse.success<IRental | null>("Order cancelled", cancelled as IRental, StatusCodes.OK);
+
+
+      if(!rental) {
+         return ServiceResponse.failure("Could not find rental", null, StatusCodes.NOT_FOUND);
+      }
+
+      await prisma.rental.delete({
+           where : { id: rentalId},
+      })
+
+      const driversLicanceImages  = rental.driverLicenceImages
+      const passportImages  = rental.passportImages
+
+      // delete images here using cloudinary or any other storage service
+
+      for ( const  each of driversLicanceImages) {
+             await deleteFile(String(each.split("/").pop()))
+      }
+
+      for ( const  each of passportImages) {
+        await deleteFile(String(each.split("/").pop()))
+       }
+
+      return ServiceResponse.success("Order cancelled", rental as any , StatusCodes.OK);
     } catch (ex) {
       return ServiceResponse.failure("An error occurred while cancelling order.", null, StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
 
-  async addCar(data: CreateCarRequest,  brandId  : string ,  userId: string): Promise<ServiceResponse<ICar | null>> {
+  async addCar(data: any   , brandId  : string ,  userId: string): Promise<ServiceResponse<ICar | null>> {
     try {
       const brand = await prisma.brand.findUnique({
         where: { id: brandId }
       });
+
 
       if (!brand) {
         return ServiceResponse.failure("Brand not found", null, StatusCodes.NOT_FOUND);
@@ -127,14 +151,17 @@ export class CarService {
         return ServiceResponse.failure("User not found", null, StatusCodes.NOT_FOUND);
       }
 
+      logger.info({ data })
+
       const car = await prisma.car.create({
         data: {
           ...data,
-          brendId: brandId,  
+          brendId : brand.id
         }
       });
 
       return ServiceResponse.success("Car created successfully", car as ICar, StatusCodes.CREATED);
+      
     } catch (ex) {
       logger.error(`Error creating car: ${(ex as Error).message}`);
       return ServiceResponse.failure(
@@ -166,11 +193,27 @@ export class CarService {
 
   async deleteCar(carId: string): Promise<ServiceResponse<ICar | null>> {
     try {
-      const deletedCar = await prisma.car.delete({
+      const car = await prisma.car.findUnique({
         where: { id: carId },
       });
 
-      return ServiceResponse.success("Car deleted successfully", deletedCar as ICar, StatusCodes.OK);
+      if(!car) {
+        return ServiceResponse.failure(
+          "Could not find car find",
+          null,
+          StatusCodes.NOT_FOUND,
+        );
+      }
+
+      const carImages = car.images
+
+      await prisma.car.delete({ where : { id : carId}})
+
+      for( const each of carImages) {
+           await deleteFile(String(each.split("/").pop())) // delete file fro storage 
+      }
+
+      return ServiceResponse.success("Car deleted successfully", car as ICar, StatusCodes.OK);
     } catch (ex) {
       logger.error(`Error deleting car: ${(ex as Error).message}`);
       return ServiceResponse.failure(

@@ -4,6 +4,7 @@ import { ServiceResponse } from "@/common/models/serviceResponse";
 import { logger } from "@/server";
 import prisma from "@/common/db/prisma";
 import { IFeature, CreateFeatureRequest, UpdateFeatureRequest, ApplyFeature } from "./feature.model";
+import { deleteFile } from "../supabase/storage";
 
 export class FeatureService {
   async findAll( currentPage : number , pageSize : number ) : Promise<ServiceResponse<{ features: IFeature[], totalCount: number } | null>> {
@@ -98,7 +99,15 @@ export class FeatureService {
 
   async deleteFeature(id: string): Promise<ServiceResponse<boolean>> {
     try {
+      const f =  await prisma.feature.findUnique({ where: { id } });
+
+      if(!f) {
+         return ServiceResponse.failure("Feature not found", true , StatusCodes.NOT_FOUND);
+      }
+
       await prisma.feature.delete({ where: { id } });
+      await deleteFile(String(f.icon.split("/").pop()));
+      
       return ServiceResponse.success("Feature deleted successfully", true);
     } catch (ex) {
       const errorMessage = `Error deleting feature: ${(ex as Error).message}`;

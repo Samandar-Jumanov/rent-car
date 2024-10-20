@@ -8,6 +8,8 @@ import { generateToken , verifyToken } from "@/common/utils/jwt";
 import { IRental } from "../brend/cars/carsModel";
 import { ISessions } from "./sessions/sessions.model";
 import bcrypt from "bcrypt"
+import sendMessage from "../sms/smsService";
+import smsService from "../sms/smsService";
 
 export class UserService {
   async findAll(currentPage: number, pageSize: number): Promise<ServiceResponse<{ blockedUsers: IUser[], activeUsers: IUser[], totalCount: number, activeCount: number, blockedCount: number } | null>> {
@@ -121,8 +123,7 @@ export class UserService {
   }
 
   async createUser(
-    data: CreateUserRequest,
-    queryData: { role: "USER" | "AGENT"  }
+    data: { phoneNumber: string , location: string},
   ): Promise<ServiceResponse<{ token: string } | null>> {
     try {
       const existingUser = await prisma.user.findUnique({
@@ -131,38 +132,27 @@ export class UserService {
   
       let user;
   
-      if (existingUser) {
-        // User exists
-        if (queryData.role === "AGENT") {
-          const invalid = await bcrypt.compare(String(data.password), String(existingUser.password));
-          if (invalid) {
-            return ServiceResponse.failure("Invalid password", null, StatusCodes.UNAUTHORIZED);
-          }
-        }
-        // For USER and AGENT (after password verification), use existing user
-        user = existingUser;
+      // send message 
+
+      // const response =  await smsService.send({ message : "Code" , phone : data.phoneNumber});
+      // console.log({ response })
+      // if( response.error ) {
+      //   return ServiceResponse.failure("Invalid code", null, StatusCodes.BAD_REQUEST);
+      // }
+      // TO DO , issue  returing 400 request
+
+
+      if( existingUser) {
+          user = existingUser
       } else {
-        // User doesn't exist, create new user
-        if (queryData.role === "AGENT") {
-          if (!data.password) {
-            return ServiceResponse.failure("Password required for new agent", null, StatusCodes.BAD_REQUEST);
-          }
           user = await prisma.user.create({
-            data: {
-              phoneNumber: data.phoneNumber,
-              role: queryData.role,
-              password: data.password,
-            },
-          });
-        } else {
-          // For USER role, create without password
-          user = await prisma.user.create({
-            data: {
-              phoneNumber: data.phoneNumber,
-              role: queryData.role,
-            },
-          });
-        }
+              data: {
+                  phoneNumber : data.phoneNumber,
+                  role : "USER",
+                  cityId : data.location 
+                  
+              }
+          })
       }
   
       // Generate token

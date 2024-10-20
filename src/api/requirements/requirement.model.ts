@@ -25,9 +25,7 @@ export const RequirementsSchema = z.object({
 
 export const CreateRequirementsSchema = z.object({
   title: z.string(),
-  icon: z.string(),
   value: z.string(),
-  
 });
 
 export const GetRequirementsSchema = z.object({

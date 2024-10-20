@@ -3,6 +3,7 @@ import { ServiceResponse } from "@/common/models/serviceResponse";
 import { logger } from "@/server";
 import prisma from "@/common/db/prisma";
 import { IRequirements, CreateRequirementsRequest, UpdateRequirementsRequest, ApplyRequirement } from "./requirement.model";
+import { deleteFile } from "../supabase/storage";
 
 export class RequirementsService {
   async findAll(currentPage : number , pageSize : number ): Promise<ServiceResponse<{ requirements: IRequirements[], totalCount: number } | null>>{
@@ -52,7 +53,7 @@ export class RequirementsService {
     }
   }
 
-  async createRequirements(data: CreateRequirementsRequest): Promise<ServiceResponse<IRequirements | null>> {
+  async createRequirements(data: { title : string , value : string , icon : string }): Promise<ServiceResponse<IRequirements | null>> {
     try {
       const requirements = await prisma.requirements.create({ data });
       return ServiceResponse.success<IRequirements>("Requirements created successfully", requirements as IRequirements);
@@ -113,7 +114,14 @@ export class RequirementsService {
 
   async deleteRequirements(id: string): Promise<ServiceResponse<boolean>> {
     try {
-      await prisma.requirements.delete({ where: { id } });
+      const r = await prisma.requirements.findUnique({ where : { id}})
+
+      if(!r) {
+        return ServiceResponse.success("Not found ", false , StatusCodes.NOT_FOUND);
+      }
+
+      await deleteFile(String(r.icon.split("/").pop())) // delete file from supabase 
+
       return ServiceResponse.success("Requirements deleted successfully", true);
     } catch (ex) {
       const errorMessage = `Error deleting requirements: ${(ex as Error).message}`;
