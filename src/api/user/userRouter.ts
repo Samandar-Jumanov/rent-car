@@ -82,9 +82,6 @@ userRegistry.registerPath({  // create user
   path: "/users",
   tags: ["User"],
   request: {
-    query : z.object({
-      location : z.string()
-    }),
     body: {
       content: {
         'application/json': {
@@ -184,6 +181,17 @@ userRegistry.registerPath({
 });
 
 userRouter.post("/refresh-token" , authMiddleware ,  userController.refreshToken);
+
+
+userRegistry.registerPath({
+  method: "delete",
+  path: "/users/delete-account",
+  tags: ["User"],
+  responses: createApiResponse(z.any(), "Success"),
+});
+
+userRouter.delete("/delete-account" , authMiddleware ,  userController.deleteAccount);
+
 
 
 // Block

@@ -77,6 +77,18 @@ class UserController {
     const serviceResponse = await userService.refreshToken(refreshToken);
     return handleServiceResponse(serviceResponse, res);
   };
+
+  public deleteAccount : RequestHandler  = async (req: Request, res: Response) => {
+    const user = req.user
+
+    if(!user) {
+         return res.status(400).json({ message: 'User not logged' })
+    } ;
+
+    
+    const serviceResponse = await userService.deleteAccount(String(user?.userId));
+    return handleServiceResponse(serviceResponse, res);
+  };
   
 
   // block actions 

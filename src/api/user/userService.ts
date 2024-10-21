@@ -10,6 +10,7 @@ import { ISessions } from "./sessions/sessions.model";
 import bcrypt from "bcrypt"
 import sendMessage from "../sms/smsService";
 import smsService from "../sms/smsService";
+import { deleteFile } from "../supabase/storage";
 
 export class UserService {
   async findAll(currentPage: number, pageSize: number): Promise<ServiceResponse<{ blockedUsers: IUser[], activeUsers: IUser[], totalCount: number, activeCount: number, blockedCount: number } | null>> {
@@ -451,6 +452,38 @@ async  brandLogin (  data : { ownerNumber : string , password : string }) {
      )
   } 
 }
+
+
+ async deleteAccount ( id : string ) {
+  try {
+    const user  = await prisma.user.findUnique({  where :{ id }})
+
+    if(!user) {
+          return ServiceResponse.failure('Could not find owner' , null , StatusCodes.NOT_FOUND)
+    }
+
+    if(user.image) {
+        await deleteFile(String(user.image.split("/").pop()))
+    }
+
+    await prisma.user.delete({
+        where : {
+            id : id
+        }
+    });
+ 
+    
+     return ServiceResponse.success("User deleted successfully", user   ,StatusCodes.OK);
+     
+   } catch (ex) {
+     const errorMessage = `Error deleting user  in: ${(ex as Error).message}`;
+     logger.error(errorMessage);
+     return ServiceResponse.failure(
+       "An error occurred while deleting user account",
+       false,
+     )
+  } 
+ }
 
 }
 

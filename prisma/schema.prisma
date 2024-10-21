@@ -85,6 +85,7 @@ model Brand {
   discounts      Discount?
   reviews        Reviews[]
   rentals        Rental[]
+  requests       Requests[]
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
 }
@@ -116,7 +117,7 @@ model Car {
   reviews          Reviews[]
   banners          Banners[]
   discounts        Discount?
-
+  
   @@index([brendId])
   @@index([modelId])
   @@index([colorId])
@@ -335,9 +336,11 @@ model Requests {
   id      String      @id @default(cuid())
   type    RequestType @default(DEMAND)
   userId  String
+  brandId  String
   content String
 
   user    User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  brand   Brand       @relation(fields: [brandId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
