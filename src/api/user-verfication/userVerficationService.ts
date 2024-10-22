@@ -1,6 +1,6 @@
 import { logger } from "@/server";
 import prisma from "@/common/db/prisma";
-import sendMessage from "../sms/smsService";
+import smsService from "../sms/smsService";
 
 class SendSmsApiWithEskiz {
     private message: string;
@@ -28,7 +28,12 @@ class SendSmsApiWithEskiz {
 
     async send(): Promise<number> {
         try {
-            const status = await sendMessage(this.message, this.phone);
+            const sendSmsData = {
+                  phone : this.phone,
+                  message : this.message
+            }
+            
+            const status = await smsService.send(sendSmsData);
             logger.info(`SMS sent successfully to ${this.phone}. Status: ${status}`);
             return status;
         } catch (error) {

@@ -196,6 +196,14 @@ public deleteBrand   : RequestHandler = async (req: Request, res: Response) => {
   return handleServiceResponse(serviceResponse, res);
 }
 
+
+public createRentalRejection    : RequestHandler = async (req: Request, res: Response) => {
+  const rentalId = req.params.rentalId
+  const data = req.body
+  const serviceResponse = await carService.rejectRental({rentalId , reason : data.reason})
+  return handleServiceResponse(serviceResponse, res);
+}
+
 }
 
 export const brendController = new BrendController();

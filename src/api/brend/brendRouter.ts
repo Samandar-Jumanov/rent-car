@@ -405,3 +405,22 @@ brendRegistry.registerPath({
 brendRouter.get("/:brendId/car/:carId", authMiddleware, brendController.getCar)
 
 
+
+
+// rental rejection 
+brendRegistry.registerPath({
+  method: "post",
+  path: "/brends/{rentalId}/reject",
+  tags: ["Brend"],
+  request: {
+    params: z.object({
+      rentalId: z.string()
+    })
+  },
+  responses: createApiResponse(z.any(), "Success"),
+});
+
+brendRouter.get("/rentalId/reject", authMiddleware,  brendController.getCar)
+
+
+

@@ -1,70 +1,44 @@
-import { PrismaClient } from '@prisma/client';
-import { faker } from '@faker-js/faker';
-
-const prisma = new PrismaClient();
-
-async function generateFakeDiscount(existingBrandId: string | null = null) {
-  const brands = await prisma.brand.findMany({ select: { id: true }, take: 2 });
-  let brandId = null;
-
-  if (brands.length > 0) {
-    if (existingBrandId) {
-      brandId = brands.find(b => b.id !== existingBrandId)?.id || null;
-    } else {
-      brandId = brands[0].id;
-    }
-  }
-
-  const car = await prisma.car.findFirst({ select: { id: true } });
-
-  return {
-    carId: car?.id || null,
-    brendId: brandId,
-    startDate: faker.date.future(),
-    endDate: faker.date.future(),
-    discountPercentage: faker.number.int({ min: 5, max: 50 }),
-    discountId: faker.string.alphanumeric(10),
-  };
-}
-
-async function seedDiscounts() {
-  console.log('Seeding 2 discounts...');
-
-  let firstDiscount = null;
-  try {
-    firstDiscount = await generateFakeDiscount();
-    await prisma.discount.create({
-      data: firstDiscount,
-    });
-    console.log('First discount created');
-  } catch (error) {
-    console.error('Error creating first discount:', error);
-  }
-
-  try {
-    const secondDiscount = await generateFakeDiscount(firstDiscount?.brendId);
-    await prisma.discount.create({
-      data: secondDiscount,
-    });
-    console.log('Second discount created');
-  } catch (error) {
-    console.error('Error creating second discount:', error);
-  }
-
-  console.log('Seeding completed.');
-}
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient()
 
 async function main() {
-  try {
-    await seedDiscounts();
-  } catch (error) {
-    console.error('Error seeding discounts:', error);
-  } finally {
-    await prisma.$disconnect();
+  const regions = [
+    { name: 'Tashkent Region', city: 'Angren' },
+    { name: 'Samarkand Region', city: 'Samarkand' },
+    { name: 'Bukhara Region', city: 'Bukhara' },
+    { name: 'Andijan Region', city: 'Andijan' },
+    { name: 'Fergana Region', city: 'Fergana' },
+    { name: 'Namangan Region', city: 'Namangan' },
+    { name: 'Kashkadarya Region', city: 'Karshi' },
+    { name: 'Surkhandarya Region', city: 'Termez' },
+    { name: 'Navoiy Region', city: 'Navoiy' },
+    { name: 'Karakalpakstan', city: 'Nukus' }
+  ]
+
+  for (const { name: regionName, city: cityName } of regions) {
+    // Create region first
+    const region = await prisma.regions.create({
+      data: {
+        name: regionName,
+      },
+    })
+
+    // Create corresponding city
+    await prisma.cities.create({
+      data: {
+        name: cityName,
+        regionId: region.id,
+      },
+    })
   }
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+main()
+  .then(async () => {
+    await prisma.$disconnect()
+  })
+  .catch(async (e) => {
+    console.error(e)
+    await prisma.$disconnect()
+    process.exit(1)
+  })

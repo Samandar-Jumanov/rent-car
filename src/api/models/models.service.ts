@@ -39,8 +39,6 @@ export class ModelService {
   async updateModel( id : string , data: CreateModelRequest): Promise<ServiceResponse<IModel | null>> {
     try {
 
-      logger.info({ id , data  })
-
         const existing = await prisma.model.findUnique({
             where : {
                 id 

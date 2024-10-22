@@ -6,6 +6,21 @@ extendZodWithOpenApi(z);
 
 const CarStatusEnum = z.enum(['FREE', "RENTED"]);
 
+
+export type IRentalRejection = {
+      id : string;
+      rentalId  : string ;
+      reason : string 
+      createdAt : Date ;
+      updatedAt : Date ;
+}
+
+
+export const  CreateRentalRejectionSchema = z.object({
+      rentalId  : z.string(),
+      reason : z.string(),
+})
+
 export interface ICar {
   id: string;
   brendId: string; 
@@ -159,3 +174,4 @@ export type CreateRentalRequest = z.infer<typeof CreateRentalSchema>;
 export type DeleteRentalRequest = z.infer<typeof DeleteRentalSchema>;
 export type CreateCarRequest = z.infer<typeof CreateCarSchema>
 export type UpdateCarRequest = z.infer<typeof UpdateCarSchema>
+export type CreateRRSchema = z.infer<typeof CreateRentalRejectionSchema>  // rental rejection schema

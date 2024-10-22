@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { ServiceResponse } from "@/common/models/serviceResponse";
 import { logger } from "@/server";
 import prisma from "@/common/db/prisma";
-import { CreateCarRequest, UpdateCarRequest, CreateRentalRequest, ICar, IRental } from "./carsModel";
+import { CreateCarRequest, UpdateCarRequest, CreateRentalRequest, ICar, IRental, CreateRRSchema, IRentalRejection } from "./carsModel";
 import { JwtPayload } from "jsonwebtoken";
 import { deleteFile } from "@/api/supabase/storage";
 
@@ -151,7 +151,6 @@ export class CarService {
         return ServiceResponse.failure("User not found", null, StatusCodes.NOT_FOUND);
       }
 
-      logger.info({ data })
 
       const car = await prisma.car.create({
         data: {
@@ -245,6 +244,36 @@ export class CarService {
       logger.error(`Error retrieving car: ${(ex as Error).message}`);
       return ServiceResponse.failure(
         "An error occurred while retrieving the car",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+
+  async  rejectRental ( data : CreateRRSchema ) : Promise<ServiceResponse<IRentalRejection | null >> {
+    try {
+
+      const rejection = await prisma.rentalRejection.findUnique({
+          where: { id: data.rentalId }
+      })
+
+      if(rejection) {
+        return ServiceResponse.failure("Rejection already exist", null, StatusCodes.CONFLICT);
+      }
+     
+
+      const newRejection = await prisma.rentalRejection.create({
+        data: {
+          rentalId: data.rentalId,
+          reason: data.reason
+        },
+      });
+      return ServiceResponse.success("Rejection created successfully", newRejection , StatusCodes.CREATED);
+    } catch (ex) {
+      logger.error(`Error creating rejection  : ${(ex as Error).message}`);
+      return ServiceResponse.failure(
+        "Error creating rejection  ",
         null,
         StatusCodes.INTERNAL_SERVER_ERROR,
       );

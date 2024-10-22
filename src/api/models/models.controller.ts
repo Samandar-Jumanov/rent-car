@@ -28,7 +28,6 @@ class ModelController {
   public updateModel: RequestHandler = async (req: Request, res: Response) => {
     const body: CreateModelRequest = req.body;
     const id = req.params.id;
-    console.log({ id })
     const serviceResponse = await modelService.updateModel( id , body);
     return handleServiceResponse(serviceResponse, res);
   };

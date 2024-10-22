@@ -30,7 +30,6 @@ export class UserService {
         prisma.user.count({ where: { role: "AGENT" } }),
         prisma.user.count({
           where: {
-            role: "AGENT",
             OR: [
               { blockedByAdmin: { some: {} } },
               { blockedByAgent: { some: {} } }
@@ -41,9 +40,8 @@ export class UserService {
   
       const activeCount = totalCount - blockedCount;
   
-      // Fetch all users for the current page
       const users = await prisma.user.findMany({
-        where: { role: "AGENT" },
+        where: { role: "USER" },
         include: {
           sessions: true,
           rentals: true,
@@ -69,7 +67,7 @@ export class UserService {
   
       return ServiceResponse.success<{ blockedUsers: IUser[], activeUsers: IUser[], totalCount: number, activeCount: number, blockedCount: number }>(
         "Users found",
-        { blockedUsers, activeUsers, totalCount, activeCount, blockedCount }
+        { blockedUsers, activeUsers, totalCount : users.length,  activeCount, blockedCount }
       );
     } catch (ex) {
       const errorMessage = `Error finding all users: ${(ex as Error).message}`;
@@ -124,7 +122,7 @@ export class UserService {
   }
 
   async createUser(
-    data: { phoneNumber: string , location: string},
+    data: { phoneNumber: string },
   ): Promise<ServiceResponse<{ token: string } | null>> {
     try {
       const existingUser = await prisma.user.findUnique({
@@ -150,7 +148,6 @@ export class UserService {
               data: {
                   phoneNumber : data.phoneNumber,
                   role : "USER",
-                  cityId : data.location 
                   
               }
           })
@@ -177,7 +174,6 @@ export class UserService {
 
   async verifyUser(code: string, phoneNumber: string): Promise<ServiceResponse<{ token : string} | boolean>> {
     try {
-      logger.info(`Verifying ${phoneNumber}`)
       const user = await prisma.user.findUnique({ where: { phoneNumber } });
 
       if (!user) {

@@ -16,8 +16,8 @@ class UserController {
   };
 
   public getUser: RequestHandler = async (req: Request, res: Response) => {
-    const user = req.user
-    const serviceResponse = await userService.findUser(String(user?.userId));
+    const id = req.params.id
+    const serviceResponse = await userService.findUser(id);
     return handleServiceResponse(serviceResponse, res);
   };
 
@@ -31,11 +31,9 @@ class UserController {
 
   public createUser: RequestHandler = async (req: Request, res: Response) => {
     const body : CreateUserRequest  =  req.body;
-    const query = req.query
 
     const data = {
          ...body ,
-         location : String(query.location)
     }
 
     const serviceResponse = await userService.createUser(data);

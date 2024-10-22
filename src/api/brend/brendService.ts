@@ -18,15 +18,24 @@ export class BrendService {
   try {
     const brands = await prisma.brand.findMany({
       select: {
-        cars: true,
-        city: true,
+        cars: {
+            include : {
+                rentals : true, 
+                requirements : true ,
+                reviews : true
+            }
+        },
+        id: true,
+        city: { 
+             include : {
+                 region : true 
+             }
+        },
         discounts: true,
         reviews: true,
         rentals: true,
         topBrend : true,
         colloboratedCars : true,
-        
-
         password : false,
         payment: true,
         logo : true,
@@ -68,15 +77,24 @@ async  getAllBrands (  ) : Promise<ServiceResponse<IBrend[] | null>> {
         }
       },
       select: {
-        cars: true,
-        city: true,
+        cars: {
+            include : {
+                rentals : true, 
+                requirements : true ,
+                reviews : true
+            }
+        },
+        id: true,
+        city: { 
+             include : {
+                 region : true 
+             }
+        },
         discounts: true,
         reviews: true,
         rentals: true,
         topBrend : true,
         colloboratedCars : true,
-        
-
         password : false,
         payment: true,
         logo : true,
@@ -88,7 +106,7 @@ async  getAllBrands (  ) : Promise<ServiceResponse<IBrend[] | null>> {
         carDelivery : true,
         createdAt : true ,
         updatedAt : true,
-      }
+      },
     });
 
     return ServiceResponse.success<IBrend[] | null>("Brands found", brands as any );
@@ -114,15 +132,24 @@ async  getAllBrands (  ) : Promise<ServiceResponse<IBrend[] | null>> {
           skip,
           take: pageSize,
           select: {
-            cars: true,
-            city: true,
+            cars: {
+                include : {
+                    rentals : true, 
+                    requirements : true ,
+                    reviews : true
+                }
+            },
+            id: true,
+            city: { 
+                 include : {
+                     region : true 
+                 }
+            },
             discounts: true,
             reviews: true,
             rentals: true,
             topBrend : true,
             colloboratedCars : true,
-            
-    
             password : false,
             payment: true,
             logo : true,
@@ -134,7 +161,7 @@ async  getAllBrands (  ) : Promise<ServiceResponse<IBrend[] | null>> {
             carDelivery : true,
             createdAt : true ,
             updatedAt : true,
-          },
+          }, 
           orderBy: {
             createdAt: 'desc' 
           }
@@ -174,30 +201,36 @@ async  getAllBrands (  ) : Promise<ServiceResponse<IBrend[] | null>> {
         include: {
           brend: {
             select: {
-              id: true,
-              logo: true,
-              brendName: true,
-              ownerNumber: true,
-              cityId: true,
-              carDelivery: true,
-              topBrendId: true,
-              payment: true,
-              ratings: true,
-              averageRating: true,
-              createdAt: true,
-              updatedAt: true,
               cars: {
-                include: {
-                  rentals: true
-                }
+                  include : {
+                      rentals : true, 
+                      requirements : true ,
+                      reviews : true
+                  }
               },
-              city: true,
+              id: true,
+              city: { 
+                   include : {
+                       region : true 
+                   }
+              },
               discounts: true,
               reviews: true,
               rentals: true,
-              topBrend: true,
-              colloboratedCars: true,
-            }
+              topBrend : true,
+              colloboratedCars : true,
+              password : false,
+              payment: true,
+              logo : true,
+              brendName : true,
+              ownerNumber : true ,
+              averageRating : true,
+              ratings : true,
+              userId : false,
+              carDelivery : true,
+              createdAt : true ,
+              updatedAt : true,
+            },
           }
         }
       });

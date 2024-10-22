@@ -17,7 +17,6 @@ export class SmsTemplateService {
         return ServiceResponse.failure("SMS template with this title already exists", null, StatusCodes.BAD_REQUEST);
       }
 
-      console.log({ data })
       const smsTemplate = await prisma.smsTemplates.create({
         data: {
           ...data,
