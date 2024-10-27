@@ -27,10 +27,16 @@ bannersRegistry.registerPath({
   method: "get",
   path: "/banners/all",
   tags: ["Banners"],
+  request :{
+       query :  z.object({
+          currentPage : z.string(),
+          pageSize : z.string()
+      })
+  },
   responses: createApiResponse(z.array(BannersSchema), "Success"),
 });
 
-bannersRouter.get("/all",  authMiddleware  , bannersController.getAllBanners);
+bannersRouter.get("/all",  authMiddleware  , checkRole (["SUPER_ADMIN"]), bannersController.getAllBanners);
 
 bannersRegistry.registerPath({
   method: "get",

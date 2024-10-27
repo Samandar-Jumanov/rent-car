@@ -6,6 +6,7 @@ import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
 import { FavoriteSchema, CreateFavoriteSchema, GetFavoriteSchema, DeleteFavoriteSchema } from "./favorite.model";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { favoriteController } from "./favorite.controller";
+import { authMiddleware } from "@/common/middleware/auth";
 
 export const favoriteRegistry = new OpenAPIRegistry();
 export const favoriteRouter: Router = express.Router();
@@ -34,7 +35,7 @@ favoriteRegistry.registerPath({
   responses: createApiResponse(z.array(FavoriteSchema), "Success"),
 });
 
-favoriteRouter.get("/user", favoriteController.getUserFavorites);
+favoriteRouter.get("/user", authMiddleware ,  favoriteController.getUserFavorites);
 
 
 favoriteRegistry.registerPath({

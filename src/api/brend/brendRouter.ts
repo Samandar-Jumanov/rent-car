@@ -23,7 +23,7 @@ brendRegistry.registerPath({
   tags: ["Brend"],
   responses: createApiResponse(z.any(), "Success"),
 });
-brendRouter.get("/cars", brendController.getAllCars)
+brendRouter.get("/cars", authMiddleware,  brendController.getAllCars)
 
 // for super addmin 
 brendRegistry.registerPath({
@@ -64,7 +64,7 @@ brendRegistry.registerPath({
   responses: createApiResponse(z.array(BrendSchema), "Success"),
 });
 
-brendRouter.get("/some", brendController.getSomeBrends);
+brendRouter.get("/some", authMiddleware,  brendController.getSomeBrends);
 
 // GET /brends/top
 brendRegistry.registerPath({

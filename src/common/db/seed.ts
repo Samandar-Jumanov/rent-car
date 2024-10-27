@@ -16,14 +16,12 @@ async function main() {
   ]
 
   for (const { name: regionName, city: cityName } of regions) {
-    // Create region first
     const region = await prisma.regions.create({
       data: {
         name: regionName,
       },
     })
 
-    // Create corresponding city
     await prisma.cities.create({
       data: {
         name: cityName,

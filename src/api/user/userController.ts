@@ -16,8 +16,8 @@ class UserController {
   };
 
   public getUser: RequestHandler = async (req: Request, res: Response) => {
-    const id = req.params.id
-    const serviceResponse = await userService.findUser(id);
+    const id = req.user?.userId
+    const serviceResponse = await userService.findUser(String(id));
     return handleServiceResponse(serviceResponse, res);
   };
 
@@ -105,6 +105,7 @@ class UserController {
     if(!blockUserId) {
          return  res.status(404).json({ message : "Block user id is required" });
     }
+    
     const serviceResponse = await blockService.cancelBlock( blockUserId);
 
     return handleServiceResponse(serviceResponse, res);

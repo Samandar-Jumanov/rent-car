@@ -70,12 +70,12 @@ userRouter.get("/", userController.getUsers);
 
 userRegistry.registerPath({ // get single 
   method: "get",
-  path: "/users/single/{id}",
+  path: "/users/single",
   tags: ["User"],
   responses: createApiResponse(UserSchema, "Success"),
 });
 
-userRouter.get("/single/:id", authMiddleware , userController.getUser);
+userRouter.get("/single", authMiddleware , userController.getUser);
 
 userRegistry.registerPath({  // create user 
   method: "post",

@@ -28,7 +28,7 @@ export class BannersService {
   async getBanners ( currentPage : number , pageSize : number ) : Promise<ServiceResponse<{ banners :  IBanners[]  , totalCount : number } | null >> {
     try {
 
-      const skip = (currentPage - 1) * pageSize;
+      const skip = Number((currentPage - 1) * pageSize);
 
       const [banners, totalCount] = await prisma.$transaction([
         prisma.banners.findMany({
