@@ -405,8 +405,6 @@ brendRegistry.registerPath({
 brendRouter.get("/:brendId/car/:carId", authMiddleware, brendController.getCar)
 
 
-
-
 // rental rejection 
 brendRegistry.registerPath({
   method: "post",

@@ -15,9 +15,6 @@ export const FavoriteSchema = z.object({
   userId: z.string(),
 });
 
-export const CreateFavoriteSchema = z.object({
-    params: z.object({ carId: z.string() }),
-});
 
 export const GetFavoriteSchema = z.object({
   params: z.object({ id: z.string() }),

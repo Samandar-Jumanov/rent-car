@@ -157,8 +157,8 @@ export class UserService {
       const token = generateToken({
         phoneNumber: user.phoneNumber,
         userId: user.id,
-        role: user.role,
-      });
+        role: user.role
+      }, '30d');  // Pass expiration string directly
   
       return ServiceResponse.success("User processed successfully", { token });
     } catch (ex) {
