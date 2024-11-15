@@ -38,23 +38,22 @@ app.use(helmet());
 // Request logging
 // app.use(requestLogger);
 
-// Routes
-// app.use("/health-check", authMiddleware, healthCheckRouter);
-// app.use("/users", userRouter);
-// app.use("/brends", brendRouter);
-// app.use("/discounts", authMiddleware, discountRouter);
-// app.use("/features", authMiddleware, featureRouter);
-// app.use("/requirements", authMiddleware, requirementsRouter);
-// app.use("/favorites", authMiddleware, favoriteRouter);
-// app.use("/colloborate", authMiddleware, checkRole(["SUPER_ADMIN"]), colloborateRouter);
-// app.use("/banners", bannersRouter);
-// app.use("/models" , modelRouter)
-// app.use("/car-brands" , carBrendRouter)
-// app.use("/car-colors" , carColorRouter)
-// app.use("/requests" , requestRouter);
-// app.use("/sms-templates" , smsTemplateRouter)
-// app.use("/regions" ,  regionRouter)
-// app.use(openAPIRouter);
+app.use("/health-check", authMiddleware, healthCheckRouter);
+app.use("/users", userRouter);
+app.use("/brends", brendRouter);
+app.use("/discounts", authMiddleware, discountRouter);
+app.use("/features", authMiddleware, featureRouter);
+app.use("/requirements", authMiddleware, requirementsRouter);
+app.use("/favorites", authMiddleware, favoriteRouter);
+app.use("/colloborate", authMiddleware, checkRole(["SUPER_ADMIN"]), colloborateRouter);
+app.use("/banners", bannersRouter);
+app.use("/models" , modelRouter)
+app.use("/car-brands" , carBrendRouter)
+app.use("/car-colors" , carColorRouter)
+app.use("/requests" , requestRouter);
+app.use("/sms-templates" , smsTemplateRouter)
+app.use("/regions" ,  regionRouter)
+app.use(openAPIRouter);
 
 // Error handlers
 app.use(errorHandler());
